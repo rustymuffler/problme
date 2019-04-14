@@ -1,8 +1,2 @@
----
----
-
-/* style.scss */
-#navbar {
-  width: 80%;
-  height: 23px;
-}
+// Import Core Clean Blog SCSS
+@import "../assets/vendor/startbootstrap-clean-blog/scss/clean-blog.scss";
