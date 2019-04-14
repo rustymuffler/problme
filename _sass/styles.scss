@@ -1,2 +1,7 @@
-// Import Core Clean Blog SCSS
-@import "../assets/vendor/startbootstrap-clean-blog/scss/clean-blog.scss";
+---
+---
+
+<link rel="stylesheet" href="{{ site.baseurl }}/css/css.css">
+<script src="{{ site.baseurl }}/js/scripts.js"></script>
+<img src="{{ site.baseurl }}/path/to/img/toto.jpg">
+<a href="{{ site.baseurl }}/linkto/">Link</a>
