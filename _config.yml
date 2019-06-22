@@ -13,7 +13,7 @@ linkedin_username: richardmuffler
 
 # Build settings
 markdown:          kramdown
-theme: jekyll-theme-clean-blog
+theme: jekyll-theme-cayman
 paginate:          5
 paginate_path:     "/posts/page:num/"
 plugins:
