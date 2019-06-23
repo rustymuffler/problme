@@ -4,3 +4,5 @@ show_downloads: false
 google_analytics: UA-142594739-1
 highlighter: pygments
 encoding: utf-8
+
+theme: jekyll-theme-cayman
