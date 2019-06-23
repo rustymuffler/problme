@@ -1,3 +1,5 @@
 theme: jekyll-theme-cayman
 title: Welcome to probl.me!
 description: Keep tabs as I update this with content
+show_downloads: false
+google_analytics: UA-142594739-1
