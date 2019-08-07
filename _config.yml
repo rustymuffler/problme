@@ -1,10 +1,10 @@
-title: Cayman theme
+title: problme
 email: richard.muffler@gmail.com
-description: Cayman is a clean, responsive theme for GitHub Pages.
+description: Resume and Product Management blog.
 author: Richard Robitaille-Muffler
 baseurl: "/problme"
 url: "https://probl.me"
-show_downloads: true
+show_downloads: false
 google_analytics: UA-142594739-1
 theme: jekyll-theme-cayman
 plugins:
