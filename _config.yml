@@ -7,5 +7,3 @@ url: "https://probl.me"
 show_downloads: false
 google_analytics: UA-142594739-1
 theme: jekyll-theme-cayman
-plugins:
-  - jekyll-seo-tag
