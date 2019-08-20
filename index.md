@@ -4,7 +4,7 @@ layout: default
 
 # About Me
 
-![Richard](https://media.licdn.com/dms/image/C5603AQEAXJ-t1dioRg/profile-displayphoto-shrink_200_200/0?e=1570665600&v=beta&t=gXNsSAJLQ7rQESD-c_0IpWr9_e3t5dlc3L9C8z3EIbo)
+![Richard](https://media.licdn.com/dms/image/C4E03AQE2KlIeeQvEpg/profile-displayphoto-shrink_200_200/0?e=1571875200&v=beta&t=T4Lawu9U4n4kVKDWOOqxx2uZ8U8BcJydA_gdxZ0iI9M)
 
 Your search and passion for Product Management knowledge has led you to this blog. My name is Richard Robitaille-Muffler and I hope these posts help you grow on your product journey.
 
