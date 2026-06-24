@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* Fonts are loaded via <link> in Layout.astro <head> — not here */
+
+/* ─── Design tokens — Workshop palette (DESIGN-BRIEF.md §2 & §3) ────────── */
+:root {
+  /* Surfaces — warm charcoal */
+  --color-bg:            #15120E;
+  --color-surface:       #1C1812;
+  --color-surface-alt:   #241E15;
+  --color-border:        #2E261B;
+  --color-border-strong: #3D3322;
+
+  /* Text — warm off-white ramp */
+  --color-text-primary:   #F4EFE6;
+  --color-text-secondary: #B6A88F;
+  --color-text-muted:     #8A7B64;
+
+  /* Accents — warm */
+  --color-amber:      #F2A24B;
+  --color-terracotta: #E8674A;
+  --color-olive:      #9DB066;
+
+  /* Functional */
+  --color-success: #7FB069;
+  --color-warning: #E8B04B;
+  --color-danger:  #D64933;
+
+  /* Typography */
+  --font-sans: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Spacing scale (8px base) */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* Layout */
+  --max-width:    1120px;
+  --reading-width: 680px;
+
+  /* Radius */
+  --radius-sm:   5px;
+  --radius-md:   8px;
+  --radius-lg:  10px;
+  --radius-xl:  12px;
+  --radius-2xl: 14px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ─── Base reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes pop {
+  0%   { transform: rotate(0); }
+  30%  { transform: rotate(-9deg); }
+  60%  { transform: rotate(6deg); }
+  100% { transform: rotate(0); }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none !important; }
+  .cursor        { animation: none !important; }
+}
+
+/* ─── Focus rings (all interactive elements) ─────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* ─── Type scale (DESIGN-BRIEF.md §3.3) ─────────────────────────────────── */
+.text-display {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.text-h1 {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.text-h2 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.text-h3 {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.text-body-lg {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+.text-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-small {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* Mono label — eyebrows, tags, meta */
+.text-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.text-code {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+/* ─── Shared interactive states ──────────────────────────────────────────── */
+.navlink:hover {
+  color: var(--color-text-primary) !important;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-amber);
+  color: var(--color-bg);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 22px;
+  border-radius: var(--radius-lg);
+  transition: background var(--duration-fast);
+}
+.btn-primary:hover { background: #F4B468; }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 22px;
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-fast);
+}
+.btn-secondary:hover { border-color: var(--color-amber); }

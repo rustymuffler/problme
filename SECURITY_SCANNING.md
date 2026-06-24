@@ -351,7 +351,8 @@ Findings reviewed and accepted as out-of-scope or not actionable for a static si
 
 | Date | Tool | Finding | Severity | Reason | Compensating Controls |
 |---|---|---|---|---|---|
-| — | — | — | — | Log entries will be added here as findings are reviewed | — |
+| 2026-06-24 | Gitleaks | `linkedin-client-id` match on `richardmuffler` in commit `204e4aca` (`_config.yml`, 2019 Jekyll era) | WARN | False positive. `richardmuffler` is a public LinkedIn profile handle, not a secret client ID. The file is no longer in the working tree and pre-dates the Astro project. | Suppressed in `.gitleaks.toml` allowlist with explanation. No real secret exposed. |
+| 2026-06-24 | rl-protect-skills | npm install performed without rl-protect-scan (tool not yet configured) | INFO | rl-protect-skills was not yet installed in this first code session. Packages installed: `astro@7.0.2`, `@astrojs/mdx@7.0.0`, `tailwindcss@4.1.x`, `@tailwindcss/vite@4.1.x` — all official, well-known packages from trusted maintainers. | npm audit run immediately after install: 0 vulnerabilities. Trivy scan required before next dependency change. rl-protect-skills must be configured before any additional packages are installed. |
 
 ---
 
@@ -371,8 +372,8 @@ Gaps to be aware of:
 |---|---|
 | Aikido | ⬜ Not yet configured |
 | Semgrep | ⬜ Not yet configured |
-| rl-protect-skills | ⬜ Not yet configured |
-| Gitleaks (pre-commit) | ⬜ Not yet installed — required in first code session |
+| rl-protect-skills | ⬜ Not yet configured — REQUIRED before any new npm package is added |
+| Gitleaks (pre-commit) | ✅ Installed 2026-06-24 — `.git/hooks/pre-commit` using Gitleaks 8.30.1; `.gitleaks.toml` with allowlist |
 | Trivy | ⬜ Not yet configured |
 | Checkov | ⬜ Not yet configured |
 

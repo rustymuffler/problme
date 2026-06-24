@@ -1,0 +1,10 @@
+title = "probl.me Gitleaks config"
+
+[allowlist]
+  description = "Reviewed false positives"
+  commits = [
+    # False positive: LinkedIn username 'richardmuffler' in old Jekyll _config.yml
+    # from 2019 (pre-Astro transition). 'richardmuffler' is a public profile handle,
+    # not a LinkedIn Client ID. Rule triggered: linkedin-client-id.
+    "204e4aca83ed598bab4a61118ab0cf37a93c350d",
+  ]
