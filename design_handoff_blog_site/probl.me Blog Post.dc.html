@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
+  a{ text-decoration:none; }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @media (prefers-reduced-motion: reduce){ .cursor{ animation:none !important } }
+  .navlink:hover{ color:#F4EFE6 !important; }
+  .prose a{ color:#F2A24B; text-decoration:none; border-bottom:1px solid rgba(242,162,75,0.35); }
+  .prose a:hover{ border-bottom-color:#F2A24B; }
+  .copybtn:hover{ color:#F4EFE6 !important; border-color:#3D3322 !important; }
+  .bcard:hover{ transform:translateY(-2px); box-shadow:0 14px 36px rgba(0,0,0,0.5) !important; }
+  .nav-pn:hover{ border-color:#F2A24B !important; }
+  .nav-pn:hover .pn-title{ color:#F4EFE6 !important; }
+</style>
+</helmet>
+<div style="background:#15120E; min-height:100vh; font-family:'Hanken Grotesk',sans-serif; color:#F4EFE6;">
+
+  <!-- HEADER -->
+  <header style="position:sticky; top:0; z-index:50; background:rgba(21,18,14,0.85); backdrop-filter:blur(12px); border-bottom:1px solid #2E261B;">
+    <div style="max-width:1120px; margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between;">
+      <a href="probl.me Homepage.dc.html" style="display:flex; align-items:center; font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; color:#F4EFE6; letter-spacing:-0.01em;">
+        <span style="color:#F2A24B; margin-right:8px;">&gt;</span>probl<span style="color:#E8674A;">.me</span><span class="cursor" style="display:inline-block; width:8px; height:17px; background:#F2A24B; margin-left:5px; border-radius:1px; animation:blink 1.1s steps(1) infinite;"></span>
+      </a>
+      <nav style="display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:13px;">
+        <a class="navlink" href="probl.me Homepage.dc.html" style="color:#B6A88F; padding:10px 14px;">home</a>
+        <a class="navlink" href="probl.me Blog Listing.dc.html" style="color:#F2A24B; padding:10px 14px;">blog</a>
+        <a class="navlink" href="probl.me About.dc.html" style="color:#B6A88F; padding:10px 14px;">about</a>
+        <a class="navlink" href="https://github.com/rustymuffler" style="color:#B6A88F; padding:10px 14px; border:1px solid #3D3322; border-radius:8px; margin-left:6px;">github &#8599;</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ARTICLE HEAD -->
+  <div style="max-width:680px; margin:0 auto; padding:56px 24px 0;">
+    <a class="navlink" href="probl.me Blog Listing.dc.html" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">&larr; all posts</a>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:26px;">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#E8674A; background:rgba(232,103,74,0.12); border-radius:999px; padding:3px 10px;">ai-development</span>
+    </div>
+    <h1 style="font-size:40px; font-weight:800; letter-spacing:-0.02em; line-height:1.12; margin:18px 0 0;">How I run a 12-agent content pipeline</h1>
+    <div style="display:flex; align-items:center; gap:14px; margin-top:22px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">
+      <span>Richard Muffler</span>
+      <span style="color:#3D3322;">|</span>
+      <span>Jun 21, 2026</span>
+      <span style="color:#3D3322;">|</span>
+      <span>8 min read</span>
+    </div>
+  </div>
+
+  <!-- HERO IMAGE -->
+  <div style="max-width:920px; margin:36px auto 0; padding:0 24px;">
+    <img src="assets/og/hero-pipeline.svg" alt="How I run a 12-agent content pipeline" style="display:block; width:100%; height:360px; object-fit:cover; border-radius:14px; border:1px solid #2E261B;">
+  </div>
+
+  <!-- BODY -->
+  <article class="prose" style="max-width:680px; margin:0 auto; padding:48px 24px 0; font-size:18px; line-height:1.75; color:#E9E1D3;">
+
+    <p style="margin:0;">For the last two months, almost everything published on this blog was drafted, researched, reviewed, and shipped by a small team of Claude agents working on a schedule. I show up in exactly two places: a short interview at the start, and the merge button at the end. Here is how the whole thing is wired.</p>
+
+    <p>I want to be honest up front. The first version broke in a way I did not expect, and the fix changed how I think about reviewing AI work. More on that near the end.</p>
+
+    <h2 style="font-family:'Hanken Grotesk'; font-size:26px; font-weight:700; letter-spacing:-0.015em; line-height:1.25; margin:44px 0 0; color:#F4EFE6;">The shape of the pipeline</h2>
+    <p>Every article moves through the same sequence of agents. Each one has a single job, and no agent reviews its own output. That last rule matters more than any other, so I made it structural rather than a guideline.</p>
+
+    <p>The handoffs run as a loop. When one agent finishes, the next is spawned automatically with the previous agent&rsquo;s output as its input. The only manual steps are mine.</p>
+
+    <!-- CODE BLOCK -->
+    <div style="background:#161310; border:1px solid #2E261B; border-radius:10px; margin:28px 0; overflow:hidden;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:1px solid #2E261B;">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8A7B64;">pipeline.txt</span>
+        <span class="copybtn" style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8A7B64; border:1px solid #2E261B; border-radius:6px; padding:4px 10px; cursor:pointer;">copy</span>
+      </div>
+      <pre style="margin:0; padding:18px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:14px; line-height:1.7; color:#E9E1D3;"><span style="color:#8A7B64;"># content loop</span>
+Interview  <span style="color:#F2A24B;">&rarr;</span> Research  <span style="color:#F2A24B;">&rarr;</span> Writer
+           <span style="color:#F2A24B;">&rarr;</span> Image  <span style="color:#F2A24B;">&rarr;</span> SEO  <span style="color:#F2A24B;">&rarr;</span> Proofread
+           <span style="color:#F2A24B;">&rarr;</span> Publisher <span style="color:#E8674A;">(opens draft PR)</span></pre>
+    </div>
+
+    <p>If the SEO reviewer or the proofreader sends feedback, the writer revises and the loop continues forward. I capped it at three revision passes before it escalates to me, so a disagreement between two agents can never spin forever.</p>
+
+    <h2 style="font-family:'Hanken Grotesk'; font-size:26px; font-weight:700; letter-spacing:-0.015em; line-height:1.25; margin:44px 0 0; color:#F4EFE6;">Why no agent reviews itself</h2>
+    <p>The temptation is to let the writer agent also check its own work. It is faster and cheaper. It is also useless. An agent grading its own output tends to confirm what it already decided. So the <a href="probl.me Blog Listing.dc.html">reviewer is always a separate agent</a> with a separate checklist.</p>
+
+    <blockquote style="margin:32px 0; padding:6px 0 6px 22px; border-left:2px solid #F2A24B; font-size:20px; line-height:1.55; color:#F4EFE6; font-weight:500;">The writer that drafts an article cannot be the agent that approves it. Make that a wall, not a suggestion.</blockquote>
+
+    <p>This is the same instinct from code review, just applied to prose. The proofreader scans for tone, banned phrases, and punctuation. The SEO reviewer checks structure and metadata. Neither one wrote the draft, so neither one is defending it.</p>
+
+    <h3 style="font-family:'Hanken Grotesk'; font-size:20px; font-weight:700; letter-spacing:-0.01em; margin:36px 0 0; color:#F4EFE6;">Where it broke first</h3>
+    <p>The first real run produced a clean, well-structured article that said almost nothing only I could say. It was technically correct and completely generic. The interview step existed, but the writer treated it as optional background instead of the spine of the piece.</p>
+
+    <p>The fix was small and structural: the interview notes are now mandatory source material, and the proofreader explicitly checks that my own perspective is present and identifiable. One line in a checklist changed the output more than any prompt tuning did.</p>
+
+    <p>If you are building something similar, that is the thing I would tell you that most write-ups skip. The interesting failures are not model failures. They are process gaps, and you fix them in the workflow, not the prompt.</p>
+
+  </article>
+
+  <!-- TAGS -->
+  <div style="max-width:680px; margin:40px auto 0; padding:0 24px;">
+    <div style="display:flex; gap:10px; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:12px;">
+      <span style="color:#B6A88F; border:1px solid #2E261B; border-radius:999px; padding:6px 12px;">#claude</span>
+      <span style="color:#B6A88F; border:1px solid #2E261B; border-radius:999px; padding:6px 12px;">#agents</span>
+      <span style="color:#B6A88F; border:1px solid #2E261B; border-radius:999px; padding:6px 12px;">#automation</span>
+      <span style="color:#B6A88F; border:1px solid #2E261B; border-radius:999px; padding:6px 12px;">#building-in-public</span>
+    </div>
+  </div>
+
+  <!-- AUTHOR CARD -->
+  <div style="max-width:680px; margin:40px auto 0; padding:0 24px;">
+    <div class="bcard" style="background:#1C1812; border:1px solid #2E261B; border-radius:16px; padding:26px; box-shadow:0 10px 30px rgba(0,0,0,0.4); transition:transform .25s, box-shadow .25s; display:flex; gap:20px; align-items:center;">
+      <img src="assets/richard.png" alt="Richard Muffler" style="width:64px; height:64px; flex-shrink:0; border-radius:12px; object-fit:cover; border:1px solid #2E261B;">
+      <div style="flex:1;">
+        <div style="font-size:17px; font-weight:700;">Richard Muffler</div>
+        <p style="font-size:14px; color:#B6A88F; line-height:1.55; margin:6px 0 0;">Security and SaaS PM tinkering on personal projects with AI. Writing probl.me and Celly in public.</p>
+      </div>
+      <a href="probl.me About.dc.html" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#F2A24B; border:1px solid #3D3322; border-radius:8px; padding:9px 14px; white-space:nowrap;">about &rarr;</a>
+    </div>
+  </div>
+
+  <!-- PREV / NEXT -->
+  <div style="max-width:680px; margin:36px auto 0; padding:0 24px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <a class="nav-pn" href="probl.me Blog Post.dc.html" style="background:#1C1812; border:1px solid #2E261B; border-radius:12px; padding:18px; transition:border-color .2s;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8A7B64;">&larr; previous</div>
+        <div class="pn-title" style="font-size:15px; font-weight:600; color:#B6A88F; margin-top:8px; line-height:1.4;">The PM skill AI can&rsquo;t replace</div>
+      </a>
+      <a class="nav-pn" href="probl.me Blog Post.dc.html" style="background:#1C1812; border:1px solid #2E261B; border-radius:12px; padding:18px; text-align:right; transition:border-color .2s;">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8A7B64;">next &rarr;</div>
+        <div class="pn-title" style="font-size:15px; font-weight:600; color:#B6A88F; margin-top:8px; line-height:1.4;">Astro on GitHub Pages, zero downtime</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid #2E261B; margin-top:64px;">
+    <div style="max-width:1120px; margin:0 auto; padding:40px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+      <div>
+        <div style="display:flex; align-items:center; font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:600;"><span style="color:#F2A24B; margin-right:8px;">&gt;</span>probl<span style="color:#E8674A;">.me</span><span class="cursor" style="display:inline-block; width:7px; height:14px; background:#F2A24B; margin-left:4px; border-radius:1px; animation:blink 1.1s steps(1) infinite;"></span></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64; margin-top:8px;">Building in public. One problem at a time.</div>
+      </div>
+      <div style="display:flex; gap:22px; font-family:'JetBrains Mono',monospace; font-size:12px;">
+        <a class="navlink" href="probl.me Homepage.dc.html" style="color:#B6A88F;">home</a>
+        <a class="navlink" href="probl.me Blog Listing.dc.html" style="color:#B6A88F;">blog</a>
+        <a class="navlink" href="https://github.com/rustymuffler" style="color:#B6A88F;">github</a>
+        <span style="color:#8A7B64;">&copy; 2026</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+</body>
+</html>
