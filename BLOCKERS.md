@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-06-22
+> Last updated: 2026-06-23
 
 ---
 
@@ -9,7 +9,7 @@
 
 | # | Blocker | Blocked Item | Owner | Date Added | Status |
 |---|---|---|---|---|---|
-| 1 | GitHub repository not yet created | All of Phase 1 | Richard | 2026-06-22 | ⬜ Not started |
+| 1 | ~~GitHub repository not yet created~~ | ~~All of Phase 1~~ | Richard | 2026-06-22 | ✅ Resolved |
 | 2 | probl.me DNS: CNAME needs to point to rustymuffler.github.io | M1.14 — Custom domain configuration | Richard | 2026-06-22 | ⬜ Not started |
 | 3 | Aikido API key not yet configured | SECURITY_SCANNING.md — Tool 1 (Aikido) | Richard | 2026-06-22 | ⬜ Not started |
 | 4 | Semgrep App Token not yet configured | SECURITY_SCANNING.md — Tool 2 + CI | Richard | 2026-06-22 | ⬜ Not started |
@@ -23,7 +23,7 @@
 
 | # | Blocker | Resolved Date | Resolution |
 |---|---|---|---|
-| — | — | — | None resolved yet |
+| 1 | GitHub repository not yet created | 2026-06-23 | Repo transitioned from old Jekyll resume to probl.me Astro project. All governance docs committed to `main`. Branch renamed from `master` to `main`. |
 
 ---
 
