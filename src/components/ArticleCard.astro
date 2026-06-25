@@ -1,0 +1,96 @@
+---
+/*
+ * ArticleCard — card-shaped link to a blog post. The entire card is the click target.
+ * Props:
+ *   href       string    — post URL (e.g. /blog/my-post)
+ *   heroImage  string    — src for the hero thumbnail (e.g. /assets/og/hero-pipeline.svg)
+ *   heroAlt    string    — alt text describing the hero image content
+ *   category   Category  — 'pm-craft' | 'ai-development' | 'tech-tools'
+ *   title      string    — post title
+ *   excerpt    string    — one- or two-sentence post description
+ *   date       string    — human-readable publish date (e.g. "Jun 21, 2026")
+ *   readTime   string    — estimated reading time (e.g. "8 min")
+ */
+import CategoryPill, { type Category } from './CategoryPill.astro';
+
+interface Props {
+  href: string;
+  heroImage: string;
+  heroAlt: string;
+  category: Category;
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+}
+
+const { href, heroImage, heroAlt, category, title, excerpt, date, readTime } = Astro.props;
+---
+
+<a class="card" href={href}>
+  <img src={heroImage} alt={heroAlt} class="card-img" />
+  <div class="card-body">
+    <CategoryPill category={category} />
+    <h3 class="card-title">{title}</h3>
+    <p class="card-excerpt">{excerpt}</p>
+    <div class="card-meta">{date} &middot; {readTime}</div>
+  </div>
+</a>
+
+<style>
+.card {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition:
+    transform var(--duration-normal),
+    border-color var(--duration-normal),
+    box-shadow var(--duration-normal);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-amber);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.card-img {
+  width: 100%;
+  height: 148px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 14px 0 0;
+  color: var(--color-text-primary);
+  transition: color var(--duration-normal);
+}
+
+.card:hover .card-title {
+  color: var(--color-text-primary);
+}
+
+.card-excerpt {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+  margin: 8px 0 0;
+}
+
+.card-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 16px;
+}
+</style>

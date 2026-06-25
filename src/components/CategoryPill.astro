@@ -1,0 +1,39 @@
+---
+/*
+ * CategoryPill — inline coloured badge showing a blog post category.
+ * Props:
+ *   category  'pm-craft' | 'ai-development' | 'tech-tools'
+ *
+ * Colour map (Workshop palette):
+ *   pm-craft       → amber     #F2A24B / 12% opacity background
+ *   ai-development → terracotta #E8674A / 12% opacity background
+ *   tech-tools     → olive     #9DB066 / 12% opacity background
+ */
+export type Category = 'pm-craft' | 'ai-development' | 'tech-tools';
+
+interface Props {
+  category: Category;
+}
+
+const { category } = Astro.props;
+
+const PALETTE: Record<Category, { color: string; bg: string }> = {
+  'pm-craft':       { color: '#F2A24B', bg: 'rgba(242,162,75,0.12)' },
+  'ai-development': { color: '#E8674A', bg: 'rgba(232,103,74,0.12)' },
+  'tech-tools':     { color: '#9DB066', bg: 'rgba(157,176,102,0.12)' },
+};
+
+const { color, bg } = PALETTE[category];
+---
+
+<span class="pill" style={`color:${color};background:${bg};`}>{category}</span>
+
+<style>
+.pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+}
+</style>

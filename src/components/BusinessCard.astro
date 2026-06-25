@@ -1,0 +1,317 @@
+---
+/*
+ * BusinessCard — 3D tilt card with glare effect. Two layout variants.
+ * Props:
+ *   variant  'homepage' | 'about'
+ *
+ * homepage — horizontal: small 60px photo + name/title row, divider,
+ *            "currently building" block, social button row (github / linkedin / probl.me).
+ *            Tilt intensity: 17°.
+ *
+ * about    — portrait: full-width 240px photo, name/title below, divider,
+ *            link rows (github / linkedin / email).
+ *            Tilt intensity: 16°.
+ *
+ * Motion:
+ *   The JS-driven tilt (mousemove rotation) and spring-back (transition) are gated
+ *   behind prefers-reduced-motion: no-preference. Static translateZ depth values
+ *   remain because they are non-vestibular positional offsets, not animation.
+ */
+
+interface Props {
+  variant: 'homepage' | 'about';
+}
+
+const { variant } = Astro.props;
+const tiltAmount = variant === 'homepage' ? 17 : 16;
+const isHomepage = variant === 'homepage';
+---
+
+<div class="perspective">
+  <div class="bcard" data-tilt={tiltAmount}>
+    <div class="glare" aria-hidden="true"></div>
+
+    {isHomepage ? (
+      <>
+        <!-- Header: small photo + name/title -->
+        <div class="header-row">
+          <img
+            src="/assets/richard.png"
+            alt="Richard Muffler"
+            class="photo-sm"
+          />
+          <div>
+            <div class="name">Richard Muffler</div>
+            <div class="title">PM &middot; security &middot; AI builder</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Currently building -->
+        <div class="building-block">
+          <div class="building-label">currently building</div>
+          <div class="building-content">
+            probl.me &mdash; this blog, in public.<br />
+            <span class="building-secondary">+ Celly, a sister product.</span>
+          </div>
+        </div>
+
+        <!-- Social buttons -->
+        <div class="social-row">
+          <a class="cardlink" href="https://github.com/rustymuffler" target="_blank" rel="noopener noreferrer">github</a>
+          <a class="cardlink" href="https://www.linkedin.com/in/richardmuffler/" target="_blank" rel="noopener noreferrer">linkedin</a>
+          <a class="cardlink" href="/">probl.me</a>
+        </div>
+      </>
+    ) : (
+      <>
+        <!-- Portrait photo -->
+        <img
+          src="/assets/richard.png"
+          alt="Richard Muffler"
+          class="photo-lg"
+        />
+
+        <!-- Name/title block -->
+        <div class="portrait-meta">
+          <div class="name">Richard Muffler</div>
+          <div class="title">PM &middot; security &middot; AI builder</div>
+        </div>
+
+        <div class="divider divider-sm"></div>
+
+        <!-- Link rows -->
+        <div class="link-rows">
+          <a class="linkrow" href="https://github.com/rustymuffler" target="_blank" rel="noopener noreferrer">
+            <span>github</span>
+            <span class="link-handle">rustymuffler &#8599;</span>
+          </a>
+          <a class="linkrow" href="https://www.linkedin.com/in/richardmuffler/" target="_blank" rel="noopener noreferrer">
+            <span>linkedin</span>
+            <span class="link-handle">in/richardmuffler &#8599;</span>
+          </a>
+          <a class="linkrow" href="mailto:richard.muffler+problme@gmail.com">
+            <span>email</span>
+            <span class="link-handle">richard.muffler@gmail.com &#8599;</span>
+          </a>
+        </div>
+      </>
+    )}
+  </div>
+</div>
+
+<style>
+.perspective {
+  perspective: 1100px;
+}
+
+.bcard {
+  position: relative;
+  transform-style: preserve-3d;
+  background: var(--color-surface);
+  border: 1px solid #322A1D;
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow:
+    0 32px 64px -22px rgba(0, 0, 0, 0.78),
+    0 4px 14px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.35s;
+  will-change: transform;
+}
+
+/* Disable all motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .bcard {
+    transition: none;
+    will-change: auto;
+  }
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+  pointer-events: none;
+  background: transparent;
+  transition: background 0.08s;
+  z-index: 5;
+}
+
+/* ── Homepage variant ───────────────────────────────────── */
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transform: translateZ(45px);
+}
+
+.photo-sm {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--color-border-strong);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+}
+
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-amber), rgba(242, 162, 75, 0));
+  border-radius: 2px;
+  margin: 22px 0;
+  transform: translateZ(25px);
+}
+
+.divider-sm {
+  margin: 18px 0;
+}
+
+.building-block {
+  transform: translateZ(55px);
+}
+
+.building-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.building-content {
+  font-size: 15px;
+  color: var(--color-text-primary);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+.building-secondary {
+  color: var(--color-text-secondary);
+}
+
+.social-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  transform: translateZ(35px);
+}
+
+.cardlink {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 9px;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.cardlink:hover {
+  border-color: var(--color-amber);
+  color: var(--color-text-primary);
+}
+
+/* ── About variant ──────────────────────────────────────── */
+
+.photo-lg {
+  display: block;
+  width: 100%;
+  height: 240px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center 28%;
+  border: 1px solid var(--color-border-strong);
+  transform: translateZ(30px);
+}
+
+.portrait-meta {
+  transform: translateZ(50px);
+}
+
+.portrait-meta .name {
+  margin-top: 18px;
+}
+
+.portrait-meta .title {
+  margin-top: 4px;
+}
+
+.link-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transform: translateZ(40px);
+}
+
+.linkrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  padding: 11px 14px;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.linkrow:hover {
+  border-color: var(--color-amber);
+  color: var(--color-text-primary);
+}
+
+.link-handle {
+  color: var(--color-text-muted);
+}
+</style>
+
+<script>
+  const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  document.querySelectorAll<HTMLElement>('.bcard').forEach((card) => {
+    card.addEventListener('mousemove', (e: MouseEvent) => {
+      if (noMotion) return;
+      const rect = card.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      const tilt = Number(card.dataset.tilt ?? 17);
+      card.style.transform = `rotateY(${px * tilt}deg) rotateX(${-py * tilt}deg) translateY(-8px) scale(1.03)`;
+      card.style.boxShadow = '0 44px 80px -24px rgba(0,0,0,0.85), 0 8px 20px rgba(0,0,0,0.45)';
+      const glare = card.querySelector<HTMLElement>('.glare');
+      if (glare) {
+        glare.style.background = `radial-gradient(circle at ${(px + 0.5) * 100}% ${(py + 0.5) * 100}%, rgba(255,255,255,0.18), rgba(255,255,255,0) 55%)`;
+      }
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+      card.style.boxShadow = '';
+      const glare = card.querySelector<HTMLElement>('.glare');
+      if (glare) glare.style.background = 'transparent';
+    });
+  });
+</script>
