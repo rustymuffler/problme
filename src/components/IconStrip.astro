@@ -1,0 +1,157 @@
+---
+/*
+ * IconStrip — full-bleed animated marquee of topic icons that link to filtered blog views.
+ * No props. Pillar data is hardcoded here; update when topics change.
+ *
+ * Animation:
+ *   - Keyframes `marquee` and `pop` are defined in src/styles/global.css.
+ *   - The `.marquee-track` global class in global.css disables the animation
+ *     for users who prefer reduced motion.
+ *   - The strip pauses on hover via CSS (`.strip:hover .track`).
+ *   - The duplicate icon row has aria-hidden="true" and tabindex="-1" on its
+ *     links so AT users and keyboard users only encounter one set of links.
+ */
+
+interface Pillar {
+  src: string;
+  label: string;
+  tag: string;
+  rounded?: boolean;
+}
+
+const pillars: Pillar[] = [
+  { src: '/assets/icons/pm-craft.svg',          label: 'PM Craft',   tag: 'pm-craft' },
+  { src: '/assets/icons/ai-development.svg',     label: 'AI Dev',     tag: 'ai-development' },
+  { src: '/assets/icons/tech-tools.svg',         label: 'Tech Stack', tag: 'tech-tools' },
+  { src: '/assets/icons/astro.svg',              label: 'Astro',      tag: 'astro' },
+  { src: '/assets/icons/github.svg',             label: 'GitHub',     tag: 'github' },
+  { src: '/assets/icons/security.svg',           label: 'Security',   tag: 'security' },
+  { src: '/assets/icons/building-in-public.svg', label: 'In Public',  tag: 'building-in-public' },
+  { src: '/assets/icons/celly.png',              label: 'Celly',      tag: 'celly', rounded: true },
+];
+---
+
+<section class="strip-section">
+  <div class="strip-header">
+    <p class="eyebrow">// what I write about &middot; click a topic</p>
+  </div>
+
+  <div class="strip">
+    <div class="track marquee-track">
+
+      <!-- Primary pass — visible to AT and keyboard users -->
+      <div class="icon-row">
+        {pillars.map(({ src, label, tag, rounded }) => (
+          <a class="iconlink" href={`/blog?tag=${tag}`}>
+            <img
+              src={src}
+              width="44"
+              height="44"
+              alt={label}
+              style={rounded ? 'border-radius:9px;' : ''}
+            />
+            <span>{label}</span>
+          </a>
+        ))}
+      </div>
+
+      <!-- Duplicate pass — visual only, hidden from AT and keyboard -->
+      <div class="icon-row" aria-hidden="true">
+        {pillars.map(({ src, label, rounded }) => (
+          <a class="iconlink" href="#" tabindex="-1">
+            <img
+              src={src}
+              width="44"
+              height="44"
+              alt=""
+              role="presentation"
+              style={rounded ? 'border-radius:9px;' : ''}
+            />
+            <span>{label}</span>
+          </a>
+        ))}
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+.strip-section {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  background: #181410;
+  overflow: hidden;
+}
+
+.strip-header {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 22px 32px 8px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.strip {
+  padding: 18px 0 28px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* .marquee-track class exists on this element for the global.css reduced-motion override */
+.track {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+  animation: marquee 36s linear infinite;
+}
+
+.strip:hover .track {
+  animation-play-state: paused;
+}
+
+.icon-row {
+  display: flex;
+  gap: 48px;
+}
+
+.iconlink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 88px;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+}
+
+.iconlink:hover {
+  transform: translateY(-7px) scale(1.14);
+}
+
+.iconlink:hover img {
+  animation: pop 0.55s ease;
+}
+
+.iconlink:hover span {
+  color: var(--color-amber);
+}
+
+.iconlink img {
+  width: 44px;
+  height: 44px;
+}
+
+.iconlink span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+</style>

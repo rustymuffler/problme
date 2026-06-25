@@ -1,0 +1,4 @@
+{
+  "extends": "astro/tsconfigs/strictest",
+  "exclude": ["tests", "design_handoff_blog_site", "dist"]
+}

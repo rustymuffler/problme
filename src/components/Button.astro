@@ -1,0 +1,29 @@
+---
+/*
+ * Button — anchor-styled CTA. Delegates to the btn-primary / btn-secondary
+ * classes defined in src/styles/global.css.
+ * Props:
+ *   href      string             — link destination
+ *   variant   'primary' | 'secondary'
+ *   external? boolean            — adds target="_blank" rel="noopener noreferrer"
+ *
+ * Primary:   amber fill (#F2A24B), dark text, hover lightens to #F4B468
+ * Secondary: transparent, amber border on hover
+ */
+
+interface Props {
+  href: string;
+  variant: 'primary' | 'secondary';
+  external?: boolean;
+}
+
+const { href, variant, external = false } = Astro.props;
+---
+
+<a
+  href={href}
+  class={variant === 'primary' ? 'btn-primary' : 'btn-secondary'}
+  {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+>
+  <slot />
+</a>

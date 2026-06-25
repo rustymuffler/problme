@@ -1,0 +1,424 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CategoryPill from '../../components/CategoryPill.astro';
+import { getCollection, render } from 'astro:content';
+import type { Category } from '../../components/CategoryPill.astro';
+
+export async function getStaticPaths() {
+  const allPosts = (await getCollection('posts'))
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return allPosts.map((post, index) => ({
+    params: { slug: post.id.replace(/\.(md|mdx)$/, '') },
+    props: {
+      post,
+      prevPost: allPosts[index + 1] ?? null,   // older post = "← previous"
+      nextPost: allPosts[index - 1] ?? null,   // newer post = "next →"
+    },
+  }));
+}
+
+const { post, prevPost, nextPost } = Astro.props;
+const { Content } = await render(post);
+
+const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+const formattedDate = fmt.format(post.data.date);
+---
+
+<Layout
+  title={`${post.data.title} — probl.me`}
+  description={post.data.description}
+  ogImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
+>
+
+  <!-- ─── ARTICLE HEAD ─────────────────────────────────────────────────── -->
+  <div class="article-head">
+    <a class="back-link navlink" href="/blog">&larr; all posts</a>
+
+    <div class="head-pills">
+      <CategoryPill category={post.data.category as Category} />
+    </div>
+
+    <h1 class="article-h1">{post.data.title}</h1>
+
+    <div class="article-byline">
+      <span>Richard Muffler</span>
+      <span class="sep">|</span>
+      <span>{formattedDate}</span>
+      <span class="sep">|</span>
+      <span>{post.data.readTime} read</span>
+    </div>
+  </div>
+
+  <!-- ─── HERO IMAGE ───────────────────────────────────────────────────── -->
+  {post.data.heroImage && (
+    <div class="hero-wrap">
+      <img
+        src={post.data.heroImage}
+        alt={post.data.title}
+        class="hero-img"
+      />
+      {post.data.imageCredit && (
+        <p class="image-credit">{post.data.imageCredit}</p>
+      )}
+    </div>
+  )}
+
+  <!-- ─── BODY ─────────────────────────────────────────────────────────── -->
+  <article class="prose">
+    <Content />
+  </article>
+
+  <!-- ─── TAGS ─────────────────────────────────────────────────────────── -->
+  {post.data.tags.length > 0 && (
+    <div class="tags-row">
+      {post.data.tags.map((tag) => (
+        <a class="tag-pill" href={`/blog?tag=${tag}`}>#{tag}</a>
+      ))}
+    </div>
+  )}
+
+  <!-- ─── AUTHOR CARD ───────────────────────────────────────────────────── -->
+  <div class="author-wrap">
+    <div class="author-card">
+      <img
+        src="/assets/richard.png"
+        alt="Richard Muffler"
+        class="author-photo"
+        width="64"
+        height="64"
+      />
+      <div class="author-body">
+        <div class="author-name">Richard Muffler</div>
+        <p class="author-bio">
+          Security and SaaS PM tinkering on personal projects with AI. Writing
+          probl.me and Celly in public.
+        </p>
+      </div>
+      <a class="author-link" href="/about">about &rarr;</a>
+    </div>
+  </div>
+
+  <!-- ─── PREV / NEXT ───────────────────────────────────────────────────── -->
+  {(prevPost || nextPost) && (
+    <div class="nav-wrap">
+      <div class="nav-grid">
+        {prevPost ? (
+          <a class="nav-card" href={`/blog/${prevPost.id.replace(/\.(md|mdx)$/, '')}`}>
+            <div class="nav-label">&larr; previous</div>
+            <div class="nav-title">{prevPost.data.title}</div>
+          </a>
+        ) : <div />}
+
+        {nextPost ? (
+          <a class="nav-card nav-card--right" href={`/blog/${nextPost.id.replace(/\.(md|mdx)$/, '')}`}>
+            <div class="nav-label">next &rarr;</div>
+            <div class="nav-title">{nextPost.data.title}</div>
+          </a>
+        ) : <div />}
+      </div>
+    </div>
+  )}
+
+</Layout>
+
+<style>
+/* ── Article head ─────────────────────────────────────────── */
+.article-head {
+  max-width: var(--reading-width);
+  margin: 0 auto;
+  padding: 56px 24px 0;
+}
+
+.back-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.head-pills {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 26px;
+}
+
+.article-h1 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 18px 0 0;
+}
+
+.article-byline {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.sep {
+  color: var(--color-border-strong);
+}
+
+/* ── Hero image ───────────────────────────────────────────── */
+.hero-wrap {
+  max-width: 920px;
+  margin: 36px auto 0;
+  padding: 0 24px;
+}
+
+.hero-img {
+  display: block;
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+}
+
+.image-credit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin: 8px 0 0;
+  text-align: right;
+}
+
+/* ── Prose ────────────────────────────────────────────────── */
+.prose {
+  max-width: var(--reading-width);
+  margin: 0 auto;
+  padding: 48px 24px 0;
+  font-size: 18px;
+  line-height: 1.75;
+  color: #E9E1D3;
+}
+
+/* MDX-generated elements don't carry Astro's scope attribute,
+   so :global() is required for all descendant selectors. */
+.prose :global(p) {
+  margin: 1.4em 0 0;
+}
+
+.prose :global(p:first-child) {
+  margin-top: 0;
+}
+
+.prose :global(h2) {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin: 44px 0 0;
+  color: var(--color-text-primary);
+}
+
+.prose :global(h3) {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 36px 0 0;
+  color: var(--color-text-primary);
+}
+
+.prose :global(a) {
+  color: var(--color-amber);
+  border-bottom: 1px solid rgba(242, 162, 75, 0.35);
+}
+
+.prose :global(a:hover) {
+  border-bottom-color: var(--color-amber);
+}
+
+.prose :global(blockquote) {
+  margin: 32px 0;
+  padding: 6px 0 6px 22px;
+  border-left: 2px solid var(--color-amber);
+  font-size: 20px;
+  line-height: 1.55;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.prose :global(ul),
+.prose :global(ol) {
+  margin: 1em 0;
+  padding-left: 1.5em;
+}
+
+.prose :global(li) {
+  margin: 0.4em 0;
+}
+
+/* Inline code */
+.prose :global(:not(pre) > code) {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  background: var(--color-surface-alt);
+  color: var(--color-amber);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+/* Code blocks */
+.prose :global(pre) {
+  background: #161310;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  margin: 28px 0;
+  overflow-x: auto;
+}
+
+.prose :global(pre code) {
+  display: block;
+  padding: 18px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  color: #E9E1D3;
+  background: none;
+}
+
+/* ── Tags ─────────────────────────────────────────────────── */
+.tags-row {
+  max-width: var(--reading-width);
+  margin: 40px auto 0;
+  padding: 0 24px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tag-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.tag-pill:hover {
+  border-color: var(--color-amber);
+  color: var(--color-text-primary);
+}
+
+/* ── Author card ──────────────────────────────────────────── */
+.author-wrap {
+  max-width: var(--reading-width);
+  margin: 40px auto 0;
+  padding: 0 24px;
+}
+
+.author-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 26px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.author-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+}
+
+.author-photo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+}
+
+.author-body {
+  flex: 1;
+}
+
+.author-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.author-bio {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+  margin: 6px 0 0;
+}
+
+.author-link {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-amber);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 9px 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+
+.author-link:hover {
+  border-color: var(--color-amber);
+}
+
+/* ── Prev / Next ──────────────────────────────────────────── */
+.nav-wrap {
+  max-width: var(--reading-width);
+  margin: 36px auto 0;
+  padding: 0 24px;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.nav-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 18px;
+  transition: border-color 0.2s;
+}
+
+.nav-card:hover {
+  border-color: var(--color-amber);
+}
+
+.nav-card:hover .nav-title {
+  color: var(--color-text-primary);
+}
+
+.nav-card--right {
+  text-align: right;
+}
+
+.nav-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.nav-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 8px;
+  line-height: 1.4;
+  transition: color 0.2s;
+}
+</style>

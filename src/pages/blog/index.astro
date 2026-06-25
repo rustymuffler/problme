@@ -1,0 +1,383 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import CategoryPill from '../../components/CategoryPill.astro';
+import { getCollection } from 'astro:content';
+import type { Category } from '../../components/CategoryPill.astro';
+
+const allPosts = (await getCollection('posts'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+const featuredPost = allPosts[0] ?? null;
+---
+
+<Layout
+  title="Blog — probl.me"
+  description="Two posts a week on product craft, building with AI, and the stack that runs this site. Honest about what worked and what didn't."
+>
+
+  <!-- ─── PAGE HEAD ─────────────────────────────────────────────────────── -->
+  <section class="page-head">
+    <div class="eyebrow">// the blog</div>
+
+    <!-- Single h1 — JS updates the text when a tag filter is active -->
+    <h1 class="page-h1" id="page-h1">Notes from building in public</h1>
+
+    <!-- Default subtitle — shown when tag=all -->
+    <div id="sub-default">
+      <p class="page-sub">
+        Two posts a week on product craft, building with AI, and the stack that
+        runs this site. Honest about what worked and what didn't.
+      </p>
+    </div>
+
+    <!-- Filtered subtitle — shown when a tag is active -->
+    <div id="sub-filtered" style="display:none;" aria-hidden="true">
+      <p class="page-sub mono">
+        <span id="count-label"></span>
+        &nbsp;&middot;&nbsp;
+        <a class="clear-link" href="/blog">clear filter &times;</a>
+      </p>
+    </div>
+
+    <!-- Filter pills -->
+    <div class="pills" role="list">
+      <a class="pill" data-pill="all"            href="/blog"                    role="listitem">all</a>
+      <a class="pill" data-pill="pm-craft"       href="/blog?tag=pm-craft"       role="listitem">pm-craft</a>
+      <a class="pill" data-pill="ai-development" href="/blog?tag=ai-development" role="listitem">ai-development</a>
+      <a class="pill" data-pill="tech-tools"     href="/blog?tag=tech-tools"     role="listitem">tech-tools</a>
+    </div>
+  </section>
+
+  <!-- ─── FEATURED POST (hidden when filtering) ─────────────────────────── -->
+  {featuredPost && (
+    <section id="feat-wrap" class="feat-wrap">
+      <a
+        class="feat-card"
+        href={`/blog/${featuredPost.id.replace(/\.(md|mdx)$/, '')}`}
+      >
+        <img
+          src={featuredPost.data.heroImage ?? '/assets/og/og-default.svg'}
+          alt={featuredPost.data.title}
+          class="feat-img"
+        />
+        <div class="feat-body">
+          <div class="feat-meta-row">
+            <CategoryPill category={featuredPost.data.category as Category} />
+            <span class="feat-label">featured</span>
+          </div>
+          <h2 class="feat-title">{featuredPost.data.title}</h2>
+          <p class="feat-desc">{featuredPost.data.description}</p>
+          <div class="feat-date">
+            {fmt.format(featuredPost.data.date)} &middot; {featuredPost.data.readTime} read
+          </div>
+        </div>
+      </a>
+    </section>
+  )}
+
+  <!-- ─── GRID ─────────────────────────────────────────────────────────── -->
+  <section class="grid-wrap">
+    <div class="card-grid">
+      {allPosts.map((post) => {
+        const slug = post.id.replace(/\.(md|mdx)$/, '');
+        const isFeat = post === featuredPost;
+        return (
+          <div
+            data-card
+            data-cat={post.data.category}
+            data-tags={post.data.tags.join(',')}
+            data-feat={isFeat ? 'true' : undefined}
+            style={isFeat ? 'display:none;' : ''}
+          >
+            <ArticleCard
+              href={`/blog/${slug}`}
+              heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
+              heroAlt={post.data.title}
+              category={post.data.category as Category}
+              title={post.data.title}
+              excerpt={post.data.description}
+              date={fmt.format(post.data.date)}
+              readTime={post.data.readTime}
+            />
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Empty state (hidden until JS reveals it) -->
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-label">
+        no posts tagged <span id="empty-tag" class="accent"></span> yet
+      </div>
+      <p class="empty-body">
+        This topic is on the roadmap. Check back soon, or browse everything.
+      </p>
+      <a class="browse-all" href="/blog">browse all posts</a>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+/* ── Page head ────────────────────────────────────────────── */
+.page-head {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 64px 32px 32px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.page-h1 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 14px 0 0;
+}
+
+.accent {
+  color: var(--color-amber);
+}
+
+.page-sub {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  max-width: 40em;
+  margin: 16px 0 0;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.clear-link {
+  color: var(--color-amber);
+}
+
+.pills {
+  display: flex;
+  gap: 10px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  transition: filter 0.2s;
+}
+
+.pill:hover { filter: brightness(1.15); }
+
+/* Active states by tag value — JS adds .is-active */
+.pill[data-pill="all"].is-active,
+.pill[data-pill="pm-craft"].is-active {
+  background: #F2A24B; color: #15120E; border-color: #F2A24B; font-weight: 600;
+}
+.pill[data-pill="ai-development"].is-active {
+  background: #E8674A; color: #15120E; border-color: #E8674A; font-weight: 600;
+}
+.pill[data-pill="tech-tools"].is-active {
+  background: #9DB066; color: #15120E; border-color: #9DB066; font-weight: 600;
+}
+
+/* ── Featured card ────────────────────────────────────────── */
+.feat-wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 8px 32px 0;
+}
+
+.feat-card {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.feat-card:hover {
+  border-color: var(--color-amber);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.feat-card:hover .feat-title {
+  color: #fff;
+}
+
+.feat-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+}
+
+.feat-body {
+  padding: 40px;
+}
+
+.feat-meta-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.feat-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.feat-title {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 18px 0 0;
+  color: var(--color-text-primary);
+  transition: color 0.25s;
+}
+
+.feat-desc {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  margin: 14px 0 0;
+}
+
+.feat-date {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 24px;
+}
+
+/* ── Grid ─────────────────────────────────────────────────── */
+.grid-wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 36px 32px 40px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.empty-state {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-2xl);
+  padding: 56px 32px;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.empty-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.empty-body {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}
+
+.browse-all {
+  display: inline-block;
+  margin-top: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 11px 22px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.browse-all:hover {
+  border-color: var(--color-amber);
+  color: var(--color-text-primary);
+}
+</style>
+
+<script>
+  const params  = new URLSearchParams(window.location.search);
+  const active  = params.get('tag') ?? 'all';
+  const isAll   = active === 'all';
+
+  // ── Filter pills ──────────────────────────────────────────
+  document.querySelectorAll<HTMLElement>('[data-pill]').forEach((pill) => {
+    if (pill.dataset.pill === active) pill.classList.add('is-active');
+  });
+
+  // ── Headings ──────────────────────────────────────────────
+  if (!isAll) {
+    const h1 = document.getElementById('page-h1');
+    const subDef = document.getElementById('sub-default');
+    const subFil = document.getElementById('sub-filtered');
+    if (h1) h1.textContent = `Tagged ${active}`;
+    if (subDef) { subDef.style.display = 'none'; subDef.setAttribute('aria-hidden', 'true'); }
+    if (subFil) { subFil.style.display = ''; subFil.removeAttribute('aria-hidden'); }
+  }
+
+  // ── Featured card ─────────────────────────────────────────
+  const featWrap = document.getElementById('feat-wrap');
+  if (featWrap && !isAll) featWrap.style.display = 'none';
+
+  // ── Grid cards ────────────────────────────────────────────
+  let visible = 0;
+
+  document.querySelectorAll<HTMLElement>('[data-card]').forEach((wrap) => {
+    const cat  = wrap.dataset.cat ?? '';
+    const tags = wrap.dataset.tags ? wrap.dataset.tags.split(',') : [];
+    const feat = wrap.dataset.feat === 'true';
+
+    if (isAll) {
+      // Default view: hide the featured-post duplicate in the grid
+      wrap.style.display = feat ? 'none' : '';
+      if (!feat) visible++;
+    } else {
+      const match = cat === active || tags.includes(active);
+      wrap.style.display = match ? '' : 'none';
+      if (match) visible++;
+    }
+  });
+
+  // ── Count label + empty state ─────────────────────────────
+  if (!isAll) {
+    const countEl = document.getElementById('count-label');
+    const emptyEl = document.getElementById('empty-state');
+    const emptyTag = document.getElementById('empty-tag');
+
+    if (countEl) {
+      countEl.textContent = `${visible} ${visible === 1 ? 'post' : 'posts'}`;
+    }
+    if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
+    if (emptyTag) emptyTag.textContent = active;
+  }
+</script>
