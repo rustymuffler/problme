@@ -49,9 +49,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release download v0.63.0 \
+          gh release download v0.71.2 \
             --repo aquasecurity/trivy \
-            --pattern "trivy_0.63.0_Linux-64bit.deb" \
+            --pattern "trivy_0.71.2_Linux-64bit.deb" \
             --output /tmp/trivy.deb
           sudo dpkg -i /tmp/trivy.deb
 
