@@ -1,0 +1,13 @@
+# Semgrep ignore file
+# Patterns here are excluded from all semgrep scans (local and CI).
+
+# Design handoff package — vendor preview runtime, not built into production.
+# This directory contains a Claude Design rendering runtime (support.js) with
+# internal IPC (postMessage) and logging code that triggers Semgrep rules.
+# The Astro build only processes src/; design_handoff_blog_site/ is never deployed.
+design_handoff_blog_site/
+
+# Standard ignores
+node_modules/
+dist/
+.astro/
