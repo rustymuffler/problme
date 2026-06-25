@@ -36,5 +36,9 @@ exclude = [
 
   # Bunny Fonts CDN -- always up and not something we control
   "^https://fonts\\.bunny\\.net",
+
+  # The site's own domain -- OG/canonical meta tags reference it but the
+  # domain may not reflect the current PR build, so skip self-references
+  "^https://probl\\.me",
 ]
 
