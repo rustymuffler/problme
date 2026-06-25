@@ -38,7 +38,3 @@ exclude = [
   "^https://fonts\\.bunny\\.net",
 ]
 
-# ── Output ─────────────────────────────────────────────────────────────────
-
-# Verbose output so CI logs show exactly which links were checked
-verbose = true
