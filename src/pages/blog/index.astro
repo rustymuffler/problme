@@ -22,20 +22,19 @@ const featuredPost = allPosts[0] ?? null;
   <section class="page-head">
     <div class="eyebrow">// the blog</div>
 
-    <!-- Default heading — shown when tag=all -->
-    <div id="head-default">
-      <h1 class="page-h1">Notes from building in public</h1>
+    <!-- Single h1 — JS updates the text when a tag filter is active -->
+    <h1 class="page-h1" id="page-h1">Notes from building in public</h1>
+
+    <!-- Default subtitle — shown when tag=all -->
+    <div id="sub-default">
       <p class="page-sub">
         Two posts a week on product craft, building with AI, and the stack that
         runs this site. Honest about what worked and what didn't.
       </p>
     </div>
 
-    <!-- Filtered heading — shown when a tag is active -->
-    <div id="head-filtered" style="display:none;">
-      <h1 class="page-h1">
-        Tagged <span id="active-tag-name" class="accent"></span>
-      </h1>
+    <!-- Filtered subtitle — shown when a tag is active -->
+    <div id="sub-filtered" style="display:none;" aria-hidden="true">
       <p class="page-sub mono">
         <span id="count-label"></span>
         &nbsp;&middot;&nbsp;
@@ -338,12 +337,12 @@ const featuredPost = allPosts[0] ?? null;
 
   // ── Headings ──────────────────────────────────────────────
   if (!isAll) {
-    const def = document.getElementById('head-default');
-    const fil = document.getElementById('head-filtered');
-    const nameSpan = document.getElementById('active-tag-name');
-    if (def) def.style.display = 'none';
-    if (fil) fil.style.display = '';
-    if (nameSpan) nameSpan.textContent = active;
+    const h1 = document.getElementById('page-h1');
+    const subDef = document.getElementById('sub-default');
+    const subFil = document.getElementById('sub-filtered');
+    if (h1) h1.textContent = `Tagged ${active}`;
+    if (subDef) { subDef.style.display = 'none'; subDef.setAttribute('aria-hidden', 'true'); }
+    if (subFil) { subFil.style.display = ''; subFil.removeAttribute('aria-hidden'); }
   }
 
   // ── Featured card ─────────────────────────────────────────

@@ -197,17 +197,17 @@ test.describe('Accessibility: blog post (/blog/[slug])', () => {
     await page.goto('/blog');
     await page.waitForLoadState('networkidle');
 
-    // Find the first link that points to a blog post URL (/blog/<slug>)
-    const firstPostLink = await page
-      .locator('a[href^="/blog/"]')
-      .first()
-      .getAttribute('href');
-
-    if (!firstPostLink) {
+    // Find the first link that points to a blog post URL (/blog/<slug>).
+    // Use count() first -- it returns immediately without waiting, unlike
+    // getAttribute() which blocks until an element appears (and times out
+    // when the content collection is empty).
+    const postLinks = page.locator('a[href^="/blog/"]');
+    if (await postLinks.count() === 0) {
       // No posts exist yet -- skip gracefully rather than failing
       test.skip();
       return;
     }
+    const firstPostLink = await postLinks.first().getAttribute('href');
 
     await page.goto(firstPostLink);
     await page.waitForLoadState('networkidle');
