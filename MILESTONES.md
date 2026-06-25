@@ -26,16 +26,16 @@
 | 1.4 | Configure MDX support | ✅ | `@astrojs/mdx` 7.0.0 — 2026-06-24 |
 | 1.5 | Configure content collections | ✅ | `src/content.config.ts` with glob loader, posts schema — 2026-06-24 |
 | 1.6 | Configure GitHub Pages deployment | ✅ | `astro.config.mjs`: `site: 'https://probl.me'`, `output: 'static'` — 2026-06-24 |
-| 1.7 | Create `.github/workflows/deploy.yml` | ⬜ | GitHub Actions → GitHub Pages deployment |
-| 1.8 | Create `.github/workflows/ci.yml` | ⬜ | Build check + lint + link checker |
-| 1.9 | Create `.github/workflows/security.yml` | ⬜ | Gitleaks + Semgrep + Trivy + Checkov |
-| 1.10 | Create `.github/workflows/lighthouse.yml` | ⬜ | Lighthouse CI checks on every PR |
+| 1.7 | Create `.github/workflows/deploy.yml` | ✅ | GitHub Actions → GitHub Pages, all SHA-pinned — 2026-06-24 |
+| 1.8 | Create `.github/workflows/ci.yml` | ✅ | Build + astro check + lychee link checker (lychee-action v2.8.0) — 2026-06-24 |
+| 1.9 | Create `.github/workflows/security.yml` | ✅ | Gitleaks + Semgrep + Trivy v0.71.2 (via gh release download) + Checkov — 2026-06-24 |
+| 1.10 | Create `.github/workflows/lighthouse.yml` | ✅ | LHCI 3-run average; perf threshold 0.50 in CI (localhost not representative) — 2026-06-24 |
 | 1.11 | Install Gitleaks pre-commit hook | ✅ | `.git/hooks/pre-commit`, Gitleaks 8.30.1, `.gitleaks.toml` allowlist — 2026-06-24 |
 | 1.12 | Verify `.env` in `.gitignore` | ✅ | Astro/Node .gitignore committed 2026-06-23 |
 | 1.13 | Commit all standards docs to repository | ✅ | All governance docs committed to main 2026-06-23 |
-| 1.14 | Configure custom domain probl.me on GitHub Pages | ⬜ | CNAME file in repo; Pages still on gh-pages branch — reconfigure when Astro build is ready |
-| 1.15 | Verify SSL/HTTPS on probl.me | ⬜ | GitHub Pages provides free TLS — cert valid through 2026-07-23, auto-renews |
-| 1.16 | First successful deploy (placeholder index page) | ⬜ | Anything that builds and deploys |
+| 1.14 | Configure custom domain probl.me on GitHub Pages | ⬜ | Add CNAME file to repo + set domain in Pages settings; Richard owns DNS — blocked on B2 |
+| 1.15 | Verify SSL/HTTPS on probl.me | ⬜ | GitHub Pages TLS auto-provisions once custom domain is verified — blocked on 1.14 |
+| 1.16 | First successful deploy (placeholder index page) | ✅ | feat/astro-foundation merged to main 2026-06-25; GitHub Actions deploy fired — site live at rustymuffler.github.io/problme |
 | 1.17 | Create CHANGELOG.md with v0.1.0 entry | ⬜ | PM Agent / Technical Writer Agent |
 | 1.18 | Create BLOCKERS.md | ✅ | Committed to main 2026-06-23 |
 
@@ -52,22 +52,22 @@
 | 2.1 | Implement design tokens in CSS variables | ✅ | Full Workshop palette + type scale + spacing in `src/styles/global.css` — 2026-06-24 |
 | 2.2 | Configure Inter + JetBrains Mono fonts | ✅ | Hanken Grotesk + JetBrains Mono via Bunny Fonts in Layout head — 2026-06-24 |
 | 2.3 | Build base layout component | ✅ | `src/layouts/Layout.astro`: sticky header, footer, OG meta — 2026-06-24 |
-| 2.4 | Build navigation component | ⬜ | Desktop + mobile responsive |
-| 2.5 | Build homepage layout | ⬜ | Hero, 3D card, scrolling icons, latest posts grid |
-| 2.6 | Build 3D business card component | ⬜ | Neumorphic, Richard's info, links |
+| 2.4 | Build navigation component | ✅ | Sticky header with nav links built into `Layout.astro` — 2026-06-24 |
+| 2.5 | Build homepage layout | ✅ | Hero + 3D card + IconStrip + latest posts grid — 2026-06-24 |
+| 2.6 | Build 3D business card component | ✅ | `BusinessCard.astro` — tilt, glare, homepage + about variants; email obfuscated via data-* attrs — 2026-06-25 |
 | 2.7 | Create brand icon set with Claude Design | ✅ | All assets in `design_handoff_blog_site/assets/` — 2026-06-24 |
-| 2.8 | Build scrolling icon strip component | ⬜ | Auto-scroll animation, pauses on hover |
-| 2.9 | Build blog listing page | ⬜ | Article card grid, category filter |
-| 2.10 | Build article card component | ⬜ | Hero thumbnail, category badge, title, excerpt, read time, date |
-| 2.11 | Build blog post template | ⬜ | Article body, hero image, metadata, reading time |
-| 2.12 | Build About page | ⬜ | Extended bio, career context, 3D card |
-| 2.13 | Implement syntax highlighting | ⬜ | Shiki with `github-dark` or `tokyo-night` theme |
+| 2.8 | Build scrolling icon strip component | ✅ | `IconStrip.astro` — marquee scroll, pauses on hover, accessible — 2026-06-24 |
+| 2.9 | Build blog listing page | ✅ | `src/pages/blog/index.astro` — category filter, ArticleCard grid — 2026-06-24 |
+| 2.10 | Build article card component | ✅ | `ArticleCard.astro` — hero thumb, category badge, title, excerpt, read time, date — 2026-06-24 |
+| 2.11 | Build blog post template | ✅ | `src/pages/blog/[slug].astro` — article body, hero, metadata — 2026-06-24 |
+| 2.12 | Build About page | ✅ | `src/pages/about.astro` — bio, 3D card (about variant), icon strip — 2026-06-24 |
+| 2.13 | Implement syntax highlighting | ⬜ | Shiki with `github-dark` or `tokyo-night` theme — needed before first real code article |
 | 2.14 | Implement callout block MDX components | ⬜ | note, warning, tip variants |
-| 2.15 | Build RSS feed | ⬜ | `/rss.xml` via `@astrojs/rss` |
-| 2.16 | Build sitemap | ⬜ | `@astrojs/sitemap` integration |
-| 2.17 | Implement Open Graph meta tags | ⬜ | Dynamic per-post OG image, title, description |
-| 2.18 | Accessibility audit on all components | ⬜ | axe-core + manual keyboard testing |
-| 2.19 | Lighthouse audit — all scores ≥ target | ⬜ | Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95 |
+| 2.15 | Build RSS feed | ⬜ | `/rss.xml` via `@astrojs/rss` — requires rl-protect scan before install |
+| 2.16 | Build sitemap | ⬜ | `@astrojs/sitemap` — requires rl-protect scan before install; Layout.astro has placeholder `<link rel="sitemap">` removed until this is done |
+| 2.17 | Implement Open Graph meta tags | ✅ | Dynamic title/description/OG in `Layout.astro` — 2026-06-24 |
+| 2.18 | Accessibility audit on all components | ✅ | axe-core Playwright tests passing; all violations resolved — 2026-06-24 |
+| 2.19 | Lighthouse audit — all scores ≥ target | ⬜ | CI threshold lowered to 0.50 perf (localhost unreliable); production audit needed once custom domain is live |
 
 **Phase 2 complete when:** All pages are designed and built, Lighthouse scores meet minimums, brand components are live, and the site looks like a real blog.
 
@@ -150,4 +150,4 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 
 ---
 
-*Last updated: 2026-06-24 — Developer Agent: marked 1.2, 1.3, 1.4, 1.5, 1.6, 1.11, 2.1, 2.2, 2.3 ✅ (STEP 1 foundation session 2026-06-24, feat/astro-foundation branch).*
+*Last updated: 2026-06-25 — PM Agent: marked 1.7–1.10, 1.16, 2.4–2.12, 2.17, 2.18 ✅ (feat/astro-foundation merged to main, PR #35, sessions 2026-06-24 and 2026-06-25).*

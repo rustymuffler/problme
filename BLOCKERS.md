@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-06-23
+> Last updated: 2026-06-25
 
 ---
 
