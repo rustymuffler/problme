@@ -1,15 +1,183 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import BusinessCard from '../components/BusinessCard.astro';
+import IconStrip from '../components/IconStrip.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import Button from '../components/Button.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = (await getCollection('posts'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 3);
+
+const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 ---
 
-<Layout title="probl.me — Building in public. One problem at a time." description="I'm Richard — a cybersecurity and SaaS product manager building personal projects with AI. This is where I share what works, what breaks, and what I'd tell someone starting from zero.">
+<Layout
+  title="probl.me — Building in public. One problem at a time."
+  description="I'm Richard, a cybersecurity and SaaS product manager tinkering on personal projects with AI. This is where I share what works, what breaks, and what I'd tell someone starting from zero."
+>
 
-  <section style="max-width:var(--max-width); margin:0 auto; padding:120px 32px; text-align:center;">
-    <div style="font-family:var(--font-mono); font-size:12px; color:var(--color-text-muted); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:24px;">// coming soon</div>
-    <h1 style="font-size:56px; font-weight:800; line-height:1.05; letter-spacing:-0.025em; margin:0 0 24px;">Building in public.<br>One <span style="color:var(--color-amber);">problem</span> at a time.</h1>
-    <p style="font-size:18px; line-height:1.75; color:var(--color-text-secondary); max-width:34em; margin:0 auto;">
-      The site is under construction. The foundation is live.
-    </p>
+  <!-- ─── HERO ──────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-text">
+      <div class="eyebrow">// building in public</div>
+      <h1 class="hero-h1">
+        Building in public.<br />
+        One <span class="accent">problem</span> at a time.
+      </h1>
+      <p class="hero-sub">
+        I'm Richard, a cybersecurity and SaaS product manager tinkering on personal
+        projects with AI. This is where I share what works, what breaks, and what
+        I'd tell someone starting from zero.
+      </p>
+      <div class="hero-btns">
+        <Button href="/blog" variant="primary">Read the blog</Button>
+        <Button href="/about" variant="secondary">About me</Button>
+      </div>
+    </div>
+
+    <BusinessCard variant="homepage" />
+  </section>
+
+  <!-- ─── ICON STRIP ────────────────────────────────────────────────────── -->
+  <IconStrip />
+
+  <!-- ─── LATEST POSTS ─────────────────────────────────────────────────── -->
+  <section class="latest">
+    <div class="latest-header">
+      <div>
+        <div class="eyebrow">// latest</div>
+        <h2 class="latest-h2">Fresh from the workbench</h2>
+      </div>
+      <a class="navlink all-posts-link" href="/blog">all posts &rarr;</a>
+    </div>
+
+    {allPosts.length > 0 ? (
+      <div class="card-grid">
+        {allPosts.map((post) => (
+          <ArticleCard
+            href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}`}
+            heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
+            heroAlt={post.data.title}
+            category={post.data.category}
+            title={post.data.title}
+            excerpt={post.data.description}
+            date={fmt.format(post.data.date)}
+            readTime={post.data.readTime}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="empty-state">
+        <div class="empty-label">// no posts yet</div>
+        <p class="empty-body">The first articles are in the pipeline. Check back soon.</p>
+      </div>
+    )}
   </section>
 
 </Layout>
+
+<style>
+/* ── Hero ─────────────────────────────────────────────────── */
+.hero {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 88px 32px 72px;
+  display: grid;
+  grid-template-columns: 1.25fr 0.9fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.hero-text {
+  /* intentionally unstyled — children handle layout */
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero-h1 {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 18px 0 0;
+}
+
+.accent {
+  color: var(--color-amber);
+}
+
+.hero-sub {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-width: 34em;
+  margin: 22px 0 0;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+/* ── Latest posts ─────────────────────────────────────────── */
+.latest {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 80px 32px 40px;
+}
+
+.latest-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.latest-h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 10px 0 0;
+}
+
+.all-posts-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-amber);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.empty-state {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-2xl);
+  padding: 56px 32px;
+  text-align: center;
+}
+
+.empty-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.empty-body {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}
+</style>

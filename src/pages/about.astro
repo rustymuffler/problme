@@ -1,0 +1,173 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BusinessCard from '../components/BusinessCard.astro';
+import IconStrip from '../components/IconStrip.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout
+  title="About — probl.me"
+  description="I'm Richard, a cybersecurity and SaaS product manager building personal projects with AI and writing about what I learn."
+>
+
+  <!-- ─── INTRO + CARD ──────────────────────────────────────────────────── -->
+  <section class="intro">
+    <div class="intro-text">
+      <div class="eyebrow">// about</div>
+      <h1 class="intro-h1">Hi, I'm Richard.<br />I build in public.</h1>
+      <p class="intro-sub">
+        I work in cybersecurity and SaaS product management, and on the side I
+        tinker on personal projects with AI, writing down what I learn as I go.
+        probl.me is that notebook, kept in the open.
+      </p>
+    </div>
+
+    <BusinessCard variant="about" />
+  </section>
+
+  <!-- ─── STORY ─────────────────────────────────────────────────────────── -->
+  <article class="prose-wrap">
+    <h2>Why this blog exists</h2>
+    <p>
+      I learn best by building the real thing and writing down what happened. Most
+      posts about working with AI are either hype or fear. I wanted a third option:
+      an honest log from someone actually shipping, including the parts that did not
+      work.
+    </p>
+    <p>
+      So probl.me runs on the same principles I write about. The site is a static
+      <a href="/blog?tag=astro">Astro</a> build on GitHub Pages, the content moves
+      through a pipeline of Claude agents, and every decision is documented. The
+      process is the subject as much as the output.
+    </p>
+
+    <h2>What I'm building now</h2>
+    <p>
+      Two things, in parallel. probl.me is the blog you're reading. Celly is a
+      sister product I'm developing alongside it. Both are early, both are public,
+      and both show up in what I write here.
+    </p>
+    <p>
+      If you're a PM curious about AI, a developer figuring out how to work with
+      agents, or someone non-technical who wants to manage their own software
+      projects, I'm writing for you.
+    </p>
+  </article>
+
+  <!-- ─── ICON STRIP ────────────────────────────────────────────────────── -->
+  <IconStrip />
+
+  <!-- ─── CTA ──────────────────────────────────────────────────────────── -->
+  <section class="cta">
+    <h2 class="cta-h2">Read along, or reach out</h2>
+    <p class="cta-sub">
+      New posts twice a week. If something here is useful or wrong, I'd genuinely
+      like to hear it.
+    </p>
+    <div class="cta-btns">
+      <Button href="/blog" variant="primary">Read the blog</Button>
+      <Button href="https://github.com/rustymuffler" variant="secondary" external>Follow on GitHub</Button>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+/* ── Intro ────────────────────────────────────────────────── */
+.intro {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 72px 32px 40px;
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.intro-h1 {
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  margin: 16px 0 0;
+}
+
+.intro-sub {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin: 20px 0 0;
+}
+
+/* ── Story prose ──────────────────────────────────────────── */
+.prose-wrap {
+  max-width: var(--reading-width);
+  margin: 24px auto 0;
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 1.75;
+  color: #E9E1D3;
+}
+
+.prose-wrap h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 40px 0 0;
+  color: var(--color-text-primary);
+}
+
+.prose-wrap h2:first-child {
+  margin-top: 0;
+}
+
+.prose-wrap p {
+  margin: 1.2em 0 0;
+}
+
+.prose-wrap a {
+  color: var(--color-amber);
+  border-bottom: 1px solid rgba(242, 162, 75, 0.35);
+}
+
+.prose-wrap a:hover {
+  border-bottom-color: var(--color-amber);
+}
+
+/* ── CTA ──────────────────────────────────────────────────── */
+.cta {
+  max-width: var(--reading-width);
+  margin: 0 auto;
+  padding: 64px 24px 24px;
+  text-align: center;
+}
+
+.cta-h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+.cta-sub {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+  margin: 12px 0 0;
+}
+
+.cta-btns {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 26px;
+}
+</style>
