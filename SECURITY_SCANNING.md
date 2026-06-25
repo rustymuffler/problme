@@ -353,6 +353,8 @@ Findings reviewed and accepted as out-of-scope or not actionable for a static si
 |---|---|---|---|---|---|
 | 2026-06-24 | Gitleaks | `linkedin-client-id` match on `richardmuffler` in commit `204e4aca` (`_config.yml`, 2019 Jekyll era) | WARN | False positive. `richardmuffler` is a public LinkedIn profile handle, not a secret client ID. The file is no longer in the working tree and pre-dates the Astro project. | Suppressed in `.gitleaks.toml` allowlist with explanation. No real secret exposed. |
 | 2026-06-24 | rl-protect-skills | npm install performed without rl-protect-scan (tool not yet configured) | INFO | rl-protect-skills was not yet installed in this first code session. Packages installed: `astro@7.0.2`, `@astrojs/mdx@7.0.0`, `tailwindcss@4.1.x`, `@tailwindcss/vite@4.1.x` — all official, well-known packages from trusted maintainers. | npm audit run immediately after install: 0 vulnerabilities. Trivy scan required before next dependency change. rl-protect-skills must be configured before any additional packages are installed. |
+| 2026-06-24 | rl-protect-skills | `yargs@17.7.3` GOVERNANCE FAIL — version published 6 days ago (recency gate) | GOVERNANCE | Transitive dependency of `@astrojs/check@0.9.9`. All seven security checks passed (no malware, no tampering, no CVEs, no secrets). `yargs` is a top-50 npm package (~50M weekly downloads). The FAIL is the recency gate only. Richard explicitly acknowledged and approved the install. | Dev-only toolchain dependency — not shipped to users. Will re-scan in ~2 weeks; recency gate will clear automatically once the package has been out long enough. |
+| 2026-06-24 | npm audit | `yaml@2.0.0-2.8.2` Stack Overflow via deeply nested YAML collections (GHSA-48c2-rrv3-qjmp) — 5 MODERATE findings in the `yaml → yaml-language-server → volar-service-yaml → @astrojs/language-server → @astrojs/check` chain | MODERATE | Dev-only type-checking tool. No user-controlled YAML flows through `@astrojs/check` — the tool consumes only project source files. Attack surface is zero in normal use. The npm-suggested fix (`--force`) would downgrade to `@astrojs/check@0.9.2`, which is a breaking change and not worth it for a MODERATE in a dev tool. | Track in scheduled dependency maintenance. Re-evaluate if `@astrojs/check` releases a non-breaking patch that resolves the chain. |
 
 ---
 
@@ -372,7 +374,7 @@ Gaps to be aware of:
 |---|---|
 | Aikido | ⬜ Not yet configured |
 | Semgrep | ⬜ Not yet configured |
-| rl-protect-skills | ⬜ Not yet configured — REQUIRED before any new npm package is added |
+| rl-protect-skills | ✅ Operational 2026-06-24 — used to scan `@astrojs/check@0.9.9` + `typescript@6.0.3` before install; one GOVERNANCE FAIL acknowledged by Richard (see Accepted Risk Log) |
 | Gitleaks (pre-commit) | ✅ Installed 2026-06-24 — `.git/hooks/pre-commit` using Gitleaks 8.30.1; `.gitleaks.toml` with allowlist |
 | Trivy | ⬜ Not yet configured |
 | Checkov | ⬜ Not yet configured |
