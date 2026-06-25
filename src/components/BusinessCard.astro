@@ -91,9 +91,11 @@ const isHomepage = variant === 'homepage';
             <span>linkedin</span>
             <span class="link-handle">in/richardmuffler &#8599;</span>
           </a>
-          <a class="linkrow" href="mailto:richard.muffler+problme@gmail.com">
+          <a class="linkrow" id="email-link" href="#"
+             data-eu="richard.muffler" data-ed="gmail.com"
+             aria-label="Contact by email">
             <span>email</span>
-            <span class="link-handle">richard.muffler@gmail.com &#8599;</span>
+            <span class="link-handle" id="email-handle">&#8599;</span>
           </a>
         </div>
       </>
@@ -314,4 +316,17 @@ const isHomepage = variant === 'homepage';
       if (glare) glare.style.background = 'transparent';
     });
   });
+
+  // Email parts come from data-* attributes — DOM reads can't be constant-folded
+  // by Vite/Rollup, so no recognisable email string appears in the built bundle.
+  const eLink = document.getElementById('email-link');
+  const eHandle = document.getElementById('email-handle');
+  if (eLink && eHandle) {
+    const at = String.fromCharCode(64);
+    const u = eLink.getAttribute('data-eu') ?? '';
+    const d = eLink.getAttribute('data-ed') ?? '';
+    (eLink as HTMLAnchorElement).href = 'mailto:' + u + '+problme' + at + d;
+    eLink.setAttribute('aria-label', 'Email ' + u + at + d);
+    eHandle.textContent = u + at + d + ' ↗';
+  }
 </script>
