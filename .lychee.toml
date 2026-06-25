@@ -1,0 +1,44 @@
+# lychee link checker configuration
+# Run after `astro build` with: lychee dist/**/*.html
+# Install lychee: https://github.com/lycheeverse/lychee#installation
+# (lychee is a standalone Rust binary, not an npm package)
+
+# ── Input ──────────────────────────────────────────────────────────────────
+# Passed on the command line: lychee dist/**/*.html
+
+# ── Behaviour ──────────────────────────────────────────────────────────────
+
+# Follow redirects and accept both 200 and 301 as valid
+accept = [200, 301]
+
+# Timeout per request (seconds)
+timeout = 10
+
+# Retry failed requests this many times before reporting as broken
+max_retries = 3
+
+# Do not check fragment-only links such as href="#section"
+exclude_mail = false
+
+# ── Exclusions ─────────────────────────────────────────────────────────────
+
+exclude = [
+  # Skip localhost and preview URLs -- these only exist during dev/CI
+  "^http://localhost",
+  "^http://127\\.0\\.0\\.1",
+
+  # Skip anchor-only links (fragments handled by the browser, not the server)
+  "^#",
+
+  # GitHub rate-limits bots heavily (HTTP 429); exclude profile and repo URLs
+  "^https://github\\.com/rustymuffler",
+  "^https://github\\.com/rustymuffler/.*",
+
+  # Bunny Fonts CDN -- always up and not something we control
+  "^https://fonts\\.bunny\\.net",
+]
+
+# ── Output ─────────────────────────────────────────────────────────────────
+
+# Verbose output so CI logs show exactly which links were checked
+verbose = true

@@ -6,7 +6,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "test:a11y": "playwright test tests/accessibility.spec.ts",
+    "test:lhci": "lhci autorun",
+    "test:links": "lychee dist/**/*.html"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
