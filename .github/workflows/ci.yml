@@ -53,9 +53,15 @@ jobs:
         run: npm run build
 
       - name: Install lychee
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -sSLf https://github.com/lycheeverse/lychee/releases/download/lychee-v0.24.2/lychee-x86_64-unknown-linux-musl.tar.gz | tar xz
-          sudo mv lychee /usr/local/bin/
+          gh release download lychee-v0.24.2 \
+            --repo lycheeverse/lychee \
+            --pattern "lychee-x86_64-unknown-linux-musl.tar.gz" \
+            --output /tmp/lychee.tar.gz
+          tar xzf /tmp/lychee.tar.gz -C /tmp
+          sudo mv /tmp/lychee /usr/local/bin/
 
       - name: Check links
         run: lychee --config .lychee.toml dist/**/*.html

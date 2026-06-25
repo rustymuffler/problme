@@ -45,14 +45,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
+      - name: Install Trivy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download v0.63.0 \
+            --repo aquasecurity/trivy \
+            --pattern "trivy_0.63.0_Linux-64bit.deb" \
+            --output /tmp/trivy.deb
+          sudo dpkg -i /tmp/trivy.deb
+
       - name: Run Trivy filesystem scan
-        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37  # v0.31.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: '1'
-          ignore-unfixed: false
+        run: trivy fs --exit-code 1 --severity HIGH,CRITICAL .
 
   checkov:
     name: Checkov — IaC Scan

@@ -44,9 +44,10 @@ const siteUrl = 'https://probl.me';
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image"       content={`${siteUrl}${ogImage}`} />
 
-  <!-- Fonts: Bunny Fonts (privacy-friendly, GDPR, no IP logging) -->
-  <link rel="preconnect" href="https://fonts.bunny.net" />
-  <link href="https://fonts.bunny.net/css?family=hanken-grotesk:400,500,600,700,800|jetbrains-mono:400,500,600,700&display=swap" rel="stylesheet" />
+  <!-- Fonts: Bunny Fonts (privacy-friendly, GDPR, no IP logging) — loaded async to avoid render-blocking -->
+  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
+  <link rel="preload" href="https://fonts.bunny.net/css?family=hanken-grotesk:400,500,600,700,800|jetbrains-mono:400,500,600,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link href="https://fonts.bunny.net/css?family=hanken-grotesk:400,500,600,700,800|jetbrains-mono:400,500,600,700&display=swap" rel="stylesheet" /></noscript>
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 </head>
