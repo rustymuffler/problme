@@ -208,6 +208,7 @@ test.describe('Accessibility: blog post (/blog/[slug])', () => {
       return;
     }
     const firstPostLink = await postLinks.first().getAttribute('href');
+    if (!firstPostLink) return;
 
     await page.goto(firstPostLink);
     await page.waitForLoadState('networkidle');
