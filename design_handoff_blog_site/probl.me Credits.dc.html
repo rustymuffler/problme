@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
+  a{ text-decoration:none; }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @media (prefers-reduced-motion: reduce){ .cursor{ animation:none !important } }
+  .navlink:hover{ color:#F4EFE6 !important; }
+  .src{ transition:color .2s; }
+  .src:hover{ color:#F2A24B !important; }
+  .lrow:hover{ background:#1A160F !important; }
+  .nav-toggle{ display:none; }
+  .mobile-menu{ display:none; }
+  .mlink:hover{ color:#F4EFE6 !important; background:#241E15 !important; }
+  @media (max-width:1023px){
+    .wrap{ padding-left:24px !important; padding-right:24px !important; }
+    .col{ padding-left:24px !important; padding-right:24px !important; }
+  }
+  @media (max-width:639px){
+    .wrap{ padding-left:20px !important; padding-right:20px !important; }
+    .col{ padding-left:20px !important; padding-right:20px !important; }
+    .nav-desktop{ display:none !important; }
+    .nav-toggle{ display:flex !important; }
+    #navtoggle:checked ~ .mobile-menu{ display:block !important; }
+    .d-h1{ font-size:30px !important; line-height:1.15 !important; }
+    .lname{ flex:1 1 100% !important; }
+    .ldesc{ flex:1 1 100% !important; }
+    .foot-wrap{ flex-direction:column !important; align-items:flex-start !important; }
+  }
+</style>
+</helmet>
+<div style="background:#15120E; min-height:100vh; font-family:'Hanken Grotesk',sans-serif; color:#F4EFE6;">
+
+  <!-- HEADER -->
+  <header style="position:sticky; top:0; z-index:50; background:rgba(21,18,14,0.85); backdrop-filter:blur(12px); border-bottom:1px solid #2E261B;">
+    <input type="checkbox" id="navtoggle" style="display:none;">
+    <div class="wrap" style="max-width:1120px; margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between;">
+      <a href="probl.me Homepage.dc.html" style="display:flex; align-items:center; font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; color:#F4EFE6; letter-spacing:-0.01em;">
+        <span style="color:#F2A24B; margin-right:8px;">&gt;</span>probl<span style="color:#E8674A;">.me</span><span class="cursor" style="display:inline-block; width:8px; height:17px; background:#F2A24B; margin-left:5px; border-radius:1px; animation:blink 1.1s steps(1) infinite;"></span>
+      </a>
+      <nav class="nav-desktop" style="display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:13px;">
+        <a class="navlink" href="probl.me Homepage.dc.html" style="color:#B6A88F; padding:10px 14px;">home</a>
+        <a class="navlink" href="probl.me Blog Listing.dc.html" style="color:#B6A88F; padding:10px 14px;">blog</a>
+        <a class="navlink" href="probl.me About.dc.html" style="color:#B6A88F; padding:10px 14px;">about</a>
+        <a class="navlink" href="https://github.com/rustymuffler" style="color:#B6A88F; padding:10px 14px; border:1px solid #3D3322; border-radius:8px; margin-left:6px;">github &#8599;</a>
+      </nav>
+      <label for="navtoggle" class="nav-toggle" aria-label="Open menu" style="width:44px; height:44px; flex-direction:column; align-items:center; justify-content:center; gap:5px; border:1px solid #3D3322; border-radius:8px; cursor:pointer;">
+        <span style="display:block; width:18px; height:2px; background:#B6A88F; border-radius:2px;"></span>
+        <span style="display:block; width:18px; height:2px; background:#B6A88F; border-radius:2px;"></span>
+        <span style="display:block; width:18px; height:2px; background:#B6A88F; border-radius:2px;"></span>
+      </label>
+    </div>
+    <div class="mobile-menu">
+      <a class="mlink" href="probl.me Homepage.dc.html" style="display:block; padding:15px 20px; color:#B6A88F; border-bottom:1px solid #2E261B; font-family:'JetBrains Mono',monospace; font-size:14px;">home</a>
+      <a class="mlink" href="probl.me Blog Listing.dc.html" style="display:block; padding:15px 20px; color:#B6A88F; border-bottom:1px solid #2E261B; font-family:'JetBrains Mono',monospace; font-size:14px;">blog</a>
+      <a class="mlink" href="probl.me About.dc.html" style="display:block; padding:15px 20px; color:#B6A88F; border-bottom:1px solid #2E261B; font-family:'JetBrains Mono',monospace; font-size:14px;">about</a>
+      <a class="mlink" href="https://github.com/rustymuffler" style="display:block; padding:15px 20px; color:#B6A88F; font-family:'JetBrains Mono',monospace; font-size:14px;">github &#8599;</a>
+    </div>
+  </header>
+
+  <!-- INTRO -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:64px 32px 8px;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:#F2A24B;">// credits &amp; thanks</div>
+    <h1 class="d-h1" style="font-size:40px; font-weight:800; letter-spacing:-0.02em; line-height:1.12; margin:14px 0 0;">Built on open source</h1>
+    <p style="font-size:18px; line-height:1.7; color:#B6A88F; max-width:640px; margin:18px 0 0;">Every layer of probl.me &mdash; the framework that renders it, the tools that test and secure it, the type you&rsquo;re reading &mdash; is built and maintained by people who give their work away freely. This is a thank-you, and a full accounting of what&rsquo;s under the hood. probl.me itself is released under the MIT License.</p>
+    <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8A7B64; margin:20px 0 0; display:inline-flex; align-items:center; gap:7px; border:1px solid #2E261B; border-radius:8px; padding:7px 11px;">&#8635; auto-generated from THIRD-PARTY-NOTICES.md</div>
+  </section>
+
+  <!-- FRAMEWORK -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:40px 32px 0;">
+    <div style="display:flex; align-items:baseline; gap:10px; padding-bottom:8px; border-bottom:1px solid #2E261B;"><span style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:#F2A24B;">Framework &amp; Runtime</span><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">4</span></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">astro <span style="color:#8A7B64; font-weight:400;">7.0.2</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">The framework that builds this static site.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/withastro/astro" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">withastro/astro &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@astrojs/mdx <span style="color:#8A7B64; font-weight:400;">7.0.0</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">MDX integration &mdash; used for blog post authoring.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/withastro/astro/tree/main/packages/integrations/mdx" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">withastro/astro &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">tailwindcss <span style="color:#8A7B64; font-weight:400;">4.3.1</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Utility-first CSS framework.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/tailwindlabs/tailwindcss" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">tailwindlabs/tailwindcss &#8599;</a></div></div>
+
+    <div class="lrow" style="transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@tailwindcss/vite <span style="color:#8A7B64; font-weight:400;">4.3.1</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Vite plugin for Tailwind CSS v4.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/tailwindlabs/tailwindcss" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">tailwindlabs/tailwindcss &#8599;</a></div></div>
+  </section>
+
+  <!-- BUILD & TEST TOOLING -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:38px 32px 0;">
+    <div style="display:flex; align-items:baseline; gap:10px; padding-bottom:8px; border-bottom:1px solid #2E261B;"><span style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:#F2A24B;">Build &amp; Test Tooling</span><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">12</span></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@astrojs/check <span style="color:#8A7B64; font-weight:400;">0.9.9</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">TypeScript type-checking for Astro files.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/withastro/astro/tree/main/packages/astro-check" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">withastro/astro &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">typescript <span style="color:#8A7B64; font-weight:400;">6.0.3</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">TypeScript compiler for strict type checking.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#F2A24B; background:rgba(242,162,75,0.12); padding:3px 7px; border-radius:999px;">Apache-2.0</span><a class="src" href="https://github.com/microsoft/TypeScript" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">microsoft/TypeScript &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@playwright/test <span style="color:#8A7B64; font-weight:400;">1.61.0</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">End-to-end testing &mdash; used for accessibility tests.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#F2A24B; background:rgba(242,162,75,0.12); padding:3px 7px; border-radius:999px;">Apache-2.0</span><a class="src" href="https://github.com/microsoft/playwright" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">microsoft/playwright &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@axe-core/playwright <span style="color:#8A7B64; font-weight:400;">4.11.3</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">axe-core accessibility engine for Playwright.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#E8674A; background:rgba(232,103,74,0.12); padding:3px 7px; border-radius:999px;">MPL-2.0</span><a class="src" href="https://github.com/dequelabs/axe-core-npm/tree/develop/packages/playwright" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">dequelabs/axe-core-npm &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">@lhci/cli <span style="color:#8A7B64; font-weight:400;">0.15.1</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Lighthouse CI &mdash; runs Lighthouse audits in CI.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#F2A24B; background:rgba(242,162,75,0.12); padding:3px 7px; border-radius:999px;">Apache-2.0</span><a class="src" href="https://github.com/GoogleChrome/lighthouse-ci" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">GoogleChrome/lighthouse-ci &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">actions/checkout <span style="color:#8A7B64; font-weight:400;">34e1148</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; checks out the repo (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/actions/checkout" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">actions/checkout &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">actions/setup-node <span style="color:#8A7B64; font-weight:400;">49933ea</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; provisions Node.js (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/actions/setup-node" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">actions/setup-node &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">actions/configure-pages <span style="color:#8A7B64; font-weight:400;">983d773</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; configures GitHub Pages (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/actions/configure-pages" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">actions/configure-pages &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">actions/upload-pages-artifact <span style="color:#8A7B64; font-weight:400;">56afc60</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; uploads the Pages artifact (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/actions/upload-pages-artifact" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">actions/upload-pages-artifact &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">actions/deploy-pages <span style="color:#8A7B64; font-weight:400;">d6db901</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; deploys to GitHub Pages (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/actions/deploy-pages" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">actions/deploy-pages &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">lycheeverse/lychee-action <span style="color:#8A7B64; font-weight:400;">82202e5</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; runs the Lychee link checker (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/lycheeverse/lychee-action" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">lycheeverse/lychee-action &#8599;</a></div></div>
+
+    <div class="lrow" style="transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">Lychee <span style="color:#8A7B64; font-weight:400;">binary</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Link checker, invoked via lychee-action in CI.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/lycheeverse/lychee" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">lycheeverse/lychee &#8599;</a></div></div>
+  </section>
+
+  <!-- SECURITY & QUALITY -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:38px 32px 0;">
+    <div style="display:flex; align-items:baseline; gap:10px; padding-bottom:8px; border-bottom:1px solid #2E261B;"><span style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:#E8674A;">Security &amp; Quality</span><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">6</span></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">Spectra Assure Community</span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">ReversingLabs &mdash; scans our open-source packages for malware, tampering, and supply-chain risk before they ship.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8A7B64; background:rgba(138,123,100,0.14); padding:3px 7px; border-radius:999px;">Community</span><a class="src" href="https://secure.software/" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">secure.software &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">Gitleaks <span style="color:#8A7B64; font-weight:400;">8.30.1</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Secret scanning for git repositories.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/gitleaks/gitleaks" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">gitleaks/gitleaks &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">gitleaks-action <span style="color:#8A7B64; font-weight:400;">dcedce4</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; runs Gitleaks on every PR (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/gitleaks/gitleaks-action" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">gitleaks/gitleaks-action &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">semgrep-action <span style="color:#8A7B64; font-weight:400;">713efdd</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; static analysis security scanning (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#9DB066; background:rgba(157,176,102,0.12); padding:3px 7px; border-radius:999px;">MIT</span><a class="src" href="https://github.com/semgrep/semgrep-action" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">semgrep/semgrep-action &#8599;</a></div></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">checkov-action <span style="color:#8A7B64; font-weight:400;">fa9edf8</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">CI/CD &mdash; infrastructure-as-code scanning (SHA-pinned).</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#F2A24B; background:rgba(242,162,75,0.12); padding:3px 7px; border-radius:999px;">Apache-2.0</span><a class="src" href="https://github.com/bridgecrewio/checkov-action" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">bridgecrewio/checkov-action &#8599;</a></div></div>
+
+    <div class="lrow" style="transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">Trivy <span style="color:#8A7B64; font-weight:400;">0.71.2</span></span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">Filesystem and dependency vulnerability scanner.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#F2A24B; background:rgba(242,162,75,0.12); padding:3px 7px; border-radius:999px;">Apache-2.0</span><a class="src" href="https://github.com/aquasecurity/trivy" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">aquasecurity/trivy &#8599;</a></div></div>
+  </section>
+
+  <!-- FONTS -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:38px 32px 8px;">
+    <div style="display:flex; align-items:baseline; gap:10px; padding-bottom:8px; border-bottom:1px solid #2E261B;"><span style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:#9DB066;">Fonts</span><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">2</span></div>
+
+    <div class="lrow" style="border-bottom:1px solid #2E261B; transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-size:14px; font-weight:700; color:#F4EFE6; flex:0 0 210px;">Hanken Grotesk</span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">&copy; 2021 the Hanken Grotesk Project Authors. Loaded via Bunny Fonts.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#B6A88F; background:rgba(182,168,143,0.12); padding:3px 7px; border-radius:999px;">OFL-1.1</span><a class="src" href="https://github.com/marcologous/hanken-grotesk" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">marcologous/hanken-grotesk &#8599;</a></div></div>
+
+    <div class="lrow" style="transition:background .15s;"><div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:15px 8px;"><span class="lname" style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; color:#F4EFE6; flex:0 0 210px;">JetBrains Mono</span><span class="ldesc" style="font-size:14px; color:#B6A88F; flex:1;">&copy; 2020 the JetBrains Mono Project Authors. Loaded via Bunny Fonts.</span><span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#B6A88F; background:rgba(182,168,143,0.12); padding:3px 7px; border-radius:999px;">OFL-1.1</span><a class="src" href="https://github.com/JetBrains/JetBrainsMono" style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64;">JetBrains/JetBrainsMono &#8599;</a></div></div>
+  </section>
+
+  <!-- THANK YOU FOOTNOTE -->
+  <section class="col" style="max-width:900px; margin:0 auto; padding:40px 32px 8px;">
+    <p style="font-size:15px; line-height:1.7; color:#8A7B64; max-width:640px;">The full SIL Open Font License 1.1 text is available at <a class="src" href="https://openfontlicense.org/open-font-license-official-text/" style="color:#B6A88F;">openfontlicense.org</a>. The complete machine-readable list, including license texts and pinned SHAs, lives in <a class="src" href="https://github.com/rustymuffler/problme/blob/main/THIRD-PARTY-NOTICES.md" style="color:#B6A88F;">THIRD-PARTY-NOTICES.md</a>. Thank you to every maintainer above.</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="border-top:1px solid #2E261B; margin-top:48px;">
+    <div class="wrap foot-wrap" style="max-width:1120px; margin:0 auto; padding:40px 32px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
+      <div>
+        <div style="display:flex; align-items:center; font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:600;"><span style="color:#F2A24B; margin-right:8px;">&gt;</span>probl<span style="color:#E8674A;">.me</span><span class="cursor" style="display:inline-block; width:7px; height:14px; background:#F2A24B; margin-left:4px; border-radius:1px; animation:blink 1.1s steps(1) infinite;"></span></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8A7B64; margin-top:8px;">Building in public. One problem at a time.</div>
+      </div>
+      <div style="display:flex; gap:22px; font-family:'JetBrains Mono',monospace; font-size:12px;">
+        <a class="navlink" href="probl.me Homepage.dc.html" style="color:#B6A88F;">home</a>
+        <a class="navlink" href="probl.me Blog Listing.dc.html" style="color:#B6A88F;">blog</a>
+        <a class="navlink" href="probl.me About.dc.html" style="color:#B6A88F;">about</a>
+        <a class="navlink" href="probl.me Credits.dc.html" style="color:#F2A24B;">credits</a>
+        <span style="color:#8A7B64;">&copy; 2026</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+</x-dc>
+</body>
+</html>

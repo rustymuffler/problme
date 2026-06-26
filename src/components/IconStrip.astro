@@ -42,7 +42,7 @@ const pillars: Pillar[] = [
       <!-- Primary pass — visible to AT and keyboard users -->
       <div class="icon-row">
         {pillars.map(({ src, label, tag, rounded }) => (
-          <a class="iconlink" href={`/blog?tag=${tag}`}>
+          <a class="iconlink" href={`/blog/tag/${tag}`}>
             <img
               src={src}
               width="44"
@@ -153,5 +153,17 @@ const pillars: Pillar[] = [
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--color-text-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconlink {
+    transition: none;
+  }
+  .iconlink:hover {
+    transform: none;
+  }
+  .iconlink:hover img {
+    animation: none;
+  }
 }
 </style>

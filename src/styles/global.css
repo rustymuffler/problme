@@ -44,6 +44,7 @@
   /* Layout */
   --max-width:    1120px;
   --reading-width: 680px;
+  --gutter:        32px;
 
   /* Radius */
   --radius-sm:   5px;
@@ -215,3 +216,18 @@ img, svg {
   transition: border-color var(--duration-fast);
 }
 .btn-secondary:hover { border-color: var(--color-amber); }
+
+/* ─── Responsive breakpoints (RESPONSIVE-SPEC.md §1–2) ──────────────────── */
+@media (max-width: 1023px) {
+  :root { --gutter: 24px; }
+}
+
+@media (max-width: 639px) {
+  :root { --gutter: 20px; }
+
+  /* Heading type-scale steps — body stays at 18px (RESPONSIVE-SPEC.md §2.4) */
+  .text-display { font-size: 34px; line-height: 1.1; }
+  .text-h1      { font-size: 30px; line-height: 1.15; }
+  .text-h2      { font-size: 22px; }
+  .text-h3      { font-size: 18px; }
+}

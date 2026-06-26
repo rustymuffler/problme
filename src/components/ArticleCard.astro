@@ -93,4 +93,13 @@ const { href, heroImage, heroAlt, category, title, excerpt, date, readTime } = A
   color: var(--color-text-muted);
   margin-top: 16px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: border-color var(--duration-normal), box-shadow var(--duration-normal);
+  }
+  .card:hover {
+    transform: none;
+  }
+}
 </style>

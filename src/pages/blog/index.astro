@@ -21,39 +21,24 @@ const featuredPost = allPosts[0] ?? null;
   <!-- ─── PAGE HEAD ─────────────────────────────────────────────────────── -->
   <section class="page-head">
     <div class="eyebrow">// the blog</div>
+    <h1 class="page-h1">Notes from building in public</h1>
+    <p class="page-sub">
+      Two posts a week on product craft, building with AI, and the stack that
+      runs this site. Honest about what worked and what didn't.
+    </p>
 
-    <!-- Single h1 — JS updates the text when a tag filter is active -->
-    <h1 class="page-h1" id="page-h1">Notes from building in public</h1>
-
-    <!-- Default subtitle — shown when tag=all -->
-    <div id="sub-default">
-      <p class="page-sub">
-        Two posts a week on product craft, building with AI, and the stack that
-        runs this site. Honest about what worked and what didn't.
-      </p>
-    </div>
-
-    <!-- Filtered subtitle — shown when a tag is active -->
-    <div id="sub-filtered" style="display:none;" aria-hidden="true">
-      <p class="page-sub mono">
-        <span id="count-label"></span>
-        &nbsp;&middot;&nbsp;
-        <a class="clear-link" href="/blog">clear filter &times;</a>
-      </p>
-    </div>
-
-    <!-- Filter pills -->
+    <!-- Filter pills — "all" is active; others link to pre-rendered tag pages -->
     <div class="pills" role="list">
-      <a class="pill" data-pill="all"            href="/blog"                    role="listitem">all</a>
-      <a class="pill" data-pill="pm-craft"       href="/blog?tag=pm-craft"       role="listitem">pm-craft</a>
-      <a class="pill" data-pill="ai-development" href="/blog?tag=ai-development" role="listitem">ai-development</a>
-      <a class="pill" data-pill="tech-tools"     href="/blog?tag=tech-tools"     role="listitem">tech-tools</a>
+      <a class="pill is-active--amber" href="/blog"                    role="listitem">all</a>
+      <a class="pill"                  href="/blog/tag/pm-craft"       role="listitem">pm-craft</a>
+      <a class="pill"                  href="/blog/tag/ai-development" role="listitem">ai-development</a>
+      <a class="pill"                  href="/blog/tag/tech-tools"     role="listitem">tech-tools</a>
     </div>
   </section>
 
-  <!-- ─── FEATURED POST (hidden when filtering) ─────────────────────────── -->
+  <!-- ─── FEATURED POST ────────────────────────────────────────────────── -->
   {featuredPost && (
-    <section id="feat-wrap" class="feat-wrap">
+    <section class="feat-wrap">
       <a
         class="feat-card"
         href={`/blog/${featuredPost.id.replace(/\.(md|mdx)$/, '')}`}
@@ -80,18 +65,11 @@ const featuredPost = allPosts[0] ?? null;
 
   <!-- ─── GRID ─────────────────────────────────────────────────────────── -->
   <section class="grid-wrap">
-    <div class="card-grid">
-      {allPosts.map((post) => {
-        const slug = post.id.replace(/\.(md|mdx)$/, '');
-        const isFeat = post === featuredPost;
-        return (
-          <div
-            data-card
-            data-cat={post.data.category}
-            data-tags={post.data.tags.join(',')}
-            data-feat={isFeat ? 'true' : undefined}
-            style={isFeat ? 'display:none;' : ''}
-          >
+    {allPosts.length > 1 ? (
+      <div class="card-grid">
+        {allPosts.slice(1).map((post) => {
+          const slug = post.id.replace(/\.(md|mdx)$/, '');
+          return (
             <ArticleCard
               href={`/blog/${slug}`}
               heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
@@ -102,21 +80,17 @@ const featuredPost = allPosts[0] ?? null;
               date={fmt.format(post.data.date)}
               readTime={post.data.readTime}
             />
-          </div>
-        );
-      })}
-    </div>
-
-    <!-- Empty state (hidden until JS reveals it) -->
-    <div id="empty-state" class="empty-state" style="display:none;">
-      <div class="empty-label">
-        no posts tagged <span id="empty-tag" class="accent"></span> yet
+          );
+        })}
       </div>
-      <p class="empty-body">
-        This topic is on the roadmap. Check back soon, or browse everything.
-      </p>
-      <a class="browse-all" href="/blog">browse all posts</a>
-    </div>
+    ) : allPosts.length === 0 ? (
+      <div class="empty-state">
+        <div class="empty-label">// no posts yet</div>
+        <p class="empty-body">
+          The first articles are in the pipeline. Check back soon.
+        </p>
+      </div>
+    ) : null}
   </section>
 
 </Layout>
@@ -144,25 +118,12 @@ const featuredPost = allPosts[0] ?? null;
   margin: 14px 0 0;
 }
 
-.accent {
-  color: var(--color-amber);
-}
-
 .page-sub {
   font-size: 18px;
   color: var(--color-text-secondary);
   line-height: 1.7;
   max-width: 40em;
   margin: 16px 0 0;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  font-size: 14px;
-}
-
-.clear-link {
-  color: var(--color-amber);
 }
 
 .pills {
@@ -177,6 +138,9 @@ const featuredPost = allPosts[0] ?? null;
   font-size: 13px;
   border-radius: var(--radius-pill);
   padding: 8px 16px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   color: var(--color-text-secondary);
   background: transparent;
   border: 1px solid var(--color-border);
@@ -185,17 +149,10 @@ const featuredPost = allPosts[0] ?? null;
 
 .pill:hover { filter: brightness(1.15); }
 
-/* Active states by tag value — JS adds .is-active */
-.pill[data-pill="all"].is-active,
-.pill[data-pill="pm-craft"].is-active {
-  background: #F2A24B; color: #15120E; border-color: #F2A24B; font-weight: 600;
-}
-.pill[data-pill="ai-development"].is-active {
-  background: #E8674A; color: #15120E; border-color: #E8674A; font-weight: 600;
-}
-.pill[data-pill="tech-tools"].is-active {
-  background: #9DB066; color: #15120E; border-color: #9DB066; font-weight: 600;
-}
+/* Active pill variants */
+.is-active--amber { background: #F2A24B; color: #15120E; border-color: #F2A24B; font-weight: 600; }
+.is-active--terra { background: #E8674A; color: #15120E; border-color: #E8674A; font-weight: 600; }
+.is-active--olive { background: #9DB066; color: #15120E; border-color: #9DB066; font-weight: 600; }
 
 /* ── Featured card ────────────────────────────────────────── */
 .feat-wrap {
@@ -307,77 +264,54 @@ const featuredPost = allPosts[0] ?? null;
   margin: 12px 0 0;
 }
 
-.browse-all {
-  display: inline-block;
-  margin-top: 20px;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  padding: 11px 22px;
-  transition: border-color 0.2s, color 0.2s;
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* Featured card stacks: image on top, text below */
+  .feat-card {
+    grid-template-columns: 1fr;
+  }
+
+  .feat-img {
+    height: 300px;
+    min-height: unset;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.browse-all:hover {
-  border-color: var(--color-amber);
-  color: var(--color-text-primary);
+@media (max-width: 639px) {
+  .page-head {
+    padding: 48px 20px 28px;
+  }
+
+  .page-h1 {
+    font-size: 30px;
+  }
+
+  .feat-wrap {
+    padding: 8px 20px 0;
+  }
+
+  .feat-img {
+    height: 220px;
+  }
+
+  .feat-body {
+    padding: 24px 20px;
+  }
+
+  .feat-title {
+    font-size: 22px;
+  }
+
+  .grid-wrap {
+    padding: 28px 20px 32px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
-
-<script>
-  const params  = new URLSearchParams(window.location.search);
-  const active  = params.get('tag') ?? 'all';
-  const isAll   = active === 'all';
-
-  // ── Filter pills ──────────────────────────────────────────
-  document.querySelectorAll<HTMLElement>('[data-pill]').forEach((pill) => {
-    if (pill.dataset.pill === active) pill.classList.add('is-active');
-  });
-
-  // ── Headings ──────────────────────────────────────────────
-  if (!isAll) {
-    const h1 = document.getElementById('page-h1');
-    const subDef = document.getElementById('sub-default');
-    const subFil = document.getElementById('sub-filtered');
-    if (h1) h1.textContent = `Tagged ${active}`;
-    if (subDef) { subDef.style.display = 'none'; subDef.setAttribute('aria-hidden', 'true'); }
-    if (subFil) { subFil.style.display = ''; subFil.removeAttribute('aria-hidden'); }
-  }
-
-  // ── Featured card ─────────────────────────────────────────
-  const featWrap = document.getElementById('feat-wrap');
-  if (featWrap && !isAll) featWrap.style.display = 'none';
-
-  // ── Grid cards ────────────────────────────────────────────
-  let visible = 0;
-
-  document.querySelectorAll<HTMLElement>('[data-card]').forEach((wrap) => {
-    const cat  = wrap.dataset.cat ?? '';
-    const tags = wrap.dataset.tags ? wrap.dataset.tags.split(',') : [];
-    const feat = wrap.dataset.feat === 'true';
-
-    if (isAll) {
-      // Default view: hide the featured-post duplicate in the grid
-      wrap.style.display = feat ? 'none' : '';
-      if (!feat) visible++;
-    } else {
-      const match = cat === active || tags.includes(active);
-      wrap.style.display = match ? '' : 'none';
-      if (match) visible++;
-    }
-  });
-
-  // ── Count label + empty state ─────────────────────────────
-  if (!isAll) {
-    const countEl = document.getElementById('count-label');
-    const emptyEl = document.getElementById('empty-state');
-    const emptyTag = document.getElementById('empty-tag');
-
-    if (countEl) {
-      countEl.textContent = `${visible} ${visible === 1 ? 'post' : 'posts'}`;
-    }
-    if (emptyEl) emptyEl.style.display = visible === 0 ? '' : 'none';
-    if (emptyTag) emptyTag.textContent = active;
-  }
-</script>

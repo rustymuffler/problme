@@ -161,6 +161,49 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
   gap: 22px;
 }
 
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 56px;
+    padding-bottom: 48px;
+  }
+
+  /* Constrain card width on tablet so it doesn't stretch full */
+  .hero > :last-child {
+    max-width: 440px;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 639px) {
+  .hero {
+    gap: 32px;
+    padding: 48px 20px 32px;
+  }
+
+  .hero > :last-child {
+    max-width: none;
+  }
+
+  .hero-h1 {
+    font-size: 34px;
+    line-height: 1.1;
+  }
+
+  .latest {
+    padding: 56px 20px 32px;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Empty state ──────────────────────────────────────────── */
 .empty-state {
   border: 1px dashed var(--color-border-strong);
