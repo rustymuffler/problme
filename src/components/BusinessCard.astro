@@ -36,9 +36,12 @@ const isHomepage = variant === 'homepage';
         <!-- Header: small photo + name/title -->
         <div class="header-row">
           <img
-            src="/assets/richard.png"
+            src="/assets/richard.webp"
             alt="Richard Muffler"
             class="photo-sm"
+            width="40"
+            height="40"
+            fetchpriority="high"
           />
           <div>
             <div class="name">Richard Muffler</div>
@@ -52,7 +55,7 @@ const isHomepage = variant === 'homepage';
         <div class="building-block">
           <div class="building-label">currently building</div>
           <div class="building-content">
-            probl.me &mdash; this blog, in public.<br />
+            probl.me, this blog, in public.<br />
             <span class="building-secondary">+ Celly, a sister product.</span>
           </div>
         </div>
@@ -68,9 +71,11 @@ const isHomepage = variant === 'homepage';
       <>
         <!-- Portrait photo -->
         <img
-          src="/assets/richard.png"
+          src="/assets/richard.webp"
           alt="Richard Muffler"
           class="photo-lg"
+          width="400"
+          height="400"
         />
 
         <!-- Name/title block -->

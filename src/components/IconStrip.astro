@@ -42,15 +42,16 @@ const pillars: Pillar[] = [
       <!-- Primary pass — visible to AT and keyboard users -->
       <div class="icon-row">
         {pillars.map(({ src, label, tag, rounded }) => (
-          <a class="iconlink" href={`/blog/tag/${tag}`}>
+          <a class="iconlink" href={`/blog/tag/${tag}`} aria-label={label}>
             <img
               src={src}
               width="44"
               height="44"
-              alt={label}
+              alt=""
+              aria-hidden="true"
               style={rounded ? 'border-radius:9px;' : ''}
             />
-            <span>{label}</span>
+            <span aria-hidden="true">{label}</span>
           </a>
         ))}
       </div>
