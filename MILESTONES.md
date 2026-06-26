@@ -36,7 +36,7 @@
 | 1.14 | Configure custom domain probl.me on GitHub Pages | ✅ | CNAME set, DNS A records and CNAME verified, Pages custom domain confirmed — 2026-06-25 |
 | 1.15 | Verify SSL/HTTPS on probl.me | ✅ | GitHub Pages TLS active; HTTP 200 confirmed at https://probl.me — 2026-06-25 |
 | 1.16 | First successful deploy (placeholder index page) | ✅ | feat/astro-foundation merged to main 2026-06-25; GitHub Actions deploy fired — site live at rustymuffler.github.io/problme |
-| 1.17 | Create CHANGELOG.md with v0.1.0 entry | ⬜ | PM Agent / Technical Writer Agent |
+| 1.17 | Create CHANGELOG.md with v0.1.0 entry | ✅ | v0.1.0 entry written — covers Phase 1 + 2 + security fixes — 2026-06-26 |
 | 1.18 | Create BLOCKERS.md | ✅ | Committed to main 2026-06-23 |
 
 **Phase 1 complete when:** Site loads at probl.me, CI/CD and security pipelines are green, and all standards docs are in the repository.
