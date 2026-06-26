@@ -33,8 +33,8 @@
 | 1.11 | Install Gitleaks pre-commit hook | ✅ | `.git/hooks/pre-commit`, Gitleaks 8.30.1, `.gitleaks.toml` allowlist — 2026-06-24 |
 | 1.12 | Verify `.env` in `.gitignore` | ✅ | Astro/Node .gitignore committed 2026-06-23 |
 | 1.13 | Commit all standards docs to repository | ✅ | All governance docs committed to main 2026-06-23 |
-| 1.14 | Configure custom domain probl.me on GitHub Pages | ⬜ | Add CNAME file to repo + set domain in Pages settings; Richard owns DNS — blocked on B2 |
-| 1.15 | Verify SSL/HTTPS on probl.me | ⬜ | GitHub Pages TLS auto-provisions once custom domain is verified — blocked on 1.14 |
+| 1.14 | Configure custom domain probl.me on GitHub Pages | ✅ | CNAME set, DNS A records and CNAME verified, Pages custom domain confirmed — 2026-06-25 |
+| 1.15 | Verify SSL/HTTPS on probl.me | ✅ | GitHub Pages TLS active; HTTP 200 confirmed at https://probl.me — 2026-06-25 |
 | 1.16 | First successful deploy (placeholder index page) | ✅ | feat/astro-foundation merged to main 2026-06-25; GitHub Actions deploy fired — site live at rustymuffler.github.io/problme |
 | 1.17 | Create CHANGELOG.md with v0.1.0 entry | ⬜ | PM Agent / Technical Writer Agent |
 | 1.18 | Create BLOCKERS.md | ✅ | Committed to main 2026-06-23 |
@@ -67,7 +67,7 @@
 | 2.16 | Build sitemap | ⬜ | `@astrojs/sitemap` — requires rl-protect scan before install; Layout.astro has placeholder `<link rel="sitemap">` removed until this is done |
 | 2.17 | Implement Open Graph meta tags | ✅ | Dynamic title/description/OG in `Layout.astro` — 2026-06-24 |
 | 2.18 | Accessibility audit on all components | ✅ | axe-core Playwright tests passing; all violations resolved — 2026-06-24 |
-| 2.19 | Lighthouse audit — all scores ≥ target | ⬜ | CI threshold lowered to 0.50 perf (localhost unreliable); production audit needed once custom domain is live |
+| 2.19 | Lighthouse audit — all scores ≥ target | ✅ | Production audit at https://probl.me: Perf 96, A11y 100, BP 100, SEO 100 — 2026-06-25 |
 
 **Phase 2 complete when:** All pages are designed and built, Lighthouse scores meet minimums, brand components are live, and the site looks like a real blog.
 
@@ -79,12 +79,12 @@
 
 | # | Item | Status | Notes |
 |---|---|---|---|
-| 3.1 | Set up Monday idea batch scheduled task | ⬜ | PM Agent creates scheduled task — Content Strategist Agent fires every Monday 9am |
-| 3.2 | Set up Friday queue health check scheduled task | ⬜ | PM Agent creates scheduled task — alerts if draft PR count < 4 |
-| 3.3 | Set up Tuesday/Thursday PR reminder scheduled task | ⬜ | PM Agent creates scheduled task — lists open draft PRs for Richard |
-| 3.4 | Set up monthly retrospective scheduled task | ⬜ | PM Agent creates scheduled task — fires first Monday of each month at 10am |
-| 3.5 | Create `retros/` folder in repository | ⬜ | PM Agent creates the folder and adds a `.gitkeep` so it is committed |
-| 3.6 | Define initial content calendar (first 4 articles) | ⬜ | First Monday idea batch; Richard selects |
+| 3.1 | Set up Monday idea batch scheduled task | ✅ | `probme-monday-idea-batch` — fires every Monday 9am — 2026-06-26 |
+| 3.2 | Set up Friday queue health check scheduled task | ✅ | `probme-friday-queue-check` — fires every Friday 9am — 2026-06-26 |
+| 3.3 | Set up Tuesday/Thursday PR reminder scheduled task | ✅ | `probme-pr-reminder` — fires every Tue/Thu 8am — 2026-06-26 |
+| 3.4 | Set up monthly retrospective scheduled task | ✅ | `probme-monthly-retro` — fires first Monday of month 10am; next run 2026-07-06 — 2026-06-26 |
+| 3.5 | Create `retros/` folder in repository | ✅ | `retros/.gitkeep` committed to main — 2026-06-26 |
+| 3.6 | Define initial content calendar (first 4 articles) | ✅ | First idea batch run 2026-06-26; Richard selected 7 articles — see Content Calendar below |
 | 3.7 | Article 1: Interview → Research → Draft → Review → Proofread → PR | ⬜ | Full end-to-end test of the complete pipeline |
 | 3.8 | Article 2: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
 | 3.9 | Article 3: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
@@ -150,4 +150,25 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 
 ---
 
-*Last updated: 2026-06-25 — PM Agent: marked 1.7–1.10, 1.16, 2.4–2.12, 2.17, 2.18 ✅ (feat/astro-foundation merged to main, PR #35, sessions 2026-06-24 and 2026-06-25).*
+---
+
+## Content Calendar
+
+> Maintained by the PM Agent. Updated when articles enter or exit the pipeline.
+> Last updated: 2026-06-26
+
+| # | Working Title | Category | Status | Target Publish |
+|---|---|---|---|---|
+| C1 | Writing a spec your AI agent can actually follow | pm-craft | ⬜ Queued | TBD |
+| C2 | How I built a fully automated content pipeline with Claude agents (and what broke first) | ai-development | ⬜ Queued | TBD |
+| C3 | Multi-agent workflows without an orchestration framework: the AGENTS.md approach | ai-development | ⬜ Queued | TBD |
+| C4 | Context limits as a design constraint: how handoff documents changed the way I build | ai-development | ⬜ Queued | TBD |
+| C5 | Scheduled Claude agents: setting up autonomous loops that don't need babysitting | ai-development | ⬜ Queued | TBD |
+| C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
+| C7 | Why I SHA-pin every GitHub Action and how I automate keeping them current | tech-tools | ⬜ Queued | TBD |
+
+**Pipeline status key:** ⬜ Queued → 🔄 Interview → 🔄 Research → 🔄 Draft → 🔄 Review → 🔄 Proofread → 🔑 PR Open → ✅ Published
+
+---
+
+*Last updated: 2026-06-26 — PM Agent: marked 1.14, 1.15, 2.19, 3.1–3.6 ✅; added Content Calendar with 7 selected articles (session 2026-06-26).*
