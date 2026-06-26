@@ -94,7 +94,7 @@
 | 3.13 | Write and publish article about the retrospective process | ⬜ | AI-Assisted Development category — documents how the monthly retro improves the workflow |
 | 3.14 | Content calendar: 4 articles in draft queue | ⬜ | Queue must stay ≥ 4 articles ahead |
 | 3.15 | Confirm 2x/week publish cadence is sustainable | ⬜ | Tuesday + Friday schedule |
-| 3.16 | Submit sitemap to Google Search Console | ⬜ | Requires Google Search Console property for probl.me |
+| 3.16 | Submit sitemap to Google Search Console | ✅ | Property verified via HTML tag; sitemap-index.xml submitted — 2026-06-26 |
 | 3.17 | Create Supabase free account + project | ⬜ | Note DATABASE_URL and DIRECT_DATABASE_URL from database settings |
 | 3.18 | Fork umami-software/umami to rustymuffler/umami | ⬜ | Modify schema.prisma to add DIRECT_DATABASE_URL for Supabase |
 | 3.19 | Create Vercel free account — import forked Umami repo | ⬜ | Connect GitHub account; select the umami fork |
