@@ -1,0 +1,422 @@
+---
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import Layout from '../layouts/Layout.astro';
+
+interface Dep {
+  name: string;
+  version: string;
+  purpose: string;
+  license: string;
+  source: string;
+}
+
+interface BadgeStyle { color: string; bg: string; }
+
+// Read THIRD-PARTY-NOTICES.md at build time
+const raw = readFileSync(resolve('THIRD-PARTY-NOTICES.md'), 'utf-8');
+
+// Parse **name** `version` style blocks (npm packages + security binaries)
+function parseVersionedBlocks(text: string): Dep[] {
+  const deps: Dep[] = [];
+  // Match: **name** `version`\ndescription\nLicense: X (stop at open paren for long names)
+  const re = /\*\*([^*\n]+)\*\*\s+`([^`]+)`\n([^\n]+)\nLicense:\s+([^\n(]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const chunk = text.slice(m.index, m.index + 600);
+    const srcM  = chunk.match(/Source:\s+(https?:\/\/[^\s\n]+)/);
+    deps.push({
+      name:    m[1].trim(),
+      version: m[2].replace(/^v/, ''),   // strip leading 'v' from binary versions
+      purpose: m[3].trimEnd().endsWith('.') ? m[3].trimEnd() : m[3].trimEnd() + '.',
+      license: m[4].trim(),
+      source:  srcM?.[1] ?? '',
+    });
+  }
+  return deps;
+}
+
+// Parse font entries — no version line
+function parseFonts(text: string): Dep[] {
+  const deps: Dep[] = [];
+  const fontSection = text.match(/## Fonts[\s\S]+/)?.[0] ?? '';
+  const re = /\*\*([^*\n]+)\*\*\nLicense:\s+([^\n]+)\nCopyright:\s+([^\n]+)\nSource:\s+(https?:\/\/[^\s\n]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(fontSection)) !== null) {
+    const copyright = m[3].replace(/^©\s*/, '').trim();
+    deps.push({
+      name:    m[1].trim(),
+      version: '',
+      purpose: `© ${copyright} Loaded via Bunny Fonts.`,
+      license: m[2].includes('OFL') ? 'OFL-1.1' : m[2].trim(),
+      source:  m[4].trim(),
+    });
+  }
+  return deps;
+}
+
+// Parse Lychee — no version in the file
+function parseLychee(text: string): Dep | null {
+  const m = text.match(/\*\*Lychee\*\*\n([^\n]+)\nLicense:\s+([^\n]+)[\s\S]*?Source:\s+(https?:\/\/[^\s\n]+)/);
+  if (!m) return null;
+  return {
+    name:    'Lychee',
+    version: 'binary',
+    purpose: m[1].trimEnd().endsWith('.') ? m[1].trimEnd() : m[1].trimEnd() + '.',
+    license: m[2].trim(),
+    source:  m[3].trim(),
+  };
+}
+
+// Parse GitHub Actions markdown table
+const actionPurposes: Record<string, string> = {
+  'actions/checkout':              'CI/CD — checks out the repo (SHA-pinned).',
+  'actions/setup-node':            'CI/CD — provisions Node.js (SHA-pinned).',
+  'actions/configure-pages':       'CI/CD — configures GitHub Pages (SHA-pinned).',
+  'actions/upload-pages-artifact': 'CI/CD — uploads the Pages artifact (SHA-pinned).',
+  'actions/deploy-pages':          'CI/CD — deploys to GitHub Pages (SHA-pinned).',
+  'lycheeverse/lychee-action':     'CI/CD — runs the Lychee link checker (SHA-pinned).',
+  'gitleaks/gitleaks-action':      'CI/CD — runs Gitleaks on every PR (SHA-pinned).',
+  'semgrep/semgrep-action':        'CI/CD — static analysis security scanning (SHA-pinned).',
+  'bridgecrewio/checkov-action':   'CI/CD — infrastructure-as-code scanning (SHA-pinned).',
+};
+
+function parseActionsTable(text: string): Dep[] {
+  const deps: Dep[] = [];
+  const re = /\| `([\w.\-/]+)` \| `([a-f0-9]{40})` \| (MIT|Apache-2\.0) \| (https?:\/\/[^\s|]+)/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const name = m[1].trim();
+    deps.push({
+      name,
+      version: m[2].slice(0, 7),
+      purpose: actionPurposes[name] ?? 'CI/CD action (SHA-pinned).',
+      license: m[3].trim(),
+      source:  m[4].trim(),
+    });
+  }
+  return deps;
+}
+
+// ── Assemble dep lists ─────────────────────────────────────
+
+const versioned = parseVersionedBlocks(raw);
+const fonts     = parseFonts(raw);
+const actions   = parseActionsTable(raw);
+const lychee    = parseLychee(raw);
+
+const frameworkNames = new Set(['astro', '@astrojs/mdx', 'tailwindcss', '@tailwindcss/vite']);
+const buildNpmNames  = new Set(['@astrojs/check', 'typescript', '@playwright/test', '@axe-core/playwright', '@lhci/cli']);
+const secBinNames    = new Set(['Gitleaks', 'Trivy']);
+const buildActNames  = new Set([
+  'actions/checkout', 'actions/setup-node', 'actions/configure-pages',
+  'actions/upload-pages-artifact', 'actions/deploy-pages', 'lycheeverse/lychee-action',
+]);
+const secActNames    = new Set(['gitleaks/gitleaks-action', 'semgrep/semgrep-action', 'bridgecrewio/checkov-action']);
+
+// Manual entry — not in THIRD-PARTY-NOTICES.md (see AGENTS.md §Security)
+const spectraEntry: Dep = {
+  name:    'Spectra Assure Community',
+  version: '',
+  purpose: 'ReversingLabs — scans open-source packages for malware, tampering, and supply-chain risk before they ship.',
+  license: 'Community',
+  source:  'https://secure.software/',
+};
+
+const framework: Dep[]        = versioned.filter(d => frameworkNames.has(d.name));
+const buildTest: Dep[]        = [
+  ...versioned.filter(d => buildNpmNames.has(d.name)),
+  ...actions.filter(d => buildActNames.has(d.name)),
+  ...(lychee ? [lychee] : []),
+];
+const securityQuality: Dep[]  = [
+  spectraEntry,
+  ...versioned.filter(d => secBinNames.has(d.name)),
+  ...actions.filter(d => secActNames.has(d.name)),
+];
+
+interface Bucket { label: string; deps: Dep[]; hue: string; }
+const buckets: Bucket[] = [
+  { label: 'Framework & Runtime',  deps: framework,       hue: 'var(--color-amber)' },
+  { label: 'Build & Test Tooling', deps: buildTest,       hue: 'var(--color-amber)' },
+  { label: 'Security & Quality',   deps: securityQuality, hue: 'var(--color-terracotta)' },
+  { label: 'Fonts',                deps: fonts,           hue: 'var(--color-olive)' },
+];
+
+function badge(license: string): BadgeStyle {
+  if (license === 'MIT')        return { color: '#9DB066', bg: 'rgba(157,176,102,0.12)' };
+  if (license === 'Apache-2.0') return { color: '#F2A24B', bg: 'rgba(242,162,75,0.12)'  };
+  if (license === 'MPL-2.0')    return { color: '#E8674A', bg: 'rgba(232,103,74,0.12)'  };
+  if (license === 'OFL-1.1')    return { color: '#B6A88F', bg: 'rgba(182,168,143,0.12)' };
+  return                               { color: '#8A7B64', bg: 'rgba(138,123,100,0.14)' };
+}
+
+function srcLabel(url: string): string {
+  // Show owner/repo only for GitHub URLs
+  const gh = url.match(/^https?:\/\/github\.com\/([^/]+\/[^/]+)/);
+  if (gh) return gh[1];
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+---
+
+<Layout
+  title="Credits & Thanks — probl.me"
+  description="The open-source software, tools, and fonts that probl.me is built on — a full accounting of what's under the hood."
+>
+
+  <!-- ─── INTRO ─────────────────────────────────────────────────────────── -->
+  <section class="col intro-section">
+    <div class="eyebrow">// credits &amp; thanks</div>
+    <h1 class="page-h1">Built on open source</h1>
+    <p class="page-sub">
+      Every layer of probl.me &mdash; the framework that renders it, the tools that
+      test and secure it, the type you&rsquo;re reading &mdash; is built and maintained by
+      people who give their work away freely. This is a thank-you, and a full
+      accounting of what&rsquo;s under the hood. probl.me itself is released under the
+      MIT License.
+    </p>
+    <div class="autogen-chip">&#8635; auto-generated from THIRD-PARTY-NOTICES.md</div>
+  </section>
+
+  <!-- ─── BUCKETS ──────────────────────────────────────────────────────── -->
+  {buckets.map(({ label, deps, hue }) => (
+    <section class="col bucket-section">
+      <div class="bucket-header">
+        <span class="bucket-label" style={`color:${hue}`}>{label}</span>
+        <span class="bucket-count">{deps.length}</span>
+      </div>
+
+      <div class="manifest">
+        {deps.map((dep, i) => {
+          const { color, bg } = badge(dep.license);
+          const isLast = i === deps.length - 1;
+          return (
+            <div class={isLast ? 'row' : 'row row--border'}>
+              <span class="dep-name">
+                {dep.name}{dep.version ? <span class="dep-ver"> {dep.version}</span> : ''}
+              </span>
+              <span class="dep-purpose">{dep.purpose}</span>
+              <span class="dep-badge" style={`color:${color};background:${bg};`}>{dep.license}</span>
+              <a
+                class="dep-src"
+                href={dep.source}
+                target="_blank"
+                rel="noopener noreferrer"
+              >{srcLabel(dep.source)} &#8599;</a>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  ))}
+
+  <!-- ─── FOOTNOTE ─────────────────────────────────────────────────────── -->
+  <section class="col footnote-section">
+    <p class="footnote">
+      The full SIL Open Font License 1.1 text is available at
+      <a class="fn-link" href="https://openfontlicense.org/open-font-license-official-text/" target="_blank" rel="noopener noreferrer">openfontlicense.org</a>.
+      The complete machine-readable list, including license texts and pinned SHAs, lives in
+      <a class="fn-link" href="https://github.com/rustymuffler/problme/blob/main/THIRD-PARTY-NOTICES.md" target="_blank" rel="noopener noreferrer">THIRD-PARTY-NOTICES.md</a>.
+      Thank you to every maintainer above.
+    </p>
+  </section>
+
+</Layout>
+
+<style>
+/* ── Shared column wrapper ────────────────────────────────── */
+.col {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-inline: 32px;
+}
+
+/* ── Intro ────────────────────────────────────────────────── */
+.intro-section {
+  padding-top: 64px;
+  padding-bottom: 8px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-amber);
+}
+
+.page-h1 {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  margin: 14px 0 0;
+}
+
+.page-sub {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-width: 640px;
+  margin: 18px 0 0;
+}
+
+.autogen-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 7px 11px;
+  margin-top: 20px;
+}
+
+/* ── Bucket sections ──────────────────────────────────────── */
+.bucket-section {
+  padding-top: 38px;
+}
+
+.bucket-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bucket-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.bucket-count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── Manifest rows ────────────────────────────────────────── */
+.manifest {
+  /* no extra margin — rows provide padding */
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 15px 8px;
+  transition: background 0.15s;
+}
+
+.row:hover {
+  background: #1A160F;
+}
+
+.row--border {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dep-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 0 0 210px;
+}
+
+.dep-ver {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.dep-purpose {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  flex: 1;
+  min-width: 160px;
+}
+
+.dep-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  border-radius: var(--radius-pill);
+  padding: 3px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dep-src {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.dep-src:hover {
+  color: var(--color-amber);
+}
+
+/* ── Footnote ─────────────────────────────────────────────── */
+.footnote-section {
+  padding-top: 40px;
+  padding-bottom: 8px;
+}
+
+.footnote {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-text-muted);
+  max-width: 640px;
+}
+
+.fn-link {
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid rgba(182, 168, 143, 0.3);
+  transition: color 0.2s, border-bottom-color 0.2s;
+}
+
+.fn-link:hover {
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-text-secondary);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .col {
+    padding-inline: 24px;
+  }
+}
+
+@media (max-width: 639px) {
+  .col {
+    padding-inline: 20px;
+  }
+
+  .intro-section {
+    padding-top: 48px;
+  }
+
+  .page-h1 {
+    font-size: 30px;
+  }
+
+  /* Name and purpose each take full width on mobile */
+  .dep-name {
+    flex: 1 1 100%;
+  }
+
+  .dep-purpose {
+    flex: 1 1 100%;
+  }
+}
+</style>

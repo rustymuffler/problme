@@ -293,10 +293,15 @@ const isHomepage = variant === 'homepage';
 
 <script>
   const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Disable tilt on touch devices and at tablet width to prevent stuck hover states
+  // (RESPONSIVE-SPEC.md §2.5)
+  const noTilt = noMotion
+    || window.matchMedia('(pointer: coarse)').matches
+    || window.matchMedia('(max-width: 1023px)').matches;
 
   document.querySelectorAll<HTMLElement>('.bcard').forEach((card) => {
     card.addEventListener('mousemove', (e: MouseEvent) => {
-      if (noMotion) return;
+      if (noTilt) return;
       const rect = card.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width - 0.5;
       const py = (e.clientY - rect.top) / rect.height - 0.5;

@@ -1,0 +1,131 @@
+---
+/*
+ * CodeBlock — styled code block with a filename / language header bar and
+ * a copy-to-clipboard button.
+ *
+ * Props:
+ *   code      string    — the code string to syntax-highlight (required)
+ *   lang      string    — Shiki language identifier, e.g. 'ts', 'bash', 'json'
+ *   filename  string    — optional filename shown in the header bar; falls back
+ *                         to the lang identifier if omitted
+ *
+ * Shiki theme: material-theme-palenight (warm dark).  Background is overridden
+ * to #161310 (DESIGN-BRIEF §6.6) so it matches the page depth tokens.
+ */
+import { Code } from 'astro:components';
+
+interface Props {
+  code: string;
+  lang?: string;
+  filename?: string;
+}
+
+const { code, lang = 'text', filename } = Astro.props;
+const label = filename ?? lang;
+---
+
+<div class="cb">
+  <div class="cb-bar">
+    <span class="cb-label">{label}</span>
+    <button class="cb-btn" type="button" aria-label="Copy code to clipboard">
+      <span class="cb-btntext">copy</span>
+    </button>
+  </div>
+  <div class="cb-body">
+    <Code code={code} lang={lang} theme="material-theme-palenight" wrap={false} />
+  </div>
+</div>
+
+<style>
+.cb {
+  background: #161310;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); /* 10px */
+  overflow: hidden;
+  margin: 28px 0;
+}
+
+.cb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.22);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cb-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+}
+
+.cb-btn {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  min-height: 28px;
+  transition:
+    border-color var(--duration-fast),
+    color var(--duration-fast);
+}
+
+.cb-btn:hover {
+  border-color: var(--color-amber);
+  color: var(--color-text-primary);
+}
+
+.cb-btn.is-copied {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.cb-body {
+  overflow-x: auto;
+}
+
+/* Override Shiki's inline background-color, size, and radius so the block
+   matches our warm dark token (#161310) exactly. */
+.cb-body :global(.astro-code) {
+  background-color: #161310 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  overflow-x: visible !important; /* overflow handled by .cb-body */
+}
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.cb').forEach((block) => {
+    const btn  = block.querySelector<HTMLButtonElement>('.cb-btn');
+    const pre  = block.querySelector<HTMLPreElement>('pre');
+    const span = block.querySelector<HTMLSpanElement>('.cb-btntext');
+    if (!btn || !pre || !span) return;
+
+    btn.addEventListener('click', async () => {
+      const text = (pre.querySelector('code') ?? pre).textContent ?? '';
+      try {
+        await navigator.clipboard.writeText(text);
+        span.textContent = 'copied!';
+        btn.classList.add('is-copied');
+        setTimeout(() => {
+          span.textContent = 'copy';
+          btn.classList.remove('is-copied');
+        }, 2000);
+      } catch {
+        // Clipboard API unavailable (insecure context etc.)
+      }
+    });
+  });
+</script>

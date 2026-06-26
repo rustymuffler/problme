@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-06-25
+> Last updated: 2026-06-25 (Step 4 a11y audit)
 
 ---
 
@@ -16,6 +16,7 @@
 | 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started |
 | 6 | Vercel account not yet created | M3.19 — Umami analytics hosting | Richard | 2026-06-22 | ⬜ Not started |
 | 7 | Umami data-website-id not yet generated | M3.22 — Tracking script in Layout.astro | Richard | 2026-06-22 | 🔑 Waiting on M3.21 (Umami deploy) |
+| 8 | Community badge contrast fails WCAG AA | `src/pages/credits.astro` — fallback `.dep-badge` style (Spectra Assure entry) | Richard | 2026-06-25 | ⬜ Needs design decision |
 
 ---
 

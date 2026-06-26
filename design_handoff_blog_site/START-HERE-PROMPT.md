@@ -13,10 +13,14 @@ Before writing any code, read, in this order:
 1. AGENTS.md and CLAUDE.md (repo conventions, pipeline, deploy rules)
 2. design_handoff_blog_site/README.md (the design handoff — start here)
 3. DESIGN-BRIEF.md and BRAND.md (canonical visual system; DESIGN-BRIEF wins on conflicts)
-4. The four design references in design_handoff_blog_site/:
+4. RESPONSIVE-SPEC.md (the tablet + mobile layouts — breakpoints, mobile nav, per-page reflow)
+5. MILESTONE-UPDATES.md (what changed this round, written as milestone-ready backlog items — for the PM agent)
+6. The five design references in design_handoff_blog_site/:
    "probl.me Homepage.dc.html", "probl.me Blog Listing.dc.html",
-   "probl.me Blog Post.dc.html", "probl.me About.dc.html"
+   "probl.me Blog Post.dc.html", "probl.me About.dc.html", "probl.me Credits.dc.html"
    (and "probl.me Brand Assets.dc.html" for the logo/icon/palette sheet)
+   These references are RESPONSIVE — resize the browser to see the desktop,
+   tablet (≤1023px), and mobile (≤639px) layouts. Match all three, pixel-for-pixel.
 Then inspect the existing repo (package.json, src/, astro.config.*) to learn what is
 already set up before adding anything.
 
@@ -34,10 +38,15 @@ STEP 1 — Foundation
   tags[], date, readTime, heroImage, imageCredit.
 - Add the design tokens as CSS custom properties (the Workshop palette + type scale +
   spacing from DESIGN-BRIEF.md). Wire up Hanken Grotesk + JetBrains Mono.
+- Add the two responsive breakpoints from RESPONSIVE-SPEC.md (≤1023px tablet, ≤639px
+  mobile) to the global layer, plus the responsive gutter + type-scale steps.
 - Copy the assets from design_handoff_blog_site/assets/ into the project's assets/public
   location and set the favicon to the logo tile.
 - Build a base Layout with the sticky translucent header (logo with the blinking amber
-  cursor) and the footer. Dark-mode only.
+  cursor) and the footer. On mobile (≤639px) the header collapses to a real
+  <button aria-expanded>-driven hamburger menu (see RESPONSIVE-SPEC.md §2.2 — build it
+  with JS, progressively enhanced; do NOT ship the checkbox hack the prototype uses).
+  Footer stacks on mobile. Dark-mode only.
 
 STEP 2 — Components
 - Reusable: ArticleCard, CategoryPill, the 8-icon set, the scrolling IconStrip
@@ -46,15 +55,32 @@ STEP 2 — Components
   prefers-reduced-motion), Button (primary/secondary), CodeBlock (with copy button).
 
 STEP 3 — Pages
-- Homepage, Blog Listing, Blog Post (template + dynamic route), About — matching the
-  four references exactly.
+- Homepage, Blog Listing, Blog Post (template + dynamic route), About, Credits — matching the
+  references exactly, at desktop, tablet, and mobile widths (RESPONSIVE-SPEC.md §3).
+  Heroes stack, card grids go 3→52→1 col, the featured card stacks image-on-top.
 - Tag filtering must be URL-driven (?tag=<slug> or pre-rendered tag routes), read at
   build/request time, with real <a> links — NOT client-side SPA filtering. Include the
   "Tagged X" heading, count, clear-filter, and the empty state.
+- About page now carries Richard's PM experience as supporting credibility below the
+  builder-voice intro: a 4-up metric stat band, a reverse-chronological role timeline
+  (date rail + nodes), a core-competencies tag row, and a CTA with a résumé-PDF download
+  + LinkedIn link. Content is in the prototype; metrics ($859M, $1.5B, 100% MITRE, 20×)
+  are pulled out as large callouts.
+- Credits ("Credits & Thanks", route /credits, FOOTER link only — not top nav):
+  GENERATE THIS PAGE AT BUILD TIME from THIRD-PARTY-NOTICES.md — do not hand-transcribe
+  the dependency list. Parse the notices file into four buckets (Framework & Runtime /
+  Build & Test Tooling / Security & Quality / Fonts) and render the manifest-ledger rows
+  (name + version/SHA · purpose · color-coded license badge · source link) per the prototype.
+  Keep the warm intro + the "auto-generated from THIRD-PARTY-NOTICES.md" note. List EVERY
+  dependency (no "+ N more" elisions). One manual addition not in the notices file:
+  "Spectra Assure Community" (ReversingLabs, secure.software) under Security & Quality —
+  keep it in the generated output via a small supplemental list.
 
 STEP 4 — Polish & a11y
 - prefers-reduced-motion (freeze marquee, drop blink, disable tilt), visible amber focus
   rings, 44px hit targets, descriptive alt text, AA contrast.
+- Disable the business-card 3D tilt on touch / coarse pointers (RESPONSIVE-SPEC.md §2.5).
+- Test against the prototypes at 1280 / 768 / 390px — no horizontal scroll at any width.
 - Confirm the GitHub Pages build/deploy works per AGENTS.md.
 
 Constraints:
@@ -64,6 +90,9 @@ Constraints:
   undistorted, for attribution.
 - OG images in assets/og/ are placeholders; keep the slots, I'll swap real heroes in.
 - Email link: mailto:richard.muffler+problme@gmail.com but display richard.muffler@gmail.com.
+- Résumé download: the About CTA links to assets/Richard-Robitaille-Muffler-Resume.pdf —
+  Richard will provide the PDF; wire the link and drop the file into the assets/public path.
+- Add a "credits" link to the site FOOTER on every page (not the top nav).
 - Celly will live at celly.pro (not live yet) — keep its icon pointed at its blog topic
   for now.
 

@@ -13,6 +13,8 @@ Your task is to **recreate these designs in Astro** using its native `.astro` co
 ## Fidelity
 **High-fidelity (hifi).** Colors, typography, spacing, and interactions are final. Recreate the UI pixel-perfectly. The canonical token reference is **`DESIGN-BRIEF.md`** (full visual brief) and **`BRAND.md`** (brand system); where they differ, `DESIGN-BRIEF.md` §0 explains the merge and wins.
 
+The four page references are **responsive** — resize the browser to see desktop (≥1024px), tablet (≤1023px), and mobile (≤639px) layouts. Match all three pixel-for-pixel. The full responsive contract — breakpoints, mobile-nav spec, and per-page reflow — is in **`RESPONSIVE-SPEC.md`**; read it alongside `DESIGN-BRIEF.md`.
+
 ---
 
 ## Design Tokens
@@ -59,8 +61,10 @@ Code     14px / 400 / 1.65  / 0
 ```
 Article reading column: **680px (~65ch)**, centered. Content max width: **1120px**.
 
+Headings step down on mobile (≤639px): Display 56→34, H1 40→30, About H1 44→32, featured-card title 30→24, H2 26→22, H3 20→18, blockquote 20→18. Body stays 18px. Tablet keeps desktop type. Full table in `RESPONSIVE-SPEC.md §2.4`.
+
 ### Spacing scale (8px base)
-`4, 8, 12, 16, 24, 32, 48, 64, 96`. Section rhythm: 96px desktop / 64px mobile.
+`4, 8, 12, 16, 24, 32, 48, 64, 96`. Section rhythm: 96px desktop / 64px mobile. Horizontal gutters step 32 → 24 (tablet) → 20px (mobile).
 
 ### Radius & depth
 - Radius: cards `12px`, business card / feature `14–16px`, pills `999px`, buttons `10px`, code `10px`, inline code `5px`.
@@ -70,12 +74,22 @@ Article reading column: **680px (~65ch)**, centered. Content max width: **1120px
 
 ---
 
-## Screens / Views
+## Responsive (tablet + mobile)
+
+> Full contract in **`RESPONSIVE-SPEC.md`**. The four `.dc.html` references implement it — resize to verify. Summary:
+
+- **Breakpoints:** desktop `≥1024px` (the comps, unchanged) · tablet `@media (max-width:1023px)` · mobile `@media (max-width:639px)`. In Tailwind terms: desktop = `lg:`+, mobile = below `sm`.
+- **Header → mobile nav (≤639px):** hide the inline nav; show a 44×44px hamburger (1px `#3D3322` border, three `#B6A88F` bars) that opens a full-width dropdown below the header — each link `display:block`, padding `15px 20px` (≥44px tall), 1px `#2E261B` dividers, active link amber. **Build it as a real `<button aria-expanded>` + a few lines of JS** (close on navigate/Escape), progressively enhanced. The prototypes use a CSS-checkbox toggle so the offline reference works — do **not** ship that; match the visual spec only.
+- **Layout reflow:** hero grids (`1.25fr/0.9fr`, `1.3fr/0.9fr`) → single column with the business card below, at **both** tablet and mobile. Card grids `repeat(3,1fr)` → 2-col (tablet) → 1-col (mobile). The blog-listing **featured card** (`1.1fr 1fr`) → stacked, image on top. Blog-post **prev/next** (`1fr 1fr`) → stacked on mobile; author card wraps with a full-width `about →`. Footer stacks on mobile.
+- **Touch:** disable the business-card 3D tilt on coarse pointers / ≤1023px (renders flat); keep tap states instant. `prefers-reduced-motion` still applies everywhere.
+- **No horizontal scroll** at any width (verified at 1280 / 768 / 390px).
+
+---
 
 > Pixel-level markup for every element is in the matching `*.dc.html` file. Summaries below; read the file for exact values.
 
 ### 1. Homepage — `probl.me Homepage.dc.html`
-- **Sticky header** (all pages): `rgba(21,18,14,0.85)` + `backdrop-filter:blur(12px)`, 1px bottom border. Left: logo lockup. Right: mono nav (`home / blog / about`) + a bordered `github ↗` button. Active link is amber. Hit targets ≥44px.
+- **Sticky header** (all pages): `rgba(21,18,14,0.85)` + `backdrop-filter:blur(12px)`, 1px bottom border. Left: logo lockup. Right: mono nav (`home / blog / about`) + a bordered `github ↗` button. Active link is amber. Hit targets ≥44px. **On mobile (≤639px) this collapses to a hamburger menu** — see the Responsive section and `RESPONSIVE-SPEC.md §2.2`.
 - **Hero** (2-col grid `1.25fr / 0.9fr`, gap 64px): left = mono eyebrow `// building in public`, Display headline "Building in public. / One **problem** at a time." (the word "problem" amber), 18px secondary intro, two buttons (primary amber CTA + secondary outline). Right = the **3D business card**.
 - **Icon strip** (full-bleed band, bg `#181410`, 1px top/bottom border): mono eyebrow `// what I write about · click a topic`; a continuously left-scrolling marquee of the 8 pillar icons (44px) above mono labels. **Pauses on hover.** Each icon links to `/blog?tag=<slug>` and "pops" (scale + slight rotate) on hover.
 - **Latest** (max 1120px): section head + `all posts →`; 3-up card grid of article cards (OG hero image, category pill, H3 title, excerpt, mono meta).
@@ -93,8 +107,16 @@ Article reading column: **680px (~65ch)**, centered. Content max width: **1120px
 - Tag chips; **author card** (reuses business-card styling with the photo); prev/next nav cards.
 
 ### 4. About — `probl.me About.dc.html`
-- Intro (2-col): left = eyebrow `// about`, H1 "Hi, I'm Richard. / I build in public.", bio paragraph. Right = the **3D business card** (photo portrait variant + name/title + github/linkedin/email link rows).
-- Long-form story in the 680px column (H2 + body). Then the **icon strip** band ("what I write about"). Then a centered CTA ("Read along, or reach out") with two buttons.
+- **Intro + story (2-col, sticky card):** a single narrative column on the left holds the eyebrow `// about`, H1 "Hi, I'm Richard. / I build in public.", bio, and the long-form story ("Why this blog exists", "What I'm building now"). The right column is the **3D business card** (photo + name/title + github/linkedin/email rows), set **`position:sticky; top:96px`** so it tracks the narrative instead of leaving a gap beside the short intro. Collapses to a single column (card below narrative, sticky off) at ≤1023px.
+- **Experience (résumé) section** — leads with the builder voice ("the blog is the side quest"), then supporting professional credibility: a **4-up metric stat band** ($859M Sophos acq · $1.5B BlackBerry acq · 100% 2024 MITRE · 20× CylancePROTECT licenses), a **reverse-chronological role timeline** (mono date rail + amber/neutral nodes, 6 roles from ReversingLabs back to Cylance/BlackBerry, each with a one-line summary + amber metric chips), a **core-competencies** mono tag row, and a **CTA** (amber *Download résumé (PDF)* → `assets/Richard-Robitaille-Muffler-Resume.pdf` + outline *LinkedIn ↗*).
+- Then the **icon strip** band ("what I write about"). Then a centered CTA ("Read along, or reach out") with two buttons.
+
+### 5. Credits & Thanks — `probl.me Credits.dc.html`
+- Route `/credits`; reachable from the **footer only** (not top nav). Dark page, standard header/footer.
+- Warm intro (eyebrow `// credits & thanks`, H1 "Built on open source", thank-you paragraph, MIT-license note) + a mono `↻ auto-generated from THIRD-PARTY-NOTICES.md` chip.
+- **Manifest-ledger** list grouped into four buckets — **Framework & Runtime (4) / Build & Test Tooling (12) / Security & Quality (6) / Fonts (2)**. Each row: package name + version/short-SHA (mono) · one-line purpose · color-coded license badge (MIT→olive, Apache-2.0→amber, MPL-2.0→terracotta, OFL-1.1→neutral, Community→muted) · source link. Rows hover-tint; every dependency is listed (no elisions).
+- **Build note:** generate this page from `THIRD-PARTY-NOTICES.md` at build time. One supplemental entry not in that file: **Spectra Assure Community** (ReversingLabs, secure.software) under Security & Quality.
+- Footnote links to the OFL text + the full THIRD-PARTY-NOTICES.md.
 
 ### Reference sheet (not a site page)
 - `probl.me Brand Assets.dc.html` — logo lockups, the 8 icons, and the palette, for quick visual reference.
@@ -132,12 +154,15 @@ Article reading column: **680px (~65ch)**, centered. Content max width: **1120px
 External marks (`github.svg`, `astro.svg`, `celly.png`) are shown to credit the tools/products used. Keep them un-stretched and in correct aspect ratio.
 
 ## Known follow-ups
+- **Résumé PDF:** the About download button points at `assets/Richard-Robitaille-Muffler-Resume.pdf` — Richard will supply the file; wire the link and drop it into the assets/public path.
+- **Credits page** is generated from `THIRD-PARTY-NOTICES.md`; keep the **Spectra Assure Community** supplemental entry when regenerating.
 - **Celly** will live at **celly.pro** (not live yet) — the Celly icon currently links to its blog topic; repoint to `https://celly.pro` at launch.
 - **Email** link uses `mailto:richard.muffler+problme@gmail.com` but displays `richard.muffler@gmail.com` (intentional, for inbox filtering).
 
 ## Files in this bundle
 - `BRAND.md`, `DESIGN-BRIEF.md` — canonical brand + visual spec.
-- `probl.me Homepage.dc.html`, `probl.me Blog Listing.dc.html`, `probl.me Blog Post.dc.html`, `probl.me About.dc.html` — the four page designs.
+- `RESPONSIVE-SPEC.md` — tablet + mobile layout spec (breakpoints, mobile nav, per-page reflow).
+- `probl.me Homepage.dc.html`, `probl.me Blog Listing.dc.html`, `probl.me Blog Post.dc.html`, `probl.me About.dc.html`, `probl.me Credits.dc.html` — the five page designs (responsive).
 - `probl.me Brand Assets.dc.html` — logo/icon/palette reference sheet.
 - `assets/` — all logos, icons, OG placeholders, and the photo.
 - `support.js` — preview runtime for the `.dc.html` files (reference only; **do not port**).

@@ -3,6 +3,77 @@ import Layout from '../layouts/Layout.astro';
 import BusinessCard from '../components/BusinessCard.astro';
 import IconStrip from '../components/IconStrip.astro';
 import Button from '../components/Button.astro';
+
+interface Role {
+  era: string;
+  title: string;
+  company: string;
+  body: string;
+  chips: string[];
+  current: boolean;
+}
+
+const roles: Role[] = [
+  {
+    era: '2025 — NOW',
+    title: 'Director of Product Management',
+    company: 'ReversingLabs · Spectra Intelligence & Analyze',
+    body: 'Own roadmap for threat-intelligence and malware-analysis platforms trusted by Fortune 500s and federal agencies. Brought Claude into the PM workflow to accelerate planning, requirements, and competitive analysis.',
+    chips: ['AI-native PM'],
+    current: true,
+  },
+  {
+    era: '2024 — 2025',
+    title: 'Senior Staff Product Manager, Detections',
+    company: 'SentinelOne',
+    body: 'Led the detection roadmap across endpoint, cloud, and storage, owning backlog priorities for engineering teams across global time zones.',
+    chips: ['100% MITRE 2024', '+32% ARR'],
+    current: false,
+  },
+  {
+    era: '2023',
+    title: 'Chief Product Officer',
+    company: 'UpSight Security',
+    body: 'Built product strategy from the ground up for an AI startup protecting endpoints with small language models against phishing, ransomware, and credential theft.',
+    chips: ['0 → 1'],
+    current: false,
+  },
+  {
+    era: '2022 — 2023',
+    title: 'Principal Product Manager',
+    company: 'Phosphorus Cybersecurity',
+    body: 'Stood up agile processes and roadmap tooling for an xIoT security SaaS platform, improving delivery predictability across engineering, marketing, and sales.',
+    chips: [],
+    current: false,
+  },
+  {
+    era: '2019 — 2022',
+    title: 'Principal PM, Taegis XDR Endpoint',
+    company: 'Dell Secureworks',
+    body: "Took a net-new EDR agent from zero to GA and led Secureworks' shift from managed services to a SaaS product org, scaling to four cross-functional squads across Windows, macOS, and Linux.",
+    chips: ['$859M exit', '3× Linux licenses'],
+    current: false,
+  },
+  {
+    era: '2016 — 2019',
+    title: 'Senior PM, CylancePROTECT',
+    company: 'BlackBerry (f.k.a. Cylance)',
+    body: 'Owned the cross-platform endpoint agent across 7+ squads and 50+ engineers, and carried product continuity through a $1.5B merger with BlackBerry.',
+    chips: ['20× licenses', '$45M new business'],
+    current: false,
+  },
+];
+
+const competencies = [
+  'EDR / Endpoint Security',
+  'Roadmap & Backlog Ownership',
+  'SaaS Product Mgmt',
+  'Go-To-Market',
+  'MITRE ATT&CK',
+  'Agile / Scrum / Kanban',
+  'OEM & Partner Mgmt',
+  'AI/ML Product Advocacy',
+];
 ---
 
 <Layout
@@ -10,49 +81,131 @@ import Button from '../components/Button.astro';
   description="I'm Richard, a cybersecurity and SaaS product manager building personal projects with AI and writing about what I learn."
 >
 
-  <!-- ─── INTRO + CARD ──────────────────────────────────────────────────── -->
-  <section class="intro">
-    <div class="intro-text">
+  <!-- ─── INTRO + STICKY CARD ──────────────────────────────────────────── -->
+  <section class="about-intro">
+
+    <div class="about-narrative">
       <div class="eyebrow">// about</div>
-      <h1 class="intro-h1">Hi, I'm Richard.<br />I build in public.</h1>
+      <h1 class="intro-h1">Hi, I&rsquo;m Richard.<br />I build in public.</h1>
       <p class="intro-sub">
         I work in cybersecurity and SaaS product management, and on the side I
         tinker on personal projects with AI, writing down what I learn as I go.
         probl.me is that notebook, kept in the open.
       </p>
+
+      <h2 class="prose-h2">Why this blog exists</h2>
+      <p class="prose-p">
+        I learn best by building the real thing and writing down what happened.
+        Most posts about working with AI are either hype or fear. I wanted a
+        third option: an honest log from someone actually shipping, including
+        the parts that did not work.
+      </p>
+      <p class="prose-p">
+        So probl.me runs on the same principles I write about. The site is a
+        static <a class="prose-link" href="/blog/tag/astro">Astro</a> build on
+        GitHub Pages, the content moves through a pipeline of Claude agents, and
+        every decision is documented. The process is the subject as much as the
+        output.
+      </p>
+
+      <h2 class="prose-h2">What I&rsquo;m building now</h2>
+      <p class="prose-p">
+        Two things, in parallel. probl.me is the blog you&rsquo;re reading. Celly is
+        a sister product I&rsquo;m developing alongside it. Both are early, both are
+        public, and both show up in what I write here.
+      </p>
+      <p class="prose-p">
+        If you&rsquo;re a PM curious about AI, a developer figuring out how to work
+        with agents, or someone non-technical who wants to manage their own
+        software projects, I&rsquo;m writing for you.
+      </p>
     </div>
 
-    <BusinessCard variant="about" />
+    <div class="card-sticky">
+      <BusinessCard variant="about" />
+    </div>
+
   </section>
 
-  <!-- ─── STORY ─────────────────────────────────────────────────────────── -->
-  <article class="prose-wrap">
-    <h2>Why this blog exists</h2>
-    <p>
-      I learn best by building the real thing and writing down what happened. Most
-      posts about working with AI are either hype or fear. I wanted a third option:
-      an honest log from someone actually shipping, including the parts that did not
-      work.
-    </p>
-    <p>
-      So probl.me runs on the same principles I write about. The site is a static
-      <a href="/blog?tag=astro">Astro</a> build on GitHub Pages, the content moves
-      through a pipeline of Claude agents, and every decision is documented. The
-      process is the subject as much as the output.
+  <!-- ─── EXPERIENCE ───────────────────────────────────────────────────── -->
+  <section class="experience">
+
+    <div class="eyebrow">// the day job</div>
+    <h2 class="xp-h2">Ten years shipping security products</h2>
+    <p class="xp-sub">
+      The blog is the side quest. By day I&rsquo;ve spent a decade leading endpoint
+      and cybersecurity product strategy &mdash; from zero-to-GA launches to
+      billion-dollar exits.
     </p>
 
-    <h2>What I'm building now</h2>
-    <p>
-      Two things, in parallel. probl.me is the blog you're reading. Celly is a
-      sister product I'm developing alongside it. Both are early, both are public,
-      and both show up in what I write here.
-    </p>
-    <p>
-      If you're a PM curious about AI, a developer figuring out how to work with
-      agents, or someone non-technical who wants to manage their own software
-      projects, I'm writing for you.
-    </p>
-  </article>
+    <!-- Stat band -->
+    <div class="stat-band">
+      <div class="stat-cell stat-cell--border">
+        <div class="stat-num">$859M</div>
+        <div class="stat-desc">Taegis XDR acquired by Sophos</div>
+      </div>
+      <div class="stat-cell stat-cell--border">
+        <div class="stat-num">$1.5B</div>
+        <div class="stat-desc">Cylance acquired by BlackBerry</div>
+      </div>
+      <div class="stat-cell stat-cell--border">
+        <div class="stat-num">100%</div>
+        <div class="stat-desc">2024 MITRE ATT&amp;CK detection</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">20&times;</div>
+        <div class="stat-desc">CylancePROTECT license growth</div>
+      </div>
+    </div>
+
+    <!-- Role timeline -->
+    <div class="timeline">
+      {roles.map((role, i) => (
+        <div class={`role-rail${i === roles.length - 1 ? ' role-rail--last' : ''}`}>
+          <div class={`role-era${role.current ? ' role-era--now' : ''}`}>{role.era}</div>
+          <div class="role-body">
+            <span class={`role-node${role.current ? ' role-node--now' : ''}`} aria-hidden="true"></span>
+            <div class="role-title">{role.title}</div>
+            <div class="role-company">{role.company}</div>
+            <p class="role-desc">{role.body}</p>
+            {role.chips.length > 0 && (
+              <div class="chip-row">
+                {role.chips.map(chip => (
+                  <span class="chip">{chip}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Core competencies -->
+    <div class="competencies">
+      <div class="comp-label">// core competencies</div>
+      <div class="comp-row">
+        {competencies.map(c => (
+          <span class="comp-tag">{c}</span>
+        ))}
+      </div>
+    </div>
+
+    <!-- Résumé CTA -->
+    <div class="resume-cta">
+      <a
+        class="resume-btn"
+        href="/assets/Richard-Robitaille-Muffler-Resume.pdf"
+        download
+      >&#8595; Download r&eacute;sum&eacute; (PDF)</a>
+      <a
+        class="linkedin-btn"
+        href="https://www.linkedin.com/in/richardmuffler/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >LinkedIn &#8599;</a>
+    </div>
+
+  </section>
 
   <!-- ─── ICON STRIP ────────────────────────────────────────────────────── -->
   <IconStrip />
@@ -61,8 +214,8 @@ import Button from '../components/Button.astro';
   <section class="cta">
     <h2 class="cta-h2">Read along, or reach out</h2>
     <p class="cta-sub">
-      New posts twice a week. If something here is useful or wrong, I'd genuinely
-      like to hear it.
+      New posts twice a week. If something here is useful or wrong, I&rsquo;d
+      genuinely like to hear it.
     </p>
     <div class="cta-btns">
       <Button href="/blog" variant="primary">Read the blog</Button>
@@ -74,14 +227,21 @@ import Button from '../components/Button.astro';
 
 <style>
 /* ── Intro ────────────────────────────────────────────────── */
-.intro {
+.about-intro {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 72px 32px 40px;
+  padding: 64px 32px 16px;
   display: grid;
-  grid-template-columns: 1.3fr 0.9fr;
-  gap: 64px;
+  grid-template-columns: 1.5fr 0.82fr;
+  gap: 56px;
   align-items: start;
+}
+
+.about-narrative {
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.75;
+  color: #E9E1D3;
 }
 
 .eyebrow {
@@ -98,55 +258,259 @@ import Button from '../components/Button.astro';
   letter-spacing: -0.025em;
   line-height: 1.1;
   margin: 16px 0 0;
+  color: var(--color-text-primary);
 }
 
 .intro-sub {
   font-size: 18px;
   color: var(--color-text-secondary);
   line-height: 1.7;
-  margin: 20px 0 0;
+  margin: 18px 0 0;
 }
 
-/* ── Story prose ──────────────────────────────────────────── */
-.prose-wrap {
-  max-width: var(--reading-width);
-  margin: 24px auto 0;
-  padding: 0 24px;
-  font-size: 18px;
-  line-height: 1.75;
-  color: #E9E1D3;
-}
-
-.prose-wrap h2 {
+.prose-h2 {
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.015em;
-  margin: 40px 0 0;
+  margin: 34px 0 0;
   color: var(--color-text-primary);
 }
 
-.prose-wrap h2:first-child {
-  margin-top: 0;
+.prose-p {
+  margin: 14px 0 0;
 }
 
-.prose-wrap p {
-  margin: 1.2em 0 0;
-}
-
-.prose-wrap a {
+.prose-link {
   color: var(--color-amber);
   border-bottom: 1px solid rgba(242, 162, 75, 0.35);
+  transition: border-bottom-color 0.2s;
 }
 
-.prose-wrap a:hover {
+.prose-link:hover {
   border-bottom-color: var(--color-amber);
+}
+
+/* Sticky card column */
+.card-sticky {
+  position: sticky;
+  top: 96px;
+}
+
+/* ── Experience ───────────────────────────────────────────── */
+.experience {
+  max-width: 820px;
+  margin: 48px auto 0;
+  padding: 0 32px;
+}
+
+.xp-h2 {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 12px 0 0;
+  color: var(--color-text-primary);
+}
+
+.xp-sub {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-width: 600px;
+  margin: 14px 0 0;
+}
+
+/* Stat band */
+.stat-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin: 32px 0 40px;
+}
+
+.stat-cell {
+  padding: 24px 0 24px 18px;
+}
+
+.stat-cell--border {
+  border-right: 1px solid var(--color-border);
+  padding-right: 18px;
+  padding-left: 0;
+}
+
+/* First cell has no left indent */
+.stat-cell--border:first-child {
+  padding-left: 0;
+}
+
+.stat-num {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-amber);
+}
+
+.stat-desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* Role timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.role-rail {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 24px;
+  padding-bottom: 28px;
+}
+
+.role-rail--last {
+  padding-bottom: 0;
+}
+
+.role-era {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  padding-top: 2px;
+}
+
+.role-era--now {
+  color: var(--color-amber);
+}
+
+.role-body {
+  border-left: 1px solid var(--color-border);
+  padding-left: 24px;
+  position: relative;
+}
+
+.role-node {
+  position: absolute;
+  left: -4.5px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-border-strong);
+}
+
+.role-node--now {
+  background: var(--color-amber);
+}
+
+.role-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.role-company {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+}
+
+.role-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-amber);
+  background: rgba(242, 162, 75, 0.1);
+  border-radius: var(--radius-pill);
+  padding: 5px 10px;
+}
+
+/* Core competencies */
+.competencies {
+  margin-top: 36px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border);
+}
+
+.comp-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+
+.comp-row {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.comp-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 7px 13px;
+}
+
+/* Résumé CTA */
+.resume-cta {
+  margin-top: 32px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.resume-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: #15120E;
+  background: var(--color-amber);
+  border-radius: var(--radius-md);
+  padding: 13px 20px;
+  transition: opacity 0.2s;
+}
+
+.resume-btn:hover { opacity: 0.88; }
+
+.linkedin-btn {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 13px 20px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.linkedin-btn:hover {
+  border-color: var(--color-amber);
 }
 
 /* ── CTA ──────────────────────────────────────────────────── */
 .cta {
-  max-width: var(--reading-width);
+  max-width: 680px;
   margin: 0 auto;
-  padding: 64px 24px 24px;
+  padding: 56px 24px 24px;
   text-align: center;
 }
 
@@ -169,5 +533,81 @@ import Button from '../components/Button.astro';
   gap: 14px;
   justify-content: center;
   margin-top: 26px;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* Intro collapses to single column; card stops being sticky */
+  .about-intro {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 56px;
+  }
+
+  .card-sticky {
+    position: static;
+    max-width: 440px;
+  }
+
+  .experience {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 639px) {
+  .about-intro {
+    padding: 48px 20px 16px;
+    gap: 32px;
+  }
+
+  .card-sticky {
+    max-width: none;
+  }
+
+  .intro-h1 {
+    font-size: 32px;
+  }
+
+  .experience {
+    padding: 0 20px;
+    margin-top: 40px;
+  }
+
+  .xp-h2 {
+    font-size: 24px;
+  }
+
+  /* Stat band collapses to 2 columns */
+  .stat-band {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-cell--border {
+    border-right: none;
+    padding: 18px 14px;
+  }
+
+  .stat-cell {
+    padding: 18px 14px;
+  }
+
+  /* Role timeline: remove date rail column */
+  .role-rail {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .role-era {
+    padding-top: 0;
+  }
+
+  .role-body {
+    padding-left: 18px;
+  }
+
+  .cta {
+    padding-top: 48px;
+    padding-inline: 20px;
+  }
 }
 </style>
