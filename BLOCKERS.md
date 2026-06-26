@@ -11,8 +11,8 @@
 |---|---|---|---|---|---|
 | 1 | ~~GitHub repository not yet created~~ | ~~All of Phase 1~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~2~~ | ~~probl.me DNS: CNAME needs to point to rustymuffler.github.io~~ | ~~M1.14~~ | Richard | 2026-06-22 | ✅ Resolved |
-| 3 | Aikido API key not yet configured | SECURITY_SCANNING.md — Tool 1 (Aikido) | Richard | 2026-06-22 | ⬜ Not started |
-| 4 | Semgrep App Token not yet configured | SECURITY_SCANNING.md — Tool 2 + CI | Richard | 2026-06-22 | ⬜ Not started |
+| ~~3~~ | ~~Aikido plugin not yet installed in Claude Code~~ | ~~SECURITY_SCANNING.md — Tool 1 (Aikido)~~ | Richard | 2026-06-22 | ✅ Resolved |
+| ~~4~~ | ~~Semgrep App Token not yet configured~~ | ~~SECURITY_SCANNING.md — Tool 2 + CI~~ | Richard | 2026-06-22 | ✅ Resolved |
 | 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started |
 | 6 | Vercel account not yet created | M3.19 — Umami analytics hosting | Richard | 2026-06-22 | ⬜ Not started |
 | 7 | Umami data-website-id not yet generated | M3.22 — Tracking script in Layout.astro | Richard | 2026-06-22 | 🔑 Waiting on M3.21 (Umami deploy) |
@@ -25,6 +25,8 @@
 | # | Blocker | Resolved Date | Resolution |
 |---|---|---|---|
 | 1 | GitHub repository not yet created | 2026-06-23 | Repo transitioned from old Jekyll resume to probl.me Astro project. All governance docs committed to `main`. Branch renamed from `master` to `main`. |
+| 4 | Semgrep App Token not yet configured | 2026-06-26 | `SEMGREP_APP_TOKEN` added to rustymuffler/problme repo secrets — reused from Celly project (account-level token). |
+| 3 | Aikido plugin not yet installed in Claude Code | 2026-06-26 | Installed via `/plugin install aikido@claude-plugins-official`; authenticated via `/aikido:setup`. Account-level — covers all Claude Code projects. |
 
 ---
 

@@ -162,7 +162,7 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 | C1 | Writing a spec your AI agent can actually follow | pm-craft | ⬜ Queued | TBD |
 | C2 | How I built a fully automated content pipeline with Claude agents (and what broke first) | ai-development | ⬜ Queued | TBD |
 | C3 | Multi-agent workflows without an orchestration framework: the AGENTS.md approach | ai-development | ⬜ Queued | TBD |
-| C4 | Context limits as a design constraint: how handoff documents changed the way I build | ai-development | ⬜ Queued | TBD |
+| C4 | How Context Limits Changed the Way I Build with AI | ai-development | ✅ Published | 2026-06-26 |
 | C5 | Scheduled Claude agents: setting up autonomous loops that don't need babysitting | ai-development | ⬜ Queued | TBD |
 | C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
 | C7 | Why I SHA-pin every GitHub Action and how I automate keeping them current | tech-tools | ⬜ Queued | TBD |
