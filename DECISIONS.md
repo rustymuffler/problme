@@ -139,6 +139,32 @@
 
 ---
 
+## Decision 9: Dependabot Vulnerability Alerts — No Action (June 2026)
+
+**Date:** 2026-06-26
+
+**Decision:** Accept the 4 open Dependabot vulnerability alerts on `main` without code changes. No PR opened.
+
+**Alerts in question:**
+
+| Alert | Severity | Vulnerable Package | Root Cause |
+|---|---|---|---|
+| #69 `tmp` Path Traversal | High | `tmp < 0.2.6` | Transitive dep of `@lhci/cli@0.15.1` |
+| #70 `js-yaml` DoS | Moderate | `js-yaml <= 4.1.1` | Transitive dep of `@lhci/cli@0.15.1` |
+| #68 `uuid` bounds check | Moderate | `uuid < 11.1.1` | Transitive dep of `@astrojs/check@0.9.9` |
+| #66 `tmp` symlink write | Low | `tmp <= 0.2.3` | Transitive dep of `@lhci/cli@0.15.1` |
+
+**Why no action:**
+
+1. Both parent packages (`@lhci/cli@0.15.1`, `@astrojs/check@0.9.9`) are already at their latest published versions — there is no upstream release that resolves these transitive deps.
+2. `npm audit fix --force` would **downgrade** `@astrojs/check` from `0.9.9` to `0.9.2`, which is the wrong direction.
+3. All affected packages are **dev-only CI tools**. They run in GitHub Actions, not in the static site served to visitors. The vulnerable code never executes in production.
+4. The high-severity `tmp` path traversal requires a malicious actor to control the prefix/postfix arguments passed to Lighthouse CI's temp file creation — an implausible attack vector in a controlled CI environment.
+
+**Action to take when revisiting:** Check whether `@lhci/cli` or `@astrojs/check` have released new versions that pull in patched transitive deps. Run `npm audit` at that point — if the vulnerability count drops, update and open a `chore/dependency-update` PR.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
