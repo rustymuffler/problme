@@ -10,7 +10,7 @@
 | # | Blocker | Blocked Item | Owner | Date Added | Status |
 |---|---|---|---|---|---|
 | 1 | ~~GitHub repository not yet created~~ | ~~All of Phase 1~~ | Richard | 2026-06-22 | ✅ Resolved |
-| 2 | probl.me DNS: CNAME needs to point to rustymuffler.github.io | M1.14 — Custom domain configuration | Richard | 2026-06-22 | ⬜ Not started |
+| ~~2~~ | ~~probl.me DNS: CNAME needs to point to rustymuffler.github.io~~ | ~~M1.14~~ | Richard | 2026-06-22 | ✅ Resolved |
 | 3 | Aikido API key not yet configured | SECURITY_SCANNING.md — Tool 1 (Aikido) | Richard | 2026-06-22 | ⬜ Not started |
 | 4 | Semgrep App Token not yet configured | SECURITY_SCANNING.md — Tool 2 + CI | Richard | 2026-06-22 | ⬜ Not started |
 | 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started |
