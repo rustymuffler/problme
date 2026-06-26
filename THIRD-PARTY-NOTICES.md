@@ -43,7 +43,7 @@ Source: https://github.com/tailwindlabs/tailwindcss
 TypeScript type-checking for Astro files.
 License: MIT
 Copyright: © The Astro Technology Company
-Source: https://github.com/withastro/astro/tree/main/packages/astro-check
+Source: https://github.com/withastro/language-tools/tree/main/packages/astro-check
 
 **typescript** `6.0.3`
 TypeScript compiler used for strict type checking.

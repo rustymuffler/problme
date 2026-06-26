@@ -27,13 +27,10 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Install lhci
-        run: npm install -g @lhci/cli@0.15.1
-
       - name: Serve site and run Lighthouse CI
         run: |
           npx astro preview --port 4321 &
           timeout 30 bash -c 'until curl -sf http://localhost:4321 > /dev/null 2>&1; do sleep 1; done'
-          lhci autorun
+          npx lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
