@@ -375,7 +375,7 @@ Gaps to be aware of:
 
 | Tool | Status |
 |---|---|
-| Aikido | ⬜ Not yet configured |
+| Aikido | ⬜ Not yet configured — install via `/plugin marketplace add aikido` in Claude Code (account-level; covers all projects once installed) |
 | Semgrep | ✅ Operational 2026-06-25 — installed via pip (`semgrep@1.168.0`); full `auto` scan run on `feat/astro-foundation` pre-PR: 0 findings in `src/` and `.github/`; 8 findings in `design_handoff_blog_site/support.js` (vendor design-preview runtime, not shipped to production — see Semgrep note in Accepted Risk) |
 | rl-protect-skills | ✅ Operational 2026-06-24 — used to scan `@astrojs/check@0.9.9` + `typescript@6.0.3` before install; one GOVERNANCE FAIL acknowledged by Richard (see Accepted Risk Log) |
 | Gitleaks (pre-commit) | ✅ Installed 2026-06-24 — `.git/hooks/pre-commit` using Gitleaks 8.30.1; `.gitleaks.toml` with allowlist |
