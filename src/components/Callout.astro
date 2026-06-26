@@ -1,0 +1,117 @@
+---
+/*
+ * Callout — inline MDX callout block for note, warning, and tip variants.
+ *
+ * Usage in MDX:
+ *   import Callout from '../../components/Callout.astro';
+ *   <Callout type="note">Watch out for X.</Callout>
+ *   <Callout type="warning">This will break if Y.</Callout>
+ *   <Callout type="tip">You can also do Z.</Callout>
+ */
+interface Props {
+  type?: 'note' | 'warning' | 'tip';
+}
+
+const { type = 'note' } = Astro.props;
+
+const config = {
+  note:    { label: 'Note',    icon: 'ℹ',  cls: 'callout--note' },
+  warning: { label: 'Warning', icon: '⚠',  cls: 'callout--warning' },
+  tip:     { label: 'Tip',     icon: '✦',  cls: 'callout--tip' },
+};
+
+const { label, icon, cls } = config[type];
+---
+
+<aside class={`callout ${cls}`} role="note">
+  <div class="callout-header">
+    <span class="callout-icon" aria-hidden="true">{icon}</span>
+    <span class="callout-label">{label}</span>
+  </div>
+  <div class="callout-body">
+    <slot />
+  </div>
+</aside>
+
+<style>
+.callout {
+  border-radius: var(--radius-lg);
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-top: 1px solid;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+  margin: 28px 0;
+  overflow: hidden;
+}
+
+.callout-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+}
+
+.callout-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.callout-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.callout-body {
+  padding: 4px 16px 14px;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.callout-body :global(p) {
+  margin: 0;
+}
+
+.callout-body :global(p + p) {
+  margin-top: 0.75em;
+}
+
+/* ── Note — amber ───────────────────────── */
+.callout--note {
+  background: rgba(242, 162, 75, 0.07);
+  border-color: rgba(242, 162, 75, 0.25);
+  border-left-color: var(--color-amber);
+}
+
+.callout--note .callout-icon,
+.callout--note .callout-label {
+  color: var(--color-amber);
+}
+
+/* ── Warning — terracotta ───────────────── */
+.callout--warning {
+  background: rgba(232, 103, 74, 0.07);
+  border-color: rgba(232, 103, 74, 0.25);
+  border-left-color: var(--color-terracotta);
+}
+
+.callout--warning .callout-icon,
+.callout--warning .callout-label {
+  color: var(--color-terracotta);
+}
+
+/* ── Tip — olive ────────────────────────── */
+.callout--tip {
+  background: rgba(157, 176, 102, 0.07);
+  border-color: rgba(157, 176, 102, 0.25);
+  border-left-color: var(--color-olive);
+}
+
+.callout--tip .callout-icon,
+.callout--tip .callout-label {
+  color: var(--color-olive);
+}
+</style>

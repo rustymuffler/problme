@@ -44,6 +44,10 @@ const siteUrl = 'https://probl.me';
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image"       content={`${siteUrl}${ogImage}`} />
 
+  <!-- Feed & sitemap discovery -->
+  <link rel="alternate" type="application/rss+xml" title="probl.me RSS feed" href="/rss.xml" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+
   <!-- Fonts: Bunny Fonts (privacy-friendly, no IP logging) -->
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
   <link
