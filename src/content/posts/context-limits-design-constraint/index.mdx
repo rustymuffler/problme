@@ -1,0 +1,103 @@
+---
+title: "How Context Limits Changed the Way I Build with AI"
+description: "I was getting inconsistent answers and the AI kept forgetting what we'd built. Here's how I stopped fighting context limits and started designing around them."
+date: 2026-07-01
+category: ai-development
+tags: ["ai-collaboration", "context-windows", "claude", "productivity", "workflow"]
+author: richard-muffler
+readTime: "7 min"
+heroImage: /assets/posts/context-limits-design-constraint/hero.png
+imageCredit: "AI-generated with Claude"
+---
+
+There is a specific feeling you get when an AI session starts going wrong. It is not a crash or an error message. It is more like quicksand. The responses get slower to understand. The AI starts suggesting things you already did two hours ago. You catch yourself typing out things you know you already explained, just to get the session back on track.
+
+I was working on Celly, my B2C SaaS app, when I first felt it. I was bogged down in mud. The AI had stopped being a collaborator and started being a liability. I was having to remind it of things we had accomplished. I was re-explaining decisions we had already made. Progress ground down to nothing useful.
+
+At the time I had no framework for what was happening. I just knew something was broken.
+
+---
+
+## What is actually going on
+
+After sitting with the frustration for a while, I started researching how other people were working with AI tools. Videos, articles, forum threads. Eventually I found my way to a 2023 Stanford paper called ["Lost in the Middle"](https://arxiv.org/abs/2307.03172) by Liu et al., and things clicked.
+
+The finding is this: language models perform best when relevant information appears at the beginning or end of their context window. When critical information gets buried in the middle of a long conversation, accuracy drops significantly, even for models specifically designed to handle long contexts. The researchers measured 20-30 percentage point accuracy drops in those middle-buried scenarios. And follow-up research confirms the same U-shaped performance curve persists in larger context windows too.
+
+That explained what I was experiencing. The early decisions and completed tasks had drifted into the middle of a long context. They were not gone. Buried, not deleted.
+
+And it is not just about the hard limit. Blake Crosley's [study of 50 Claude Code sessions](https://blakecrosley.com/blog/context-window-management) found that output quality starts degrading at around 60% context utilization, well before anything technically runs out. Forgotten instructions. Repeated suggestions. Reduced coherence. That tracks exactly with what I was hitting.
+
+---
+
+## The PM instinct that unlocked the fix
+
+Here is what I did not do: I did not go looking for a technical solution. I went back to what I already knew from years of PM work.
+
+When a project gets too big to track, you carve it into bite-size chunks. You define clear milestones with measurable success criteria. You assign specific areas of ownership so nothing falls through the gaps. You do not try to hold everything in one place at one time.
+
+That instinct is exactly what the context problem needed. I started treating AI agents as peers with defined areas of focus and responsibility, not as a general-purpose assistant I was having a long, winding conversation with. I built a strict development process from brainstorming to release. I defined milestones the AI could measure itself against.
+
+This structure is what eventually made it possible to build and ship the probl.me blog and the content publishing pipeline now running on it. It was not a technical breakthrough. It was a project management one.
+
+---
+
+## Two steps to a working system
+
+The first thing I built was an MD file that functioned as an audit log. A running record of every decision made, everything built, and what came next. The idea was simple: if the AI was forgetting things, give it a file it could read back to remember.
+
+That helped. But then I found [Anthropic's own writing on long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents), which made something concrete that I had only half-figured out. Each new session starts with no memory of what came before. Full stop. The solution is not to write better prompts inside a degrading session. The solution is to design the session transition so nothing gets lost when you move to a fresh one.
+
+That led to the second step: threshold-triggered handoffs. Instead of waiting until a session felt broken, I built a rule into the project. When context hits approximately 90%, the current session produces a structured handoff document and closes out. The next session opens that document and picks up with full context, fresh attention, and none of the accumulated drift.
+
+Anthropic has since [written up this exact approach](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) as context engineering best practice. The initializer-agent plus incremental-coding-agent pattern they describe is structurally what I built. I find that satisfying. Not because I figured it out first, but because it means the approach has legs beyond my specific setup.
+
+Factory.ai builds AI coding tools for production teams. They [make the same point directly](https://factory.ai/news/context-window-problem): even context windows measuring in the millions of tokens are not large enough to hold real enterprise codebases. Bigger windows delay the problem. They do not eliminate it. The discipline of managing context actively is here to stay.
+
+---
+
+## The session that proved it
+
+I want to give you a concrete example rather than staying at the abstract level.
+
+A few weeks ago I ran a session to implement responsive layouts across the probl.me site. It was a heavy context lift. The Developer Agent had to read the old design files, the current project files, and the new design files. Then it had to figure out what was new, what was the same, and what was outdated. All of that before writing a single line of code. That is a full project review packed into one session.
+
+The reason this kind of session is a real risk is that a lot of decisions had already been made and locked in. The color system, the typography, the component architecture, the accessibility rules. Getting any of those wrong in a responsive overhaul would mean regression bugs that look fine visually until they do not. The context had to carry all of that history cleanly.
+
+I am, as I will freely admit, technical enough to create problems and break things. Working closely with AI is valuable to me specifically because it steers me away from mistakes while I pursue my goals. A session like this one, where a design direction change could break something that was already working, is exactly where I need that guardrail.
+
+The session produced what it was supposed to: a responsive site, a Credits and Thanks page for open-source acknowledgement, and my personal resume integrated into the About page. And when it hit the 90% context threshold, it wrote a handoff document before closing.
+
+That document contained a complete file manifest, a breakdown of what was fully complete, and what was in progress. It listed the exact next steps with numbered sub-tasks, the critical invariants the session must never break, the key decisions from the session with their rationale, and the commands needed to resume.
+
+The next session opened that file and picked up without any friction. No re-explaining. No reconstructing decisions from memory. No lost work. The handoff was seamless. I did not hit a single snag at the transition.
+
+That is what designing around a constraint looks like versus fighting it.
+
+---
+
+## The thing I am still not fully satisfied with
+
+I want to be honest about something that sits unresolved for me.
+
+When I transferred my development process from Celly to probl.me, I noticed there was no test-driven development in the probl.me process. I asked Claude about it. The answer was that probl.me uses a separate Test Writer Agent that writes tests after the code is complete, not during. That is a reasonable approach, and the site launched successfully. It matched the product requirements and design specs exactly.
+
+But I still believe in TDD as an additional validation point during development, not just after it. The success of probl.me thus far does not fully dissolve that conviction. I want the Developer Agent to lean on tests while writing code, not only when it is done. That is a gap in the current process, and I am flagging it here rather than smoothing over it, because a process that works in one context is not automatically the right process for every context.
+
+---
+
+## What I would tell someone starting out
+
+It is crazy to think that what I share here is likely outdated tomorrow. AI power users are already moving from prompting to loops, schedules, and multi-agent orchestration. The pace is real.
+
+What I can tell you is what worked for me on two different projects, with two different requirements. Celly and probl.me use different processes. Both can succeed. The point is not to copy either one.
+
+Test approaches. Try things that feel wrong and see what actually breaks. Borrow from whatever discipline you already know well, because the problems you will hit with AI collaboration are often problems that have been solved in other domains under different names.
+
+The handoff document pattern I described took me two projects to refine. The first version was too thin and missed key decisions. A later version captured too much and became hard to parse at the start of a session. The current version sits somewhere in between, and it will probably change again. That is fine. The goal is not to get the format perfect before you start. The goal is to build the habit of treating the session boundary as something you design for, not something that happens to you.
+
+There is no correct gold-plated process to follow. Anyone claiming otherwise is selling something.
+
+I am not here to self-crown as the AI guru, so please know that what you read here can contain errors. Treat this as one practitioner's account of one thing that worked, not as a playbook. The most useful outcome would be for you to take one idea from this and adapt it into something that fits your own work better than mine ever could.
+
+That is the whole point.
