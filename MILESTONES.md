@@ -61,10 +61,10 @@
 | 2.10 | Build article card component | ✅ | `ArticleCard.astro` — hero thumb, category badge, title, excerpt, read time, date — 2026-06-24 |
 | 2.11 | Build blog post template | ✅ | `src/pages/blog/[slug].astro` — article body, hero, metadata — 2026-06-24 |
 | 2.12 | Build About page | ✅ | `src/pages/about.astro` — bio, 3D card (about variant), icon strip — 2026-06-24 |
-| 2.13 | Implement syntax highlighting | ⬜ | Shiki with `github-dark` or `tokyo-night` theme — needed before first real code article |
-| 2.14 | Implement callout block MDX components | ⬜ | note, warning, tip variants |
-| 2.15 | Build RSS feed | ⬜ | `/rss.xml` via `@astrojs/rss` — requires rl-protect scan before install |
-| 2.16 | Build sitemap | ⬜ | `@astrojs/sitemap` — requires rl-protect scan before install; Layout.astro has placeholder `<link rel="sitemap">` removed until this is done |
+| 2.13 | Implement syntax highlighting | ✅ | Shiki `material-theme-palenight` via `astro.config.mjs` + `CodeBlock.astro` with copy button — 2026-06-26 |
+| 2.14 | Implement callout block MDX components | ✅ | `src/components/Callout.astro` — note (amber), warning (terracotta), tip (olive) — 2026-06-26 |
+| 2.15 | Build RSS feed | ✅ | `/rss.xml` via `@astrojs/rss@4.0.18`; autodiscovery `<link>` in Layout.astro — 2026-06-26 |
+| 2.16 | Build sitemap | ✅ | `@astrojs/sitemap@3.7.3` in integrations; `sitemap-index.xml` at build; `<link rel="sitemap">` in Layout.astro — 2026-06-26 |
 | 2.17 | Implement Open Graph meta tags | ✅ | Dynamic title/description/OG in `Layout.astro` — 2026-06-24 |
 | 2.18 | Accessibility audit on all components | ✅ | axe-core Playwright tests passing; all violations resolved — 2026-06-24 |
 | 2.19 | Lighthouse audit — all scores ≥ target | ✅ | Production audit at https://probl.me: Perf 96, A11y 100, BP 100, SEO 100 — 2026-06-25 |
