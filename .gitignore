@@ -34,3 +34,4 @@ test-results/
 
 # Security scan outputs
 rl-protect.report.json
+.lighthouseci/
