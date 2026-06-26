@@ -26,10 +26,10 @@ function parseVersionedBlocks(text: string): Dep[] {
     const chunk = text.slice(m.index, m.index + 600);
     const srcM  = chunk.match(/Source:\s+(https?:\/\/[^\s\n]+)/);
     deps.push({
-      name:    m[1].trim(),
-      version: m[2].replace(/^v/, ''),   // strip leading 'v' from binary versions
-      purpose: m[3].trimEnd().endsWith('.') ? m[3].trimEnd() : m[3].trimEnd() + '.',
-      license: m[4].trim(),
+      name:    m[1]!.trim(),
+      version: m[2]!.replace(/^v/, ''),
+      purpose: m[3]!.trimEnd().endsWith('.') ? m[3]!.trimEnd() : m[3]!.trimEnd() + '.',
+      license: m[4]!.trim(),
       source:  srcM?.[1] ?? '',
     });
   }
@@ -43,13 +43,13 @@ function parseFonts(text: string): Dep[] {
   const re = /\*\*([^*\n]+)\*\*\nLicense:\s+([^\n]+)\nCopyright:\s+([^\n]+)\nSource:\s+(https?:\/\/[^\s\n]+)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(fontSection)) !== null) {
-    const copyright = m[3].replace(/^©\s*/, '').trim();
+    const copyright = m[3]!.replace(/^©\s*/, '').trim();
     deps.push({
-      name:    m[1].trim(),
+      name:    m[1]!.trim(),
       version: '',
       purpose: `© ${copyright} Loaded via Bunny Fonts.`,
-      license: m[2].includes('OFL') ? 'OFL-1.1' : m[2].trim(),
-      source:  m[4].trim(),
+      license: m[2]!.includes('OFL') ? 'OFL-1.1' : m[2]!.trim(),
+      source:  m[4]!.trim(),
     });
   }
   return deps;
@@ -62,9 +62,9 @@ function parseLychee(text: string): Dep | null {
   return {
     name:    'Lychee',
     version: 'binary',
-    purpose: m[1].trimEnd().endsWith('.') ? m[1].trimEnd() : m[1].trimEnd() + '.',
-    license: m[2].trim(),
-    source:  m[3].trim(),
+    purpose: m[1]!.trimEnd().endsWith('.') ? m[1]!.trimEnd() : m[1]!.trimEnd() + '.',
+    license: m[2]!.trim(),
+    source:  m[3]!.trim(),
   };
 }
 
@@ -86,13 +86,13 @@ function parseActionsTable(text: string): Dep[] {
   const re = /\| `([\w.\-/]+)` \| `([a-f0-9]{40})` \| (MIT|Apache-2\.0) \| (https?:\/\/[^\s|]+)/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
-    const name = m[1].trim();
+    const name = m[1]!.trim();
     deps.push({
       name,
-      version: m[2].slice(0, 7),
+      version: m[2]!.slice(0, 7),
       purpose: actionPurposes[name] ?? 'CI/CD action (SHA-pinned).',
-      license: m[3].trim(),
-      source:  m[4].trim(),
+      license: m[3]!.trim(),
+      source:  m[4]!.trim(),
     });
   }
   return deps;
@@ -154,7 +154,7 @@ function badge(license: string): BadgeStyle {
 function srcLabel(url: string): string {
   // Show owner/repo only for GitHub URLs
   const gh = url.match(/^https?:\/\/github\.com\/([^/]+\/[^/]+)/);
-  if (gh) return gh[1];
+  if (gh) return gh[1]!;
   return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 }
 ---
