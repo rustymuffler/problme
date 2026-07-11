@@ -188,11 +188,11 @@ Blog post cards in the listing grid.
 ### Hero Images
 
 - **Dimensions:** 1200×630px (also used as OG image)
-- **Style:** Abstract, conceptual, or illustrative — not stock photo clichés
+- **Style:** Abstract, conceptual, or illustrative — not generic stock photo clichés (handshakes, lightbulbs, stock office scenes). Claude Design generation is the default choice for heroes; a stock photo may be used if it's treated per the Stock Images rules below so it doesn't read as generic
 - **Color palette:** Drawn from the probl.me palette (dark background, blue/teal accents)
 - **Typography in images:** Use Inter if text is included. Keep text to a minimum.
 - **Format:** PNG for Claude-generated images; WebP for photos
-- **Attribution frontmatter:** `imageCredit: "AI-generated with Claude"`
+- **Attribution frontmatter:** `imageCredit: "AI-generated with Claude"` or, for a sourced stock image, `imageCredit: "Stock photo — [Source name], royalty-free"`
 
 ### In-Article Images
 
@@ -200,6 +200,17 @@ Blog post cards in the listing grid.
 - **Diagrams and flowcharts:** Dark background, blue/teal accent colors, clear labels
 - **Screenshots:** Include a thin border (`#2E3147`) to frame light-background screenshots against the dark site
 - **Alt text:** Always descriptive. Describe what the image shows, not what it is.
+- **Minimum:** every article needs at least one in-article image in addition to the hero — no article should publish as a wall of text
+
+### Stock Images
+
+Every blog article must include visuals, and not every image needs to be Claude-generated. Royalty-free stock images are an acceptable source for hero or in-article images alongside Claude Design artwork, diagrams, and charts.
+
+- **Approved sources only:** use libraries that grant free commercial use with no attribution requirement (e.g., Unsplash, Pexels, Pixabay). Confirm the specific image's license before using it, not just the general site policy.
+- **Fit the brand, don't fight it:** avoid generic corporate stock clichés. Prefer photography that is moody, technical, abstract, or texture-driven over posed people-in-an-office shots.
+- **Color treatment required:** if the raw stock image doesn't already sit comfortably in the probl.me dark palette, apply a dark overlay or a blue/teal duotone treatment before using it, so it doesn't look like a bright rectangle dropped onto a dark page.
+- **Record the source:** set `imageCredit: "Stock photo — [Source name], royalty-free"` in frontmatter so the source is traceable.
+- **Same bar as generated images:** descriptive alt text and "must add information, not decorate" both still apply.
 
 ---
 
