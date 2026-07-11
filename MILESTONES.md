@@ -140,7 +140,7 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 3. **No em dashes.** Never. Proofreader Agent rejects any draft containing `—`. Rewrite the sentence.
 4. **Proofreader must approve** before any content PR is opened.
 5. **No fabricated quotes.** Every attributed quote must be real and verifiable.
-6. **No unlicensed images.** Claude-generated, personal screenshots, or personal photos only.
+6. **No unlicensed images.** Claude-generated, personal screenshots, personal photos, or confirmed royalty-free stock images only. Every article must include a hero image plus at least one in-article visual.
 7. **No secrets in source files.** Use environment variables and GitHub Secrets.
 8. **SEO checklist 100% complete before any content PR opens.**
 9. **Lighthouse minimums:** Performance ≥ 90, Accessibility ≥ 95, SEO ≥ 95.

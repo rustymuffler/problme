@@ -166,7 +166,7 @@ tags:
 slug: your-article-slug     # lowercase, hyphens only, keyword-rich
 heroImage: ./images/hero.png
 imageAlt: "A descriptive alt text for the hero image"
-imageCredit: "AI-generated with Claude"   # or "Personal screenshot" or "Personal photo"
+imageCredit: "AI-generated with Claude"   # or "Stock photo — [Source name], royalty-free" or "Personal screenshot" or "Personal photo"
 draft: false                # true = will not publish; false = publishes on build
 featured: false             # true = shown in featured slot on homepage
 ---
@@ -221,10 +221,11 @@ Every article must meet these requirements before the Publisher Agent opens a PR
 
 ### Images
 
-- Every article must have a hero image
+- Every article must have a hero image, plus at least one in-article image — no article ships as pure text
 - Every image must have descriptive alt text (not "image" or "photo" — describe what is shown)
 - Hero image doubles as the OG image (1200×630px)
 - Compress all images before committing (use `astro:assets` optimization or WebP format)
+- Every stock image's royalty-free license must be confirmed before use, with the source recorded in `imageCredit`
 
 ### Internal Linking
 
@@ -299,10 +300,12 @@ Richard's personal content from the interview notes should be distributed throug
 
 ### Step 5: Image Creator Agent — Images
 
-The Image Creator Agent creates:
+The Image Creator Agent creates or sources:
 
 - Hero image (1200×630px, follows `BRAND.md`)
-- Any in-article images replacing Writer Agent's image placeholders
+- At least one in-article image replacing Writer Agent's image placeholders
+
+Every article must ship with a hero image plus at least one in-article visual (diagram, chart, artwork, screenshot, or photo) — no article publishes as pure text. Each image is either generated with Claude Design or sourced as a royalty-free stock image (license confirmed and source recorded — see `AGENTS.md` → Image Creator Agent — Image Rules).
 
 Images are saved to `src/content/posts/[article-slug]/images/` with descriptive names.
 
@@ -383,7 +386,7 @@ If a factual error is found after publishing:
 2. **Interview notes are required.** No article may enter the drafting step without `interview-notes.md`. Richard's personal content must be present and identifiable in the final draft.
 3. **No em dashes.** Never. The Proofreader Agent will reject any draft containing `—`. Rewrite the sentence instead.
 4. **No fabricated quotes.** Every attributed quote must be real and verifiable.
-5. **No unlicensed images.** Claude-generated, personal screenshots, or personal photos only.
+5. **No unlicensed images.** Claude-generated, personal screenshots, personal photos, or confirmed royalty-free stock images only. Every article must include a hero image plus at least one in-article visual.
 6. **[VERIFY] flags must be resolved before publishing.** Never publish an article with unresolved `[VERIFY]` flags.
 7. **SEO checklist must be 100% complete** before the Publisher Agent opens a PR.
 8. **Proofreader must approve** before the Publisher Agent opens a PR.

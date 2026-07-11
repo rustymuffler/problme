@@ -37,7 +37,7 @@ To maintain quality and accountability across both tracks, Claude uses a **multi
 | **Interview Agent** | Claude Cowork | Conducts a structured interview with Richard to capture his personal thoughts, firsthand experiences, and opinions on the article topic before any drafting begins | After an article idea is selected; before any research or drafting begins |
 | **Research Agent** | Claude Cowork | Searches the web and technical sources to build a `research-brief.md` for the article: current statistics, relevant documentation, credible external sources to cite, competitive content scan, and counterarguments worth addressing | After Interview Agent completes; before Writer Agent drafts |
 | **Writer Agent** | Claude Cowork | Drafts articles in MDX format following `CONTENT_STANDARDS.md` — 1,200–2,500 words, professional but approachable, written in Richard's voice, weaving in both the interview notes and research brief | After Research Agent delivers the research brief |
-| **Image Creator Agent** | Claude Cowork | Creates a hero image and any in-article images using Claude's native image generation, following `BRAND.md` guidelines | After Writer Agent completes a draft |
+| **Image Creator Agent** | Claude Cowork | Creates a hero image and any in-article images, either via Claude Design generation or by sourcing royalty-free stock images, following `BRAND.md` guidelines | After Writer Agent completes a draft |
 | **SEO Reviewer Agent** | Claude Cowork | Reviews the completed draft for SEO compliance: meta tags, Open Graph, keywords, heading structure, reading level, word count — approves or returns feedback | After Image Creator Agent completes images |
 | **Proofreader Agent** | Claude Cowork | Reviews the SEO-approved draft for natural human-sounding tone, correct grammar, correct punctuation, and prohibited patterns (no em dashes, no banned phrases) — approves or returns specific line-level feedback | After SEO Reviewer Agent approves; before Publisher Agent opens the PR |
 
@@ -176,14 +176,24 @@ When generating article ideas, the Content Strategist Agent must:
 
 ### Image Creator Agent — Image Rules
 
-When creating images:
+Every article must ship with visuals. No article publishes as pure text: at minimum, a hero image plus at least one in-article image (diagram, chart, screenshot, artwork, or photo).
 
-- All images must follow the `BRAND.md` color palette and visual style
+Images may come from either source:
+
+1. **Claude Design generation** — original artwork, diagrams, charts, or illustrations, created natively.
+2. **Royalty-free stock images** — sourced online from libraries that grant free commercial use with no attribution required (e.g., Unsplash, Pexels, Pixabay). Before using a stock image, the Image Creator Agent must confirm the license permits commercial use and redistribution, and record the source URL.
+
+When creating or sourcing images:
+
+- All images must follow the `BRAND.md` color palette and visual style — this applies to stock images too; see `BRAND.md` → Image Standards → Stock Images for the required treatment.
 - Hero images must be 1200×630px (Open Graph dimensions) — this image doubles as the OG image for social sharing
 - In-article images should be relevant, not decorative. Each image must add information or clarify a concept
 - Save images alongside the MDX file: `src/content/posts/[article-slug]/images/`
 - Name images descriptively: `hero.png`, `agent-workflow-diagram.png`, `before-after-component.png`
-- All Claude-generated images must include a frontmatter field: `imageCredit: "AI-generated with Claude"`
+- Set the frontmatter `imageCredit` field to match the actual source:
+  - `imageCredit: "AI-generated with Claude"` — Claude Design generated
+  - `imageCredit: "Stock photo — [Source name], royalty-free"` — sourced stock image, e.g. `"Stock photo — Unsplash, royalty-free"`
+  - `imageCredit: "Personal screenshot"` or `imageCredit: "Personal photo"` — Richard's own material
 
 ### Interview Agent — Interview Process
 
