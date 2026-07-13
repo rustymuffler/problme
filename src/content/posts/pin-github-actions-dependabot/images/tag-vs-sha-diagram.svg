@@ -1,0 +1,68 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+      .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+      .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+    </style>
+  </defs>
+
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <!-- panel divider -->
+  <line x1="550" y1="40" x2="550" y2="520" stroke="#2E3147" stroke-width="2"/>
+
+  <!-- LEFT PANEL: tag, mutable -->
+  <text x="275" y="55" text-anchor="middle" class="lbl" font-size="26" font-weight="700">uses: action@v4</text>
+  <text x="275" y="82" text-anchor="middle" class="sub" font-size="16">a tag, moves over time</text>
+
+  <g stroke="#2E3147" stroke-width="2">
+    <line x1="90" y1="300" x2="460" y2="300"/>
+  </g>
+  <g fill="#252836" stroke="#2E3147" stroke-width="2">
+    <circle cx="120" cy="300" r="16"/>
+    <circle cx="220" cy="300" r="16"/>
+    <circle cx="320" cy="300" r="16"/>
+  </g>
+  <circle cx="420" cy="300" r="16" fill="#F59E0B" stroke="#F59E0B"/>
+
+  <!-- arrow jumping from early commit (t1) to later malicious commit (t2) -->
+  <path d="M220 260 Q 320 150 420 260" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="7 6" marker-end="url(#arrowAmber)"/>
+  <text x="320" y="150" text-anchor="middle" fill="#F59E0B" class="sub" font-size="15">v4 retagged here</text>
+
+  <text x="120" y="345" text-anchor="middle" class="mono" font-size="13">t0</text>
+  <text x="220" y="345" text-anchor="middle" class="mono" font-size="13">t1</text>
+  <text x="420" y="345" text-anchor="middle" class="mono" font-size="13">t2 (compromised)</text>
+
+  <rect x="120" y="410" width="310" height="70" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+  <text x="275" y="440" text-anchor="middle" class="lbl" font-size="15" font-weight="700">Your workflow trusted "v4"</text>
+  <text x="275" y="462" text-anchor="middle" class="sub" font-size="14">and silently ran whatever it now points to</text>
+
+  <!-- RIGHT PANEL: SHA, immutable -->
+  <text x="825" y="55" text-anchor="middle" class="lbl" font-size="26" font-weight="700">uses: action@34e1148...</text>
+  <text x="825" y="82" text-anchor="middle" class="sub" font-size="16">a commit SHA, fixed forever</text>
+
+  <g stroke="#2E3147" stroke-width="2">
+    <line x1="640" y1="300" x2="1010" y2="300"/>
+  </g>
+  <g fill="#252836" stroke="#2E3147" stroke-width="2">
+    <circle cx="670" cy="300" r="16"/>
+    <circle cx="970" cy="300" r="16"/>
+  </g>
+  <circle cx="820" cy="300" r="20" fill="#2DD4BF" stroke="#2DD4BF"/>
+
+  <line x1="820" y1="300" x2="820" y2="200" stroke="#38BDF8" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="820" cy="190" r="6" fill="#38BDF8"/>
+
+  <text x="820" y="345" text-anchor="middle" class="mono" font-size="13">always this one commit</text>
+
+  <rect x="670" y="410" width="310" height="70" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+  <text x="825" y="440" text-anchor="middle" class="lbl" font-size="15" font-weight="700">Your workflow runs one snapshot</text>
+  <text x="825" y="462" text-anchor="middle" class="sub" font-size="14">no one can redirect it later</text>
+
+  <defs>
+    <marker id="arrowAmber" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+</svg>
