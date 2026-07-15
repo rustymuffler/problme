@@ -291,9 +291,9 @@ Added 2026-07-15. Beyond classic SEO, every article is optimized to be *cited by
 
 ### External Linking
 
-**Correction (2026-07-12):** this section previously stated that all external links must include `target="_blank" rel="noopener noreferrer"`, phrased as if it were already enforced. It isn't. Standard markdown link syntax (`[text](url)`) is what's actually used across the site today; external links open in the same tab and carry no `rel` attribute. If opening external links in a new tab is wanted, it needs a site-wide fix (e.g. a rehype plugin such as `rehype-external-links` in `astro.config.mjs`), not something each article handles by hand. Logged as a real follow-up rather than silently dropped.
+External links automatically open in a new tab with `target="_blank" rel="noopener noreferrer"`, applied site-wide by `rehype-external-links` in `astro.config.mjs`. Writers use standard markdown link syntax (`[text](url)`) — no per-article handling. Internal links are unaffected.
 
-**Status (2026-07-15):** install attempted; blocked by the rl-protect governance gate (two transitive dependencies published under 7 days ago — no actual findings). Rescan and install once the versions age past the policy window.
+**History:** a 2026-07-12 correction noted this behavior was documented but not actually implemented. Implemented for real on 2026-07-15 (the initial install attempt that day was briefly blocked by the rl-protect governance gate — two transitive dependencies were under 7 days old, no actual findings — and Richard authorized the override).
 
 ---
 

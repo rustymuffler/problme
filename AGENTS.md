@@ -276,7 +276,7 @@ The SEO Reviewer Agent must verify all of the following before approving a conte
 □ Published date: set to the planned publish date
 ```
 
-Structured data (`BlogPosting`, `FAQPage`, `Person`), canonical URLs, and the table of contents are generated automatically by the site templates — the SEO Reviewer does not check them per-article. (Removed 2026-07-15: the "Author: richard-muffler" item — author is hardcoded in the template, not frontmatter — and the external-link `target="_blank"` item, which is a pending site-wide fix, not a per-article check.)
+Structured data (`BlogPosting`, `FAQPage`, `Person`), canonical URLs, and the table of contents are generated automatically by the site templates — the SEO Reviewer does not check them per-article. (Removed 2026-07-15: the "Author: richard-muffler" item — author is hardcoded in the template, not frontmatter — and the external-link `target="_blank"` item, which is now applied site-wide by `rehype-external-links` in `astro.config.mjs`, not per-article.)
 
 ---
 
