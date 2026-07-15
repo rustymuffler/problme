@@ -17,8 +17,14 @@ timeout = 10
 # Retry failed requests this many times before reporting as broken
 max_retries = 3
 
-# Do not check fragment-only links such as href="#section"
-exclude_mail = false
+# Check mailto: links, not just http(s) ones
+include_mail = true
+
+# Resolve root-relative links (e.g. href="/blog") against the built site,
+# so internal navigation links are actually checked instead of silently
+# skipped. Older lychee versions did not error on unresolvable
+# root-relative links without this set; newer versions do.
+root_dir = "dist"
 
 # ── Exclusions ─────────────────────────────────────────────────────────────
 
