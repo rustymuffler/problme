@@ -23,6 +23,18 @@ License: MIT
 Copyright: © The Astro Technology Company
 Source: https://github.com/withastro/astro/tree/main/packages/integrations/mdx
 
+**@astrojs/rss** `4.0.18`
+RSS feed generation for Astro — powers `/rss.xml`.
+License: MIT
+Copyright: © The Astro Technology Company
+Source: https://github.com/withastro/astro/tree/main/packages/astro-rss
+
+**@astrojs/sitemap** `3.7.3`
+Sitemap generation for Astro — powers `sitemap-index.xml`.
+License: MIT
+Copyright: © The Astro Technology Company
+Source: https://github.com/withastro/astro/tree/main/packages/sitemap
+
 **tailwindcss** `4.3.1`
 Utility-first CSS framework.
 License: MIT
@@ -86,15 +98,20 @@ site output. Source and license for each action is available at the linked repos
 
 | Action | Version (SHA pinned) | License | Repository |
 |---|---|---|---|
-| `actions/checkout` | `34e114876b0b11c390a56381ad16ebd13914f8d5` | MIT | https://github.com/actions/checkout |
-| `actions/setup-node` | `49933ea5288caeca8642d1e84afbd3f7d6820020` | MIT | https://github.com/actions/setup-node |
-| `actions/configure-pages` | `983d7736d9b0ae728b81ab479565c72886d7745b` | MIT | https://github.com/actions/configure-pages |
-| `actions/upload-pages-artifact` | `56afc609e74202658d3ffba0e8f6dda462b719fa` | MIT | https://github.com/actions/upload-pages-artifact |
+| `actions/checkout` | `9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0` | MIT | https://github.com/actions/checkout |
+| `actions/setup-node` | `48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e` | MIT | https://github.com/actions/setup-node |
+| `actions/configure-pages` | `45bfe0192ca1faeb007ade9deae92b16b8254a0d` | MIT | https://github.com/actions/configure-pages |
+| `actions/upload-pages-artifact` | `fc324d3547104276b827a68afc52ff2a11cc49c9` | MIT | https://github.com/actions/upload-pages-artifact |
 | `actions/deploy-pages` | `d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e` | MIT | https://github.com/actions/deploy-pages |
-| `lycheeverse/lychee-action` | `82202e5e9c2f4ef1a55a3d02563e1cb6041e5332` | MIT | https://github.com/lycheeverse/lychee-action |
+| `actions/upload-artifact` | `043fb46d1a93c77aae656e7c1c64a875d1fc6a0a` | MIT | https://github.com/actions/upload-artifact |
+| `lycheeverse/lychee-action` | `e7477775783ea5526144ba13e8db5eec57747ce8` | MIT | https://github.com/lycheeverse/lychee-action |
 | `gitleaks/gitleaks-action` | `dcedce43c6f43de0b836d1fe38946645c9c638dc` | MIT | https://github.com/gitleaks/gitleaks-action |
 | `semgrep/semgrep-action` | `713efdd345f3035192eaa63f56867b88e63e4e5d` | MIT | https://github.com/semgrep/semgrep-action |
 | `bridgecrewio/checkov-action` | `fa9edf8f0a491c59a924ea6accd5bdcf07752cff` | Apache-2.0 | https://github.com/bridgecrewio/checkov-action |
+| `ossf/scorecard-action` | `4eaacf0543bb3f2c246792bd56e8cdeffafb205a` | Apache-2.0 | https://github.com/ossf/scorecard-action |
+| `github/codeql-action` | `02c5e83432fe5497fd85b873b6c9f16a8578e1d9` | MIT | https://github.com/github/codeql-action |
+
+Note (2026-07-15): `actions/checkout`, `actions/setup-node`, `actions/configure-pages`, and `actions/upload-pages-artifact` SHAs above were bumped by Dependabot since this file was last updated. `.github/workflows/scorecard.yml` was pinning a stale `actions/checkout` SHA (added after Dependabot's last scan of it, so it was never caught); fixed directly to match the current SHA above.
 
 ---
 
@@ -119,6 +136,12 @@ Link checker (invoked via lychee-action).
 License: MIT
 Copyright: © Matthias Endler and contributors
 Source: https://github.com/lycheeverse/lychee
+
+**Semgrep** `1.169.0`
+Installed directly via pip in `security.yml` to generate SARIF output for GitHub code scanning (separate from the semgrep-action invocation above, which does not support SARIF).
+License: LGPL-2.1-or-later
+Copyright: © Semgrep Inc.
+Source: https://github.com/semgrep/semgrep
 
 ---
 
