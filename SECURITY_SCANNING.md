@@ -27,6 +27,7 @@ Each tool covers a distinct threat category. They are **not redundant** — do n
 | 5 | Trivy | Dependency CVEs (SCA) | After package installs / CI |
 | 6 | Gitleaks | Hardcoded secrets | Pre-commit hook + CI |
 | 7 | Checkov | IaC misconfigurations | When GitHub Actions workflows are written |
+| 8 | OpenSSF Scorecard | Supply-chain hygiene (pinning, token permissions, dangerous workflow patterns, dependency update tooling) | Weekly + on push to `main` + branch protection rule change |
 
 ---
 
@@ -206,13 +207,32 @@ checkov -d . --quiet
 
 **probl.me-specific focus:**
 - GitHub Actions workflow security is the primary concern. Every workflow must be scanned.
-- Pin all third-party GitHub Actions to a specific commit SHA (not just a tag): `uses: actions/checkout@v4` is a tag and can be compromised; `uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683` is pinned.
 - Use `permissions: read-all` at the workflow level and only escalate permissions for the specific job that needs them (e.g., `pages: write` only for the deploy job).
+
+**Correction (2026-07-12):** an earlier version of this section claimed Checkov enforces SHA-pinning of third-party Actions (`uses: actions/checkout@v4` is a tag and can be compromised; the pinned SHA form is required). That was inaccurate. Checkov's actual GitHub Actions checks (`CKV_GHA_1`–`CKV_GHA_7`, `CKV2_GHA_1`) cover unsecure commands, shell injection, curl-with-secrets, netcat usage, cosign attestation, and build parameter isolation, none of them check SHA-pinning. There is an open, stale, never-shipped Checkov feature request for this exact check ([bridgecrewio/checkov#7057](https://github.com/bridgecrewio/checkov/issues/7057)). All Actions in this repo are still pinned to a full commit SHA, that practice is real and verified, it just isn't enforced by Checkov. See Section 8 (OpenSSF Scorecard) for the tool that actually checks this.
 
 **Suppressing false positives:**
 ```yaml
 # checkov:skip=CKV_GHA_1 — reason why this is acceptable
 ```
+
+---
+
+### 8. OpenSSF Scorecard — Supply-Chain Hygiene
+
+**Workflow:** `.github/workflows/scorecard.yml`
+
+**When to run:**
+- Automatically: weekly (Saturdays), on every push to `main`, and on branch protection rule changes
+- No local install needed for CI; can be run locally via the official Docker image for ad hoc checks: `docker run --rm -e GITHUB_AUTH_TOKEN="$(gh auth token)" gcr.io/openssf/scorecard:stable --repo=github.com/rustymuffler/problme --format=json`
+
+**What it catches (that other tools in this stack don't):**
+- Whether third-party Actions are actually pinned to a commit SHA (Checkov does not check this, see the correction in Section 7)
+- Branch protection status, token permission scoping, dangerous workflow patterns, whether a dependency update tool is present, and several other supply-chain hygiene signals across ~18 checks total
+
+**Results handling:** results are uploaded as SARIF to this repo's own Security tab (code scanning alerts) only. `publish_results` is set to `false`, results are **not** published to the public OpenSSF/deps.dev database or exposed as a public badge. This was a deliberate choice (2026-07-12): several Scorecard checks (Code-Review, Contributors, CII-Best-Practices, Fuzzing) score near-zero for a solo-maintainer static site for structural reasons unrelated to actual risk, and publishing before the genuinely actionable gaps are addressed would be a misleading public signal. See `SCORECARD_IMPROVEMENTS.md` for the current score breakdown and what's actually worth fixing before flipping `publish_results` to `true`.
+
+**Static site context:** this is the tool that actually validates the SHA-pinning practice this repo already follows. It complements Checkov (which covers different IaC concerns) rather than replacing it, consistent with the "not redundant" philosophy at the top of this document.
 
 ---
 
@@ -382,7 +402,8 @@ Gaps to be aware of:
 | rl-protect-skills | ✅ Operational 2026-06-24 — used to scan `@astrojs/check@0.9.9` + `typescript@6.0.3` before install; one GOVERNANCE FAIL acknowledged by Richard (see Accepted Risk Log) |
 | Gitleaks (pre-commit) | ✅ Installed 2026-06-24 — `.git/hooks/pre-commit` using Gitleaks 8.30.1; `.gitleaks.toml` with allowlist |
 | Trivy | ✅ Operational 2026-06-25 — installed via winget (`trivy@0.71.2`); filesystem scan of `feat/astro-foundation` at HIGH,CRITICAL: 0 vulnerabilities found in `package-lock.json` (dev deps excluded by default) |
-| Checkov | ✅ Operational 2026-06-25 — installed via pip; run on `.github/workflows/` for `feat/astro-foundation` pre-PR: 180 checks passed, 0 failed (re-verified this session) |
+| Checkov | ✅ Operational 2026-06-25 — installed via pip; run on `.github/workflows/` for `feat/astro-foundation` pre-PR: 180 checks passed, 0 failed (re-verified this session); 200 checks passed, 0 failed after `scorecard.yml` added 2026-07-12 |
+| OpenSSF Scorecard | ✅ Operational 2026-07-12 — `.github/workflows/scorecard.yml` added, weekly + push-to-main + branch-protection-rule triggers, results private (`publish_results: false`). Initial live score: 6.1/10 — see `SCORECARD_IMPROVEMENTS.md` |
 
 Update this table as tools are configured during setup.
 

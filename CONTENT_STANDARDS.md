@@ -71,17 +71,19 @@ Every article must follow this structure:
 
 ### Callout Blocks
 
-Use callout blocks sparingly to highlight important notes or warnings. In MDX:
+Use callout blocks sparingly to highlight important notes or warnings. Import the `Callout` component and use it directly, there is no `:::` container syntax support:
 
 ```mdx
-:::note
-This is important context the reader shouldn't miss.
-:::
+import Callout from '../../../components/Callout.astro';
 
-:::warning
-A common mistake to avoid.
-:::
+<Callout type="note">This is important context the reader shouldn't miss.</Callout>
+
+<Callout type="warning">A common mistake to avoid.</Callout>
+
+<Callout type="tip">You can also do this instead.</Callout>
 ```
+
+The relative import path depends on the article's location. From `src/content/posts/[slug]/index.mdx` it is `../../../components/Callout.astro`.
 
 ### Code Blocks
 
@@ -149,38 +151,42 @@ The Proofreader Agent must scan for both `—` and `–` in every draft before a
 
 ## 5. MDX Frontmatter Requirements
 
-Every article file must include complete frontmatter. The Writer Agent fills this out before handing off to the SEO Reviewer Agent.
+Every article file must include complete frontmatter matching the schema defined in `src/content.config.ts`, which is the actual source of truth. Keep this section in sync with that file if the schema ever changes.
+
+**Correction (2026-07-12):** an earlier version of this section described a frontmatter schema that did not match `content.config.ts`, and following it would have broken the build. The schema below is verified against the real implementation.
 
 ```yaml
 ---
 title: "Your Article Title — Clear and Keyword-Rich"
 description: "A 150–160 character description that summarizes the article and includes the primary keyword. This appears in Google and social previews."
-publishDate: 2026-06-25
-updatedDate: 2026-06-25   # Update this if the article is significantly revised
-author: richard-muffler
 category: tech-tools        # pm-craft | ai-development | tech-tools
 tags:
   - astro
   - github-pages
   - static-site
-slug: your-article-slug     # lowercase, hyphens only, keyword-rich
-heroImage: ./images/hero.png
-imageAlt: "A descriptive alt text for the hero image"
+date: 2026-06-25
+readTime: "7 min"           # estimated reading time, matches the site's existing display convention
+heroImage: /assets/posts/[article-slug]/hero.png
 imageCredit: "AI-generated with Claude"   # or "Stock photo — [Source name], royalty-free" or "Personal screenshot" or "Personal photo"
-draft: false                # true = will not publish; false = publishes on build
-featured: false             # true = shown in featured slot on homepage
 ---
 ```
 
 ### Required Fields
 
-All of the following are required. The SEO Reviewer Agent will reject any draft missing these:
-
-`title`, `description`, `publishDate`, `author`, `category`, `tags`, `slug`, `heroImage`, `imageAlt`, `imageCredit`, `draft`
+`title`, `description`, `category`, `tags`, `date`, `readTime`. The Astro build fails outright if any of these are missing or malformed, this is enforced by the Zod schema in `content.config.ts`, not just a style convention.
 
 ### Optional Fields
 
-`updatedDate`, `featured`
+`heroImage`, `imageCredit`.
+
+### Fields that do not exist in the schema
+
+An earlier version of this document referenced `publishDate`, `updatedDate`, `author`, `slug`, `imageAlt`, `draft`, and `featured` as frontmatter fields. None of these exist in the real content collection schema:
+
+- **Slug** is derived automatically from the article's folder name (`src/content/posts/[slug]/index.mdx`), not a frontmatter field.
+- **Author** is hardcoded in the site template, this is a single-author blog, not a frontmatter field.
+- **Alt text** for the hero image is derived automatically from `title`. There is no separate `imageAlt` field. In-article images set their own alt text directly in markdown image syntax (`![descriptive alt text](url)`).
+- **Draft status:** there is no `draft` field or build-time gate. An article is unpublished simply by not existing on `main` yet, the Publisher Agent's draft PR is the real gate. Do not merge an article's PR until it's ready to go live.
 
 ---
 
@@ -234,7 +240,7 @@ Every article must meet these requirements before the Publisher Agent opens a PR
 
 ### External Linking
 
-All external links must include `target="_blank" rel="noopener noreferrer"`.
+**Correction (2026-07-12):** this section previously stated that all external links must include `target="_blank" rel="noopener noreferrer"`, phrased as if it were already enforced. It isn't. Standard markdown link syntax (`[text](url)`) is what's actually used across the site today; external links open in the same tab and carry no `rel` attribute. If opening external links in a new tab is wanted, it needs a site-wide fix (e.g. a rehype plugin such as `rehype-external-links` in `astro.config.mjs`), not something each article handles by hand. Logged as a real follow-up rather than silently dropped.
 
 ---
 

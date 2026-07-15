@@ -188,7 +188,8 @@ When creating or sourcing images:
 - All images must follow the `BRAND.md` color palette and visual style — this applies to stock images too; see `BRAND.md` → Image Standards → Stock Images for the required treatment.
 - Hero images must be 1200×630px (Open Graph dimensions) — this image doubles as the OG image for social sharing
 - In-article images should be relevant, not decorative. Each image must add information or clarify a concept
-- Save images alongside the MDX file: `src/content/posts/[article-slug]/images/`
+- **Runtime images** (what the site actually serves) go in `public/assets/posts/[article-slug]/`, referenced in frontmatter/MDX as `/assets/posts/[article-slug]/hero.png`. This is the real, working convention, verified against the content schema and the published articles. **Correction (2026-07-12):** an earlier version of this document said images live at `src/content/posts/[article-slug]/images/`; that path is not served by the site.
+- **Source design files** (editable SVGs, working files) may still be kept alongside the article at `src/content/posts/[article-slug]/images/` for provenance. They are not served directly and are not required, but are worth keeping if the image was hand-built rather than sourced externally.
 - Name images descriptively: `hero.png`, `agent-workflow-diagram.png`, `before-after-component.png`
 - Set the frontmatter `imageCredit` field to match the actual source:
   - `imageCredit: "AI-generated with Claude"` — Claude Design generated

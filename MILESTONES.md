@@ -85,7 +85,7 @@
 | 3.4 | Set up monthly retrospective scheduled task | ✅ | `probme-monthly-retro` — fires first Monday of month 10am; next run 2026-07-06 — 2026-06-26 |
 | 3.5 | Create `retros/` folder in repository | ✅ | `retros/.gitkeep` committed to main — 2026-06-26 |
 | 3.6 | Define initial content calendar (first 4 articles) | ✅ | First idea batch run 2026-06-26; Richard selected 7 articles — see Content Calendar below |
-| 3.7 | Article 1: Interview → Research → Draft → Review → Proofread → PR | ⬜ | Full end-to-end test of the complete pipeline |
+| 3.7 | Article 1: Interview → Research → Draft → Review → Proofread → PR | ✅ | C7 "Why I SHA-Pin Every GitHub Action" ran the full pipeline end-to-end — PR [#55](https://github.com/rustymuffler/problme/pull/55) open, pending Richard's review/merge — 2026-07-12 |
 | 3.8 | Article 2: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
 | 3.9 | Article 3: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
 | 3.10 | Article 4: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
@@ -165,10 +165,10 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 | C4 | How Context Limits Changed the Way I Build with AI | ai-development | ✅ Published | 2026-06-26 |
 | C5 | Scheduled Claude agents: setting up autonomous loops that don't need babysitting | ai-development | ⬜ Queued | TBD |
 | C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
-| C7 | Why I SHA-pin every GitHub Action and how I automate keeping them current | tech-tools | ⬜ Queued | TBD |
+| C7 | Why I SHA-Pin Every GitHub Action (and Automate Updates) | tech-tools | 🔑 PR Open | 2026-07-17 |
 
 **Pipeline status key:** ⬜ Queued → 🔄 Interview → 🔄 Research → 🔄 Draft → 🔄 Review → 🔄 Proofread → 🔑 PR Open → ✅ Published
 
 ---
 
-*Last updated: 2026-06-26 — PM Agent: marked 1.14, 1.15, 2.19, 3.1–3.6 ✅; added Content Calendar with 7 selected articles (session 2026-06-26).*
+*Last updated: 2026-07-12 — PM Agent: C7 ran the full pipeline end-to-end (interview → research → draft → images → SEO review → proofread → draft PR). PR [#55](https://github.com/rustymuffler/problme/pull/55) open for Richard's review. Also merged two supporting infra PRs found while researching C7: [#48](https://github.com/rustymuffler/problme/pull/48) (Dependabot for github-actions) and [#54](https://github.com/rustymuffler/problme/pull/54) (OpenSSF Scorecard, corrected a false Checkov claim in SECURITY_SCANNING.md). No blockers hit; this was the first full validation of M3.7 (Article 1 end-to-end).*
