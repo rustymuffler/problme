@@ -33,7 +33,7 @@ Source: https://github.com/withastro/astro/tree/main/packages/astro-rss
 Sitemap generation for Astro — powers `sitemap-index.xml`.
 License: MIT
 Copyright: © The Astro Technology Company
-Source: https://github.com/withastro/astro/tree/main/packages/sitemap
+Source: https://github.com/withastro/astro/tree/main/packages/integrations/sitemap
 
 **tailwindcss** `4.3.1`
 Utility-first CSS framework.
