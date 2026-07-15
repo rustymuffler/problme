@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import CategoryPill from '../../components/CategoryPill.astro';
 import { getCollection, render } from 'astro:content';
 import type { Category } from '../../components/CategoryPill.astro';
+import { SITE_URL, personRef } from '../../lib/schema';
 
 export async function getStaticPaths() {
   const allPosts = (await getCollection('posts'))
@@ -19,16 +20,51 @@ export async function getStaticPaths() {
 }
 
 const { post, prevPost, nextPost } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 const formattedDate = fmt.format(post.data.date);
+
+const slug = post.id.replace(/\.(md|mdx)$/, '');
+const postUrl = `${SITE_URL}/blog/${slug}/`;
+const toc = headings.filter((h) => h.depth === 2);
+const faq = post.data.faq ?? [];
+
+const blogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  url: postUrl,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+  datePublished: post.data.date.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.date).toISOString(),
+  author: personRef,
+  publisher: personRef,
+  articleSection: post.data.category,
+  keywords: post.data.tags.join(', '),
+  ...(post.data.heroImage && { image: `${SITE_URL}${post.data.heroImage}` }),
+};
+
+const faqSchema = faq.length > 0 && {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+};
+
+const jsonLd = [blogPostingSchema, ...(faqSchema ? [faqSchema] : [])];
 ---
 
 <Layout
   title={`${post.data.title} — probl.me`}
   description={post.data.description}
   ogImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
+  ogType="article"
+  jsonLd={jsonLd}
 >
 
   <!-- ─── ARTICLE HEAD ─────────────────────────────────────────────────── -->
@@ -64,10 +100,37 @@ const formattedDate = fmt.format(post.data.date);
     </div>
   )}
 
+  <!-- ─── TABLE OF CONTENTS ────────────────────────────────────────────── -->
+  {toc.length >= 3 && (
+    <div class="toc-wrap">
+      <nav class="toc" aria-label="Table of contents">
+        <div class="toc-label">// contents</div>
+        <ol class="toc-list">
+          {toc.map((heading) => (
+            <li><a href={`#${heading.slug}`}>{heading.text}</a></li>
+          ))}
+        </ol>
+      </nav>
+    </div>
+  )}
+
   <!-- ─── BODY ─────────────────────────────────────────────────────────── -->
   <article class="prose">
     <Content />
   </article>
+
+  <!-- ─── FAQ (rendered from frontmatter; also emitted as FAQPage JSON-LD) ─ -->
+  {faq.length > 0 && (
+    <section class="prose faq-section" aria-labelledby="faq-heading">
+      <h2 id="faq-heading">Frequently asked questions</h2>
+      {faq.map((item) => (
+        <>
+          <h3>{item.question}</h3>
+          <p>{item.answer}</p>
+        </>
+      ))}
+    </section>
+  )}
 
   <!-- ─── TAGS ─────────────────────────────────────────────────────────── -->
   {post.data.tags.length > 0 && (
@@ -191,6 +254,51 @@ const formattedDate = fmt.format(post.data.date);
   color: var(--color-text-muted);
   margin: 8px 0 0;
   text-align: right;
+}
+
+/* ── Table of contents ────────────────────────────────────── */
+.toc-wrap {
+  max-width: var(--reading-width);
+  margin: 40px auto 0;
+  padding: 0 24px;
+}
+
+.toc {
+  padding: 20px 22px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+}
+
+.toc-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.toc-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.toc-list li {
+  margin-top: 8px;
+}
+
+.toc-list a {
+  color: var(--color-text-primary);
+  border-bottom: 1px solid rgba(242, 162, 75, 0.35);
+}
+
+.toc-list a:hover {
+  color: var(--color-amber);
+  border-bottom-color: var(--color-amber);
+}
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+.faq-section {
+  padding-top: 0;
 }
 
 /* ── Prose ────────────────────────────────────────────────── */

@@ -42,20 +42,28 @@ All articles are assigned to exactly one of three categories:
 - **Standard:** 1,200–2,500 words
 - **Minimum:** 1,000 words (exceptions require Richard's approval)
 - **Maximum:** 3,000 words (split into a series if longer content is needed)
+- **Per-article target:** set from the research brief's competitive content scan, not defaulted to the maximum. If the top-ranking articles for the target keyword average 1,000 words, do not write 2,500. Word count is not a ranking factor; coverage is — padding hurts both readers and AI citation odds.
 
 ### Structure
 
-Every article must follow this structure:
+Every article must follow this structure. It is designed for both human skimmers and AI engines (AI Overviews, ChatGPT, Perplexity), which ground on the top of the page and lift self-contained sections as citations.
 
 ```
 # Title (H1) — only one H1 per article, matches the post title exactly
 
-[Opening hook — 1–2 paragraphs that establish the problem or question]
+[TL;DR — REQUIRED, first thing after the title. 40–60 words that directly
+and completely answer the article's core question. Written in Richard's
+voice, not a robotic summary. AI engines weight the top of the page most
+heavily; the direct answer goes first, the story follows.]
 
-[Optional: TL;DR callout block — 3–5 bullet points for readers who skim]
+[Opening hook — 1–2 paragraphs that establish the problem or question.
+The primary keyword and the core answer must both appear in the first
+200 words of the article.]
 
 ## Section One (H2)
-[Body content — 2–4 paragraphs, supported by examples or data]
+[Body content — 2–4 paragraphs, supported by examples or data. Each H2
+section should stand alone: a reader (or AI engine) landing on just this
+section should get a complete answer to the heading's question.]
 
 ### Subsection (H3) — only if needed within a section
 [Keep H3 usage intentional — not every paragraph needs a heading]
@@ -68,6 +76,20 @@ Every article must follow this structure:
 
 [Optional: What's next — brief preview of related work or upcoming articles]
 ```
+
+**Table of contents:** rendered automatically by the post template from the article's H2 headings (shown when there are 3 or more). Writers never build one by hand.
+
+**Headings as questions:** phrase H2s as the question the section answers where it reads naturally ("Why did the deploy fail?" over "Deploy issues"). Do not force it — an awkward question heading is worse than a clear statement heading.
+
+**Data as tables:** present comparisons and data in markdown tables, never as screenshots of tables. AI engines can parse HTML tables; they cannot parse a picture of one.
+
+### FAQ (required)
+
+Every article ships with 3–5 frequently asked questions, authored in the `faq` frontmatter field (see Section 5). The post template renders them as a "Frequently asked questions" section at the end of the article and emits matching `FAQPage` JSON-LD automatically — one source of truth, no duplication.
+
+- Questions should be real queries a reader would type or ask an AI assistant, phrased naturally
+- Answers are 40–90 words, plain text (no markdown), self-contained, and in Richard's voice
+- Do not restate content verbatim from the body — the FAQ complements the article, it does not summarize it
 
 ### Callout Blocks
 
@@ -168,6 +190,11 @@ date: 2026-06-25
 readTime: "7 min"           # estimated reading time, matches the site's existing display convention
 heroImage: /assets/posts/[article-slug]/hero.png
 imageCredit: "AI-generated with Claude"   # or "Stock photo — [Source name], royalty-free" or "Personal screenshot" or "Personal photo"
+faq:
+  - question: "Does Astro work with GitHub Pages custom domains?"
+    answer: "Yes. Set the site option in astro.config.mjs to your custom domain and keep the CNAME file in public/. GitHub Pages serves the built output unchanged."
+  - question: "How long did this setup take?"
+    answer: "About one evening for the working site, plus a second session for the deploy workflow."
 ---
 ```
 
@@ -177,11 +204,13 @@ imageCredit: "AI-generated with Claude"   # or "Stock photo — [Source name], r
 
 ### Optional Fields
 
-`heroImage`, `imageCredit`.
+- `heroImage`, `imageCredit`
+- `updatedDate` — set when an article receives a significant update (see Section 9); feeds `dateModified` in the article's structured data
+- `faq` — an array of `question`/`answer` pairs (added 2026-07-15). Required by content standards for every new article (3–5 entries), though the schema marks it optional so older articles still build. The post template renders the FAQ section and its `FAQPage` JSON-LD from this field.
 
 ### Fields that do not exist in the schema
 
-An earlier version of this document referenced `publishDate`, `updatedDate`, `author`, `slug`, `imageAlt`, `draft`, and `featured` as frontmatter fields. None of these exist in the real content collection schema:
+An earlier version of this document referenced `publishDate`, `author`, `slug`, `imageAlt`, `draft`, and `featured` as frontmatter fields. None of these exist in the real content collection schema (`updatedDate`, also once on this list, was added for real on 2026-07-15):
 
 - **Slug** is derived automatically from the article's folder name (`src/content/posts/[slug]/index.mdx`), not a frontmatter field.
 - **Author** is hardcoded in the site template, this is a single-author blog, not a frontmatter field.
@@ -227,7 +256,9 @@ Every article must meet these requirements before the Publisher Agent opens a PR
 
 ### Images
 
-- Every article must have a hero image, plus at least one in-article image — no article ships as pure text
+- Every article must have a hero image plus in-article images at a minimum ratio of **one in-article image per ~500 words** — a 2,000-word article carries the hero plus roughly four in-article visuals. (Research basis: most sources recommend one image per 350–500 words; engagement studies favor even more. Updated 2026-07-15 from the old "hero + at least one" minimum.)
+- Every image must add information — original diagrams, real screenshots from probl.me/Celly work, and charts beat decorative stock. Original visuals are also a GEO advantage: an AI summary cannot reproduce them, which gives readers a reason to click through
+- Data and comparisons go in markdown tables, never in screenshots of tables
 - Every image must have descriptive alt text (not "image" or "photo" — describe what is shown)
 - Hero image doubles as the OG image (1200×630px)
 - Compress all images before committing (use `astro:assets` optimization or WebP format)
@@ -238,9 +269,31 @@ Every article must meet these requirements before the Publisher Agent opens a PR
 - Every article should link to at least one other article or page on probl.me once other content exists
 - Use descriptive anchor text ("how I set up GitHub Actions" not "click here")
 
+### AI Search Standards (AIO / GEO)
+
+Added 2026-07-15. Beyond classic SEO, every article is optimized to be *cited by* AI engines (Google AI Overviews, ChatGPT, Perplexity), not just ranked. Most of this is enforced by structure the site now provides automatically:
+
+**Handled by the site (no per-article work):**
+
+- `BlogPosting` JSON-LD on every post, with the author linked to the canonical Person entity on `/about`
+- `FAQPage` JSON-LD generated from the `faq` frontmatter field
+- `Person` + `ProfilePage` JSON-LD on `/about` (E-E-A-T: AI engines filter out faceless content)
+- Canonical URLs, `robots.txt`, and `llms.txt` (a curated site summary for AI crawlers at `probl.me/llms.txt`)
+- Automatic table of contents from H2 headings
+
+**Handled per-article (Writer, SEO Reviewer):**
+
+- TL;DR direct answer in the first 40–60 words; core answer and primary keyword within the first 200 words
+- H2 sections that stand alone as complete answers (AI engines lift individual sections)
+- FAQ frontmatter with 3–5 natural-language questions
+- Cited, linked external sources for every statistic (AI engines weight verifiable sourcing)
+- Firsthand specifics — real numbers, real decisions, real failures from Richard's work. This is the strongest citation signal we have: it is content no other site can offer
+
 ### External Linking
 
 **Correction (2026-07-12):** this section previously stated that all external links must include `target="_blank" rel="noopener noreferrer"`, phrased as if it were already enforced. It isn't. Standard markdown link syntax (`[text](url)`) is what's actually used across the site today; external links open in the same tab and carry no `rel` attribute. If opening external links in a new tab is wanted, it needs a site-wide fix (e.g. a rehype plugin such as `rehype-external-links` in `astro.config.mjs`), not something each article handles by hand. Logged as a real follow-up rather than silently dropped.
+
+**Status (2026-07-15):** install attempted; blocked by the rl-protect governance gate (two transitive dependencies published under 7 days ago — no actual findings). Rescan and install once the versions age past the policy window.
 
 ---
 

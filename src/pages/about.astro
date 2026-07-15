@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import BusinessCard from '../components/BusinessCard.astro';
 import IconStrip from '../components/IconStrip.astro';
 import Button from '../components/Button.astro';
+import { SITE_URL, person } from '../lib/schema';
 
 interface Role {
   era: string;
@@ -74,11 +75,19 @@ const competencies = [
   'OEM & Partner Mgmt',
   'AI/ML Product Advocacy',
 ];
+
+const profilePageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  url: `${SITE_URL}/about/`,
+  mainEntity: person,
+};
 ---
 
 <Layout
   title="About — probl.me"
   description="I'm Richard, a cybersecurity and SaaS product manager building personal projects with AI and writing about what I learn."
+  jsonLd={[profilePageSchema]}
 >
 
   <!-- ─── INTRO + STICKY CARD ──────────────────────────────────────────── -->

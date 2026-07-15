@@ -1,16 +1,22 @@
 ---
 import '../styles/global.css';
 
+import { websiteSchema } from '../lib/schema';
+
 interface Props {
   title: string;
   description?: string;
   ogImage?: string;
+  ogType?: 'website' | 'article';
+  jsonLd?: object[];
 }
 
 const {
   title,
   description = 'Building in public. One problem at a time.',
   ogImage = '/assets/og/og-default.svg',
+  ogType = 'website',
+  jsonLd = [],
 } = Astro.props;
 
 const pathname = new URL(Astro.request.url).pathname;
@@ -19,6 +25,9 @@ const isBlog  = pathname.startsWith('/blog');
 const isAbout = pathname.startsWith('/about');
 
 const siteUrl = 'https://probl.me';
+
+// WebSite schema on the homepage; pages pass their own schemas via jsonLd.
+const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 ---
 
 <!doctype html>
@@ -30,9 +39,10 @@ const siteUrl = 'https://probl.me';
 
   <title>{title}</title>
   <meta name="description" content={description} />
+  <link rel="canonical" href={`${siteUrl}${pathname}`} />
 
   <!-- Open Graph -->
-  <meta property="og:type"        content="website" />
+  <meta property="og:type"        content={ogType} />
   <meta property="og:title"       content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:image"       content={`${siteUrl}${ogImage}`} />
@@ -50,6 +60,11 @@ const siteUrl = 'https://probl.me';
   <!-- Feed & sitemap discovery -->
   <link rel="alternate" type="application/rss+xml" title="probl.me RSS feed" href="/rss.xml" />
   <link rel="sitemap" href="/sitemap-index.xml" />
+
+  <!-- Structured data (JSON-LD) -->
+  {schemas.map((schema) => (
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+  ))}
 
   <!-- Fonts: Bunny Fonts (privacy-friendly, no IP logging) -->
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
