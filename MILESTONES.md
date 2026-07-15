@@ -165,10 +165,10 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 | C4 | How Context Limits Changed the Way I Build with AI | ai-development | ✅ Published | 2026-06-26 |
 | C5 | Scheduled Claude agents: setting up autonomous loops that don't need babysitting | ai-development | ⬜ Queued | TBD |
 | C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
-| C7 | Why I SHA-Pin Every GitHub Action (and Automate Updates) | tech-tools | 🔑 PR Open | 2026-07-17 |
+| C7 | Why I SHA-Pin Every GitHub Action (and Automate Updates) | tech-tools | ✅ Published | 2026-07-15 |
 
 **Pipeline status key:** ⬜ Queued → 🔄 Interview → 🔄 Research → 🔄 Draft → 🔄 Review → 🔄 Proofread → 🔑 PR Open → ✅ Published
 
 ---
 
-*Last updated: 2026-07-12 — PM Agent: C7 ran the full pipeline end-to-end (interview → research → draft → images → SEO review → proofread → draft PR). PR [#55](https://github.com/rustymuffler/problme/pull/55) open for Richard's review. Also merged two supporting infra PRs found while researching C7: [#48](https://github.com/rustymuffler/problme/pull/48) (Dependabot for github-actions) and [#54](https://github.com/rustymuffler/problme/pull/54) (OpenSSF Scorecard, corrected a false Checkov claim in SECURITY_SCANNING.md). No blockers hit; this was the first full validation of M3.7 (Article 1 end-to-end).*
+*Last updated: 2026-07-15 — PM Agent: C7 published, live at probl.me/blog/pin-github-actions-dependabot (confirmed HTTP 200). PR [#55](https://github.com/rustymuffler/problme/pull/55) merged. The session also produced six supporting infra/docs PRs, all merged: [#48](https://github.com/rustymuffler/problme/pull/48) Dependabot for github-actions, [#54](https://github.com/rustymuffler/problme/pull/54) OpenSSF Scorecard + Checkov correction, [#56](https://github.com/rustymuffler/problme/pull/56)/[#57](https://github.com/rustymuffler/problme/pull/57) doc corrections + SECURITY.md, [#58](https://github.com/rustymuffler/problme/pull/58) lychee config fix + missing resume PDF, [#59](https://github.com/rustymuffler/problme/pull/59)/[#61](https://github.com/rustymuffler/problme/pull/61) Scorecard tracking updates, [#60](https://github.com/rustymuffler/problme/pull/60) Semgrep SARIF upload. OpenSSF Scorecard score improved 6.1 → 7.0 over the session. No blockers hit; this was the first full validation of M3.7 (Article 1 end-to-end), and it surfaced real value beyond the article itself.*
