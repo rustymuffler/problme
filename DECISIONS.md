@@ -165,6 +165,38 @@
 
 ---
 
+## Decision 10: OpenSSF Scorecard Added, Results Kept Private
+
+**Date:** 2026-07-12 to 2026-07-15
+
+**Decision:** Add `.github/workflows/scorecard.yml` as a new, non-redundant security layer (weekly + push-to-main + branch-protection-rule triggers). Keep `publish_results: false` rather than exposing the score on the public OpenSSF/deps.dev database.
+
+**Context:** Discovered while researching the C7 article that `SECURITY_SCANNING.md` had been claiming Checkov enforces SHA-pinning of GitHub Actions. It doesn't, that check doesn't exist in Checkov. Scorecard's Pinned-Dependencies check is the real tool for this.
+
+**Reason for keeping results private:** Several Scorecard checks (Code-Review, Contributors, CII-Best-Practices, Fuzzing) score near-zero for a solo-maintainer static site for structural reasons unrelated to actual risk. Publishing before the genuinely actionable gaps (branch protection, `SECURITY.md`, SAST recognition) closed would have been a misleading public signal, readers would see a low number without the context that half of it is structural, not a real weakness.
+
+**What actually happened by end of session:** Richard merged `SECURITY.md` (PR #57) and configured a branch protection ruleset directly. Score moved 6.1 → 7.0. Security-Policy and part of Branch-Protection are now genuinely resolved. `publish_results` is still `false`; SAST recognition and Vulnerabilities triage remain open. Full breakdown tracked in `SCORECARD_IMPROVEMENTS.md`.
+
+**Impact:** `SCORECARD_IMPROVEMENTS.md` is the source of truth for when to flip `publish_results` to `true`. Revisit once the remaining actionable items close, not on a fixed date.
+
+---
+
+## Decision 11: Prompt Injection Article — No Live Payloads Against Third Parties
+
+**Date:** 2026-07-15
+
+**Decision:** The planned C8 article on prompt injection will discuss and cite real techniques (hidden web pages, DNS TXT records, SEO-poisoned pages, email/calendar/shared-doc payloads, images/PDFs, untrusted survey input) with inert, clearly-labeled example payloads. It will **not** embed a live, functioning prompt-injection payload in the published page or its content, even a non-malicious one, designed to trigger an unintended action in any AI agent that reads it.
+
+**Context:** Richard's pitch for the article came from personally encountering a hidden prompt-injection attempt on lawsofux.com. He proposed demonstrating the technique on probl.me itself with a harmless payload (redirecting an AI agent to a rickroll video), hidden in the live article page.
+
+**Reason:** A real, functioning injection payload on a public, indexed page affects any third party's AI agent that processes it, a future reader's browser assistant, a search crawler's summarizer, another Claude Code session run against this repo by someone else, without that party's knowledge or consent. The harmlessness of the specific payload doesn't change the mechanism: it's the same "hidden instruction manipulates an AI that wasn't expecting it" pattern the article is meant to warn readers about, deployed against an uncontrolled, non-consenting audience instead of a controlled one.
+
+**Alternative agreed:** An explicitly opt-in, clearly-labeled interactive demo (reader chooses to trigger it, sees what's happening) plus inert example payloads shown as text/code for each technique category, discussed and cited rather than live. Exact shape to be worked out when C8 enters the pipeline.
+
+**Impact:** The Interview Agent should not need to re-litigate this framing when C8's interview happens, it's settled. See `MILESTONES.md`'s Content Calendar C8 note for the full pitch and this decision's summary.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
