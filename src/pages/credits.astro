@@ -76,9 +76,12 @@ const actionPurposes: Record<string, string> = {
   'actions/upload-pages-artifact': 'CI/CD — uploads the Pages artifact (SHA-pinned).',
   'actions/deploy-pages':          'CI/CD — deploys to GitHub Pages (SHA-pinned).',
   'lycheeverse/lychee-action':     'CI/CD — runs the Lychee link checker (SHA-pinned).',
+  'actions/upload-artifact':       'CI/CD — uploads build artifacts between jobs (SHA-pinned).',
   'gitleaks/gitleaks-action':      'CI/CD — runs Gitleaks on every PR (SHA-pinned).',
   'semgrep/semgrep-action':        'CI/CD — static analysis security scanning (SHA-pinned).',
   'bridgecrewio/checkov-action':   'CI/CD — infrastructure-as-code scanning (SHA-pinned).',
+  'ossf/scorecard-action':         'CI/CD — OpenSSF Scorecard supply-chain checks (SHA-pinned).',
+  'github/codeql-action':          'CI/CD — uploads SARIF results to code scanning (SHA-pinned).',
 };
 
 function parseActionsTable(text: string): Dep[] {
@@ -105,14 +108,18 @@ const fonts     = parseFonts(raw);
 const actions   = parseActionsTable(raw);
 const lychee    = parseLychee(raw);
 
-const frameworkNames = new Set(['astro', '@astrojs/mdx', 'tailwindcss', '@tailwindcss/vite']);
+const frameworkNames = new Set(['astro', '@astrojs/mdx', '@astrojs/rss', '@astrojs/sitemap', 'tailwindcss', '@tailwindcss/vite']);
 const buildNpmNames  = new Set(['@astrojs/check', 'typescript', '@playwright/test', '@axe-core/playwright', '@lhci/cli']);
-const secBinNames    = new Set(['Gitleaks', 'Trivy']);
+const secBinNames    = new Set(['Gitleaks', 'Trivy', 'Semgrep']);
 const buildActNames  = new Set([
   'actions/checkout', 'actions/setup-node', 'actions/configure-pages',
-  'actions/upload-pages-artifact', 'actions/deploy-pages', 'lycheeverse/lychee-action',
+  'actions/upload-pages-artifact', 'actions/deploy-pages', 'actions/upload-artifact',
+  'lycheeverse/lychee-action',
 ]);
-const secActNames    = new Set(['gitleaks/gitleaks-action', 'semgrep/semgrep-action', 'bridgecrewio/checkov-action']);
+const secActNames    = new Set([
+  'gitleaks/gitleaks-action', 'semgrep/semgrep-action', 'bridgecrewio/checkov-action',
+  'ossf/scorecard-action', 'github/codeql-action',
+]);
 
 // Manual entry — not in THIRD-PARTY-NOTICES.md (see AGENTS.md §Security)
 const spectraEntry: Dep = {
