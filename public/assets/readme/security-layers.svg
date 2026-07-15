@@ -1,0 +1,61 @@
+<svg viewBox="0 0 1200 420" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F1117"/>
+      <stop offset="100%" stop-color="#1A1D27"/>
+    </linearGradient>
+    <style>
+      .tool { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; font-size: 18px; font-weight: 700; }
+      .catch { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; font-size: 14px; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="420" fill="url(#bg)"/>
+
+  <text x="600" y="42" text-anchor="middle" font-family="'DejaVu Sans', Arial, sans-serif" font-size="20" font-weight="700" fill="#94A3B8" letter-spacing="1">SECURITY STACK</text>
+  <text x="600" y="66" text-anchor="middle" class="catch" font-size="13">Each layer catches something different. Not redundant.</text>
+
+  <!-- 5 layers -->
+  <g id="layers">
+    <!-- 1 Gitleaks -->
+    <g transform="translate(100,90)">
+      <rect width="1000" height="56" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="1.5"/>
+      <rect width="6" height="56" rx="3" fill="#38BDF8"/>
+      <text class="tool" x="30" y="24">Gitleaks</text>
+      <text class="catch" x="30" y="44">Hardcoded secrets, API keys, tokens</text>
+      <text class="catch" x="970" y="34" text-anchor="end" font-family="'DejaVu Sans Mono', monospace">pre-commit + CI</text>
+    </g>
+    <!-- 2 Semgrep -->
+    <g transform="translate(100,158)">
+      <rect width="1000" height="56" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="1.5"/>
+      <rect width="6" height="56" rx="3" fill="#38BDF8"/>
+      <text class="tool" x="30" y="24">Semgrep</text>
+      <text class="catch" x="30" y="44">Static analysis (SAST) — XSS, injection, unsafe patterns</text>
+      <text class="catch" x="970" y="34" text-anchor="end" font-family="'DejaVu Sans Mono', monospace">every push/PR</text>
+    </g>
+    <!-- 3 Trivy -->
+    <g transform="translate(100,226)">
+      <rect width="1000" height="56" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="1.5"/>
+      <rect width="6" height="56" rx="3" fill="#2DD4BF"/>
+      <text class="tool" x="30" y="24">Trivy</text>
+      <text class="catch" x="30" y="44">Dependency CVEs (SCA)</text>
+      <text class="catch" x="970" y="34" text-anchor="end" font-family="'DejaVu Sans Mono', monospace">every push/PR</text>
+    </g>
+    <!-- 4 Checkov -->
+    <g transform="translate(100,294)">
+      <rect width="1000" height="56" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="1.5"/>
+      <rect width="6" height="56" rx="3" fill="#2DD4BF"/>
+      <text class="tool" x="30" y="24">Checkov</text>
+      <text class="catch" x="30" y="44">Infrastructure-as-code misconfigurations</text>
+      <text class="catch" x="970" y="34" text-anchor="end" font-family="'DejaVu Sans Mono', monospace">workflow changes</text>
+    </g>
+    <!-- 5 Scorecard -->
+    <g transform="translate(100,362)">
+      <rect width="1000" height="56" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="1.5"/>
+      <rect width="6" height="56" rx="3" fill="#F59E0B"/>
+      <text class="tool" x="30" y="24">OpenSSF Scorecard</text>
+      <text class="catch" x="30" y="44">Supply-chain hygiene — pinning, branch protection, tokens</text>
+      <text class="catch" x="970" y="34" text-anchor="end" font-family="'DejaVu Sans Mono', monospace">weekly + push</text>
+    </g>
+  </g>
+</svg>

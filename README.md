@@ -46,6 +46,8 @@ npm run check        # type-check with astro check
 
 Every push and pull request runs a layered security scanning stack: [Gitleaks](https://github.com/gitleaks/gitleaks) (secrets), [Semgrep](https://semgrep.dev) (SAST), [Trivy](https://aquasecurity.github.io/trivy) (dependency CVEs), [Checkov](https://www.checkov.io) (IaC misconfigurations), and [OpenSSF Scorecard](https://scorecard.dev) (supply-chain hygiene). All third-party GitHub Actions are pinned to a full commit SHA, kept current via Dependabot.
 
+![Security stack: Gitleaks, Semgrep, Trivy, Checkov, and OpenSSF Scorecard, each catching a different category of issue](public/assets/readme/security-layers.png)
+
 See [`SECURITY.md`](SECURITY.md) for how to report a vulnerability, and [`SECURITY_SCANNING.md`](SECURITY_SCANNING.md) for the full breakdown of what each tool covers and why.
 
 ---
@@ -53,6 +55,8 @@ See [`SECURITY.md`](SECURITY.md) for how to report a vulnerability, and [`SECURI
 ## Built with AI Agents
 
 The content pipeline for this blog, idea generation, interviews, research, drafting, image creation, SEO review, and proofreading, runs through a defined multi-agent workflow using Claude. Each stage is a distinct role with its own responsibilities, and no single agent both writes and approves its own work.
+
+![Animated diagram of the nine-stage content pipeline: Idea, Interview, Research, Write, Images, SEO, Proofread, Publish, Merge, each stage lighting up as it completes](public/assets/readme/content-pipeline.gif)
 
 See [`AGENTS.md`](AGENTS.md) for the full roster and workflow, and [`CONTENT_STANDARDS.md`](CONTENT_STANDARDS.md) for the editorial standards every article is held to.
 
