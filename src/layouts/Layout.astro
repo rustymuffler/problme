@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 
-import { websiteSchema } from '../lib/schema';
+import { SITE_URL, websiteSchema } from '../lib/schema';
 
 interface Props {
   title: string;
@@ -24,7 +24,7 @@ const isHome  = pathname === '/' || pathname === '';
 const isBlog  = pathname.startsWith('/blog');
 const isAbout = pathname.startsWith('/about');
 
-const siteUrl = 'https://probl.me';
+const siteUrl = SITE_URL;
 
 // WebSite schema on the homepage; pages pass their own schemas via jsonLd.
 const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
@@ -61,9 +61,14 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
   <link rel="alternate" type="application/rss+xml" title="probl.me RSS feed" href="/rss.xml" />
   <link rel="sitemap" href="/sitemap-index.xml" />
 
-  <!-- Structured data (JSON-LD) -->
+  <!-- Structured data (JSON-LD). '<' is escaped so content containing
+       "</script>" cannot break out of the script element (HTML injection). -->
   {schemas.map((schema) => (
-    <script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(schema).replace(/</g, '\\u003c')}
+      is:inline
+    />
   ))}
 
   <!-- Fonts: Bunny Fonts (privacy-friendly, no IP logging) -->

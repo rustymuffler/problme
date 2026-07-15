@@ -9,6 +9,8 @@
 
 export const SITE_URL = 'https://probl.me';
 export const SITE_NAME = 'probl.me';
+export const SITE_DESCRIPTION =
+  'Building software in public — PM craft, AI-assisted development, and tech tools.';
 export const PERSON_ID = `${SITE_URL}/about/#richard`;
 
 export const person = {
@@ -43,7 +45,6 @@ export const websiteSchema = {
   '@type': 'WebSite',
   name: SITE_NAME,
   url: SITE_URL,
-  description:
-    'Building software in public — PM craft, AI-assisted development, and tech tools.',
+  description: SITE_DESCRIPTION,
   author: personRef,
 };
