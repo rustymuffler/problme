@@ -114,7 +114,7 @@ The Research Agent runs after the Interview Agent and before the Writer Agent. I
 
 1. **Current data and statistics** — search for recent numbers, studies, or benchmarks relevant to the topic. Prefer sources from the past 12 months. Flag any statistic older than 2 years.
 2. **Tool documentation** — if the article covers a specific tool (Astro, Gitleaks, n8n, Clerk, etc.), pull the relevant sections of official documentation so the Writer Agent cites current behavior, not outdated descriptions.
-3. **Competitive content scan** — search for the top 3–5 articles already published on this topic. Note: what angle do they take? What do they miss? What can this article say that is different or better?
+3. **Competitive content scan** — search for the top 3–5 articles already published on this topic. Note: what angle do they take? What do they miss? What can this article say that is different or better? Record each article's approximate word count and state a recommended target length for this article (within the 1,200–2,500 standard) based on what actually ranks — the Writer Agent and SEO Reviewer use this instead of defaulting to the maximum.
 4. **Credible external sources** — identify 3–5 sources the article can cite or link to: official docs, reputable publications (Smashing Magazine, CSS-Tricks, Martin Fowler's blog, OWASP, etc.), or primary research. No linking to content farms or low-quality aggregators.
 5. **Counterarguments** — find the strongest objections or alternative views on the topic. The Writer Agent should acknowledge these in the article — it makes the content more credible.
 6. **Recent news or community discussions** — check GitHub Issues, Hacker News, Reddit, or relevant community forums for recent discussions on the topic. Surface any that are worth referencing.
@@ -163,6 +163,8 @@ The Writer Agent always writes in Richard's voice. These rules are non-negotiabl
 - Avoid buzzwords: "synergy", "leverage" (as a verb), "deep dive", "cutting-edge", "game-changer", "innovative"
 - Short paragraphs (2–4 sentences max). No walls of text
 - Active voice over passive voice
+- Front-load the answer: the TL;DR (first 40–60 words) and the first 200 words must directly answer the article's core question. Tell the reader the conclusion first, then tell the story
+- The TL;DR and FAQ answers are written in Richard's voice like everything else — a direct answer up front is not permission to sound like a bot
 
 ### Content Strategist Agent — Idea Generation Rules
 
@@ -176,7 +178,7 @@ When generating article ideas, the Content Strategist Agent must:
 
 ### Image Creator Agent — Image Rules
 
-Every article must ship with visuals. No article publishes as pure text: at minimum, a hero image plus at least one in-article image (diagram, chart, screenshot, artwork, or photo).
+Every article must ship with visuals. No article publishes as pure text: the minimum is a hero image plus **one in-article image per ~500 words of body text** (diagram, chart, screenshot, artwork, or photo) — a 2,000-word article carries the hero plus roughly four in-article visuals. (Ratio raised 2026-07-15 from "at least one in-article image", based on image-frequency research; see CONTENT_STANDARDS.md → Images.)
 
 Images may come from either source:
 
@@ -257,17 +259,24 @@ The SEO Reviewer Agent must verify all of the following before approving a conte
 □ Description (meta): 150–160 characters, compelling, includes primary keyword
 □ Slug: lowercase, hyphenated, keyword-rich (e.g., /blog/astro-github-pages-blog-setup)
 □ OG image: hero image present, 1200×630px
+□ TL;DR: present as the first block after the title; 40–60 words; directly answers the core question
+□ Front-load: primary keyword AND the core answer both appear in the first 200 words
 □ Headings: H1 = post title only; body uses H2 and H3 correctly (no skipped levels)
-□ Word count: 1,200–2,500 words
+□ Headings: H2s phrased as questions where natural; each H2 section reads as a standalone answer
+□ FAQ: `faq` frontmatter present with 3–5 natural-language questions; answers 40–90 words each
+□ Word count: 1,200–2,500 words, matched to the research brief's competitor word-count target
 □ Reading level: Grade 8–10 (test with Hemingway App or equivalent)
 □ Internal links: at least 1 link to another post or page on probl.me (once other content exists)
-□ External links: open in new tab (`target="_blank" rel="noopener noreferrer"`)
+□ Images: hero + at least one in-article image per ~500 words of body text
 □ Images: all have alt text that describes the image content
+□ Data: comparisons and statistics in markdown tables, never screenshots of tables
+□ Sources: every statistic has a working linked source
 □ Category: assigned to exactly one of: pm-craft | ai-development | tech-tools
 □ Tags: 2–5 descriptive tags
-□ Author: richard-muffler
 □ Published date: set to the planned publish date
 ```
+
+Structured data (`BlogPosting`, `FAQPage`, `Person`), canonical URLs, and the table of contents are generated automatically by the site templates — the SEO Reviewer does not check them per-article. (Removed 2026-07-15: the "Author: richard-muffler" item — author is hardcoded in the template, not frontmatter — and the external-link `target="_blank"` item, which is now applied site-wide by `rehype-external-links` in `astro.config.mjs`, not per-article.)
 
 ---
 
