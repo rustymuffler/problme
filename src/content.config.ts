@@ -12,6 +12,15 @@ const posts = defineCollection({
     readTime: z.string(),
     heroImage: z.string().optional(),
     imageCredit: z.string().optional(),
+    updatedDate: z.coerce.date().optional(),
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      )
+      .optional(),
   }),
 });
 
