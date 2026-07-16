@@ -47,6 +47,12 @@ License: MIT
 Copyright: © Tailwind Labs Inc.
 Source: https://github.com/tailwindlabs/tailwindcss
 
+**rehype-external-links** `3.0.0`
+Rehype plugin that opens external links in a new tab site-wide.
+License: MIT
+Copyright: © Titus Wormer
+Source: https://github.com/rehypejs/rehype-external-links
+
 ---
 
 ### Build tooling and type checking
@@ -142,6 +148,20 @@ Installed directly via pip in `security.yml` to generate SARIF output for GitHub
 License: LGPL-2.1-or-later
 Copyright: © Semgrep Inc.
 Source: https://github.com/semgrep/semgrep
+
+---
+
+## Self-Hosted Analytics
+
+Runs on its own infrastructure (Vercel + Supabase), separate from this repository.
+The tracking script it serves is the one approved third-party script on the site
+(see DECISIONS.md Decision 8).
+
+**umami** `3.2.0`
+Privacy-first, cookie-free analytics — self-hosted on Vercel with a Supabase Postgres database (both free tier).
+License: MIT
+Copyright: © Umami Software, Inc.
+Source: https://github.com/umami-software/umami
 
 ---
 
