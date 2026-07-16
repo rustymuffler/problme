@@ -13,8 +13,11 @@ interface Dep {
 
 interface BadgeStyle { color: string; bg: string; }
 
-// Read THIRD-PARTY-NOTICES.md at build time
-const raw = readFileSync(resolve('THIRD-PARTY-NOTICES.md'), 'utf-8');
+// Read THIRD-PARTY-NOTICES.md at build time. Normalize CRLF → LF: on
+// Windows working trees git's autocrlf checks the file out with CRLF,
+// which silently broke every \n-based parser below (empty credits page
+// in local builds; CI checkouts are LF so production was unaffected).
+const raw = readFileSync(resolve('THIRD-PARTY-NOTICES.md'), 'utf-8').replace(/\r\n/g, '\n');
 
 // Parse **name** `version` style blocks (npm packages + security binaries)
 function parseVersionedBlocks(text: string): Dep[] {
@@ -108,7 +111,7 @@ const fonts     = parseFonts(raw);
 const actions   = parseActionsTable(raw);
 const lychee    = parseLychee(raw);
 
-const frameworkNames = new Set(['astro', '@astrojs/mdx', '@astrojs/rss', '@astrojs/sitemap', 'tailwindcss', '@tailwindcss/vite']);
+const frameworkNames = new Set(['astro', '@astrojs/mdx', '@astrojs/rss', '@astrojs/sitemap', 'tailwindcss', '@tailwindcss/vite', 'rehype-external-links']);
 const buildNpmNames  = new Set(['@astrojs/check', 'typescript', '@playwright/test', '@axe-core/playwright', '@lhci/cli']);
 const secBinNames    = new Set(['Gitleaks', 'Trivy', 'Semgrep']);
 const buildActNames  = new Set([
@@ -141,12 +144,16 @@ const securityQuality: Dep[]  = [
   ...versioned.filter(d => secBinNames.has(d.name)),
   ...actions.filter(d => secActNames.has(d.name)),
 ];
+// Umami's row carries the Vercel + Supabase mention in its purpose text,
+// mirroring how Bunny Fonts is credited inside the font entries.
+const analytics: Dep[]        = versioned.filter(d => d.name === 'umami');
 
 interface Bucket { label: string; deps: Dep[]; hue: string; }
 const buckets: Bucket[] = [
   { label: 'Framework & Runtime',  deps: framework,       hue: 'var(--color-amber)' },
   { label: 'Build & Test Tooling', deps: buildTest,       hue: 'var(--color-amber)' },
   { label: 'Security & Quality',   deps: securityQuality, hue: 'var(--color-terracotta)' },
+  { label: 'Analytics',            deps: analytics,       hue: 'var(--color-amber)' },
   { label: 'Fonts',                deps: fonts,           hue: 'var(--color-olive)' },
 ];
 
