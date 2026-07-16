@@ -137,6 +137,8 @@
 
 **Impact:** Monthly retrospectives have access to real reader engagement data. The `data-website-id` and Vercel Umami URL are stored as environment variables or build-time constants — never hardcoded without review. The Umami tracking script is the one approved third-party script in `<head>` per the project invariants. The setup process itself is a blog article candidate in the Tech Stack + Tools category.
 
+**Addendum (2026-07-15):** Setup step 2's `schema.prisma` modification is no longer needed. Upstream Umami now supports `DIRECT_DATABASE_URL` natively — its `scripts/check-db.js` uses that variable for Prisma migrations when set, which is exactly what the Supabase workaround provided. The fork was created as planned (`rustymuffler/umami`, for Vercel to deploy from) but carries **no code changes**; keeping it unmodified means upstream updates can be pulled cleanly. Steps 1 and 3–8 are unchanged: set both `DATABASE_URL` (pooled) and `DIRECT_DATABASE_URL` (direct) as Vercel environment variables in step 4.
+
 ---
 
 ## Decision 9: Dependabot Vulnerability Alerts — No Action (June 2026)

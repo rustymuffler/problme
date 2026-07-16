@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-06-25 (Step 4 a11y audit)
+> Last updated: 2026-07-15 (Umami analytics prep — fork created, blockers 5–7 refreshed)
 
 ---
 
@@ -13,9 +13,9 @@
 | ~~2~~ | ~~probl.me DNS: CNAME needs to point to rustymuffler.github.io~~ | ~~M1.14~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~3~~ | ~~Aikido plugin not yet installed in Claude Code~~ | ~~SECURITY_SCANNING.md — Tool 1 (Aikido)~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~4~~ | ~~Semgrep App Token not yet configured~~ | ~~SECURITY_SCANNING.md — Tool 2 + CI~~ | Richard | 2026-06-22 | ✅ Resolved |
-| 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started |
-| 6 | Vercel account not yet created | M3.19 — Umami analytics hosting | Richard | 2026-06-22 | ⬜ Not started |
-| 7 | Umami data-website-id not yet generated | M3.22 — Tracking script in Layout.astro | Richard | 2026-06-22 | 🔑 Waiting on M3.21 (Umami deploy) |
+| 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started — next action: create free account, note `DATABASE_URL` + `DIRECT_DATABASE_URL` |
+| 6 | Vercel account not yet created | M3.19 — Umami analytics hosting | Richard | 2026-06-22 | ⬜ Not started — fork to import is ready: `rustymuffler/umami` (created 2026-07-15, no code changes needed; see Decision 8 addendum) |
+| 7 | Umami data-website-id not yet generated | M3.22 — Tracking script in Layout.astro | Richard | 2026-06-22 | 🔑 Waiting on M3.21 (Umami deploy) — once available, Developer Agent adds the script tag to `Layout.astro` via PR |
 | ~~8~~ | ~~Community badge contrast fails WCAG AA~~ | ~~`src/pages/credits.astro`~~ | Richard | 2026-06-25 | ✅ Resolved |
 
 ---
