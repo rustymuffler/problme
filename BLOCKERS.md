@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-07-15 (Umami analytics prep — fork created, blockers 5–7 refreshed)
+> Last updated: 2026-07-15 (Umami analytics live — blockers 5–7 resolved; no active blockers remain)
 
 ---
 
@@ -13,9 +13,9 @@
 | ~~2~~ | ~~probl.me DNS: CNAME needs to point to rustymuffler.github.io~~ | ~~M1.14~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~3~~ | ~~Aikido plugin not yet installed in Claude Code~~ | ~~SECURITY_SCANNING.md — Tool 1 (Aikido)~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~4~~ | ~~Semgrep App Token not yet configured~~ | ~~SECURITY_SCANNING.md — Tool 2 + CI~~ | Richard | 2026-06-22 | ✅ Resolved |
-| 5 | Supabase account + project not yet created | M3.17 — Umami analytics database | Richard | 2026-06-22 | ⬜ Not started — next action: create free account, note `DATABASE_URL` + `DIRECT_DATABASE_URL` |
-| 6 | Vercel account not yet created | M3.19 — Umami analytics hosting | Richard | 2026-06-22 | ⬜ Not started — fork to import is ready: `rustymuffler/umami` (created 2026-07-15, no code changes needed; see Decision 8 addendum) |
-| 7 | Umami data-website-id not yet generated | M3.22 — Tracking script in Layout.astro | Richard | 2026-06-22 | 🔑 Waiting on M3.21 (Umami deploy) — once available, Developer Agent adds the script tag to `Layout.astro` via PR |
+| ~~5~~ | ~~Supabase account + project not yet created~~ | ~~M3.17 — Umami analytics database~~ | Richard | 2026-06-22 | ✅ Resolved |
+| ~~6~~ | ~~Vercel account not yet created~~ | ~~M3.19 — Umami analytics hosting~~ | Richard | 2026-06-22 | ✅ Resolved |
+| ~~7~~ | ~~Umami data-website-id not yet generated~~ | ~~M3.22 — Tracking script in Layout.astro~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~8~~ | ~~Community badge contrast fails WCAG AA~~ | ~~`src/pages/credits.astro`~~ | Richard | 2026-06-25 | ✅ Resolved |
 
 ---
@@ -27,6 +27,9 @@
 | 1 | GitHub repository not yet created | 2026-06-23 | Repo transitioned from old Jekyll resume to probl.me Astro project. All governance docs committed to `main`. Branch renamed from `master` to `main`. |
 | 4 | Semgrep App Token not yet configured | 2026-06-26 | `SEMGREP_APP_TOKEN` added to rustymuffler/problme repo secrets — reused from Celly project (account-level token). |
 | 3 | Aikido plugin not yet installed in Claude Code | 2026-06-26 | Installed via `/plugin install aikido@claude-plugins-official`; authenticated via `/aikido:setup`. Account-level — covers all Claude Code projects. |
+| 5 | Supabase account + project not yet created | 2026-07-15 | Free-tier project created (US East); pooled + session connection strings stored directly in Vercel env vars. |
+| 6 | Vercel account not yet created | 2026-07-15 | Free-tier account created; `rustymuffler/umami` fork (stock, no code changes — see Decision 8 addendum) imported and deployed at `problme-umami.vercel.app`. |
+| 7 | Umami data-website-id not yet generated | 2026-07-15 | probl.me added as a website in the Umami dashboard; tracking script added to `Layout.astro` with `data-domains="probl.me"` (PR #69). |
 
 ---
 
