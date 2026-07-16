@@ -26,6 +26,10 @@ const isAbout = pathname.startsWith('/about');
 
 const siteUrl = SITE_URL;
 
+// Umami analytics (Decision 8) — build-time constants, not secrets.
+const UMAMI_SCRIPT_URL = 'https://problme-umami.vercel.app/script.js';
+const UMAMI_WEBSITE_ID = '774d4193-5d49-48c4-9214-e957b38c6067';
+
 // WebSite schema on the homepage; pages pass their own schemas via jsonLd.
 const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 ---
@@ -70,6 +74,19 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
       is:inline
     />
   ))}
+
+  <!-- Umami analytics: self-hosted, cookie-free, GDPR-compliant. The one
+       pre-approved third-party script (DECISIONS.md Decision 8).
+       data-domains limits tracking to production, so localhost previews
+       and any forks never pollute the stats. Neither value is a secret;
+       the website id is visible in page source by design. -->
+  <script
+    is:inline
+    async
+    src={UMAMI_SCRIPT_URL}
+    data-website-id={UMAMI_WEBSITE_ID}
+    data-domains="probl.me"
+  ></script>
 
   <!-- Fonts: Bunny Fonts (privacy-friendly, no IP logging) -->
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
