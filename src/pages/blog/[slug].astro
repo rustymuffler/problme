@@ -375,6 +375,43 @@ const jsonLd = [blogPostingSchema, ...(faqSchema ? [faqSchema] : [])];
   margin: 0.4em 0;
 }
 
+/* Tables — MDX markdown tables. Wrapped in overflow-x for narrow screens. */
+.prose :global(table) {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 15px;
+  line-height: 1.55;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+}
+
+.prose :global(th),
+.prose :global(td) {
+  border: 1px solid var(--color-border-strong);
+  padding: 11px 15px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose :global(thead th) {
+  background: var(--color-surface-alt);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.prose :global(tbody tr:nth-child(even)) {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.prose :global(td:first-child) {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 /* Inline code */
 .prose :global(:not(pre) > code) {
   font-family: var(--font-mono);

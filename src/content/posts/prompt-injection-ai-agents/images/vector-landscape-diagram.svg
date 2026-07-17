@@ -1,0 +1,67 @@
+<svg viewBox="0 0 1100 620" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+    .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+  </style>
+    <linearGradient id="node" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1100" height="620" fill="#0F1117"/>
+  <text x="550" y="34" text-anchor="middle" class="lbl" font-size="20" font-weight="700">Six ways prompt injection reaches an agent</text>
+  <text x="550" y="54" text-anchor="middle" class="sub" font-size="13">circle size = relative prevalence today &#183; dot color = severity ceiling</text>
+
+  <line x1="550" y1="300" x2="550" y2="120" stroke="#2E3147" stroke-width="2"/><line x1="550" y1="300" x2="705.884572681199" y2="210" stroke="#2E3147" stroke-width="2"/><line x1="550" y1="300" x2="705.884572681199" y2="390" stroke="#2E3147" stroke-width="2"/><line x1="550" y1="300" x2="550" y2="480" stroke="#2E3147" stroke-width="2"/><line x1="550" y1="300" x2="394.11542731880104" y2="390" stroke="#2E3147" stroke-width="2"/><line x1="550" y1="300" x2="394.11542731880104" y2="210" stroke="#2E3147" stroke-width="2"/>
+  <path d="M 550 120 Q 510 135 394.11542731880104 210" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="4 5" opacity="0.7"/>
+
+  <!-- central agent -->
+  <circle cx="550" cy="300" r="46" fill="url(#node)"/>
+  <circle cx="550" cy="300" r="20" fill="#0F1117"/>
+  <circle cx="550" cy="300" r="7" fill="#38BDF8"/>
+  <text x="550" y="366" text-anchor="middle" class="sub" font-size="12">AI agent</text>
+
+  
+      <circle cx="550" cy="120" r="52" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="585.36" cy="155.36" r="7" fill="#F59E0B" stroke="#0F1117" stroke-width="2"/>
+      <circle cx="705.884572681199" cy="210" r="47" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="737.844572681199" cy="241.96" r="7" fill="#EF4444" stroke="#0F1117" stroke-width="2"/>
+      <circle cx="705.884572681199" cy="390" r="41" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="733.764572681199" cy="417.88" r="7" fill="#F59E0B" stroke="#0F1117" stroke-width="2"/>
+      <circle cx="550" cy="480" r="25" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="567" cy="497" r="7" fill="#64748B" stroke="#0F1117" stroke-width="2"/>
+      <circle cx="394.11542731880104" cy="390" r="36" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="418.59542731880106" cy="414.48" r="7" fill="#2DD4BF" stroke="#0F1117" stroke-width="2"/>
+      <circle cx="394.11542731880104" cy="210" r="31" fill="#1A1D27" stroke="#38BDF8" stroke-width="2.5"/>
+      <circle cx="415.195427318801" cy="231.08" r="7" fill="#38BDF8" stroke="#0F1117" stroke-width="2"/>
+  
+      <text x="550" y="192" text-anchor="middle" class="lbl" font-size="14" font-weight="700">Webpages</text>
+      <text x="550" y="208" text-anchor="middle" class="sub" font-size="11">most prevalent</text>
+      <text x="705.884572681199" y="277" text-anchor="middle" class="lbl" font-size="14" font-weight="700">Email &amp; calendar</text>
+      <text x="705.884572681199" y="293" text-anchor="middle" class="sub" font-size="11">highest severity</text>
+      <text x="705.884572681199" y="451" text-anchor="middle" class="lbl" font-size="14" font-weight="700">DNS TXT records</text>
+      <text x="705.884572681199" y="467" text-anchor="middle" class="sub" font-size="11">bypasses code review</text>
+      <text x="550" y="525" text-anchor="middle" class="lbl" font-size="14" font-weight="700">Form input</text>
+      <text x="550" y="541" text-anchor="middle" class="sub" font-size="11">least documented</text>
+      <text x="394.11542731880104" y="446" text-anchor="middle" class="lbl" font-size="14" font-weight="700">Images &amp; PDFs</text>
+      <text x="394.11542731880104" y="462" text-anchor="middle" class="sub" font-size="11">growing vector</text>
+      <text x="394.11542731880104" y="261" text-anchor="middle" class="lbl" font-size="14" font-weight="700">SEO-poisoned pages</text>
+      <text x="394.11542731880104" y="277" text-anchor="middle" class="sub" font-size="11">overlaps webpages</text>
+
+  <!-- legend -->
+  <line x1="60" y1="566" x2="1040" y2="566" stroke="#2E3147" stroke-width="1.5"/>
+  <g transform="translate(60,592)">
+    <circle cx="0" cy="0" r="6" fill="#EF4444"/>
+    <text x="14" y="4" class="sub" font-size="12">Critical</text>
+    <circle cx="110" cy="0" r="6" fill="#F59E0B"/>
+    <text x="124" y="4" class="sub" font-size="12">High</text>
+    <circle cx="200" cy="0" r="6" fill="#2DD4BF"/>
+    <text x="214" y="4" class="sub" font-size="12">Growing</text>
+    <circle cx="320" cy="0" r="6" fill="#38BDF8"/>
+    <text x="334" y="4" class="sub" font-size="12">Moderate</text>
+    <circle cx="440" cy="0" r="6" fill="#64748B"/>
+    <text x="454" y="4" class="sub" font-size="12">Depends on the app</text>
+  </g>
+</svg>
