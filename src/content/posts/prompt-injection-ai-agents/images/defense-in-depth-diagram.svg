@@ -1,0 +1,38 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+    .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+  </style>
+    <linearGradient id="core" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <text x="550" y="40" text-anchor="middle" class="lbl" font-size="18" font-weight="700">Defense in depth for an AI agent</text>
+  <text x="550" y="60" text-anchor="middle" class="sub" font-size="12">four layers protecting one consequential action at the center</text>
+
+  <circle cx="550" cy="292" r="200" fill="none" stroke="#F59E0B" stroke-width="34" opacity="0.22"/><circle cx="550" cy="292" r="200" fill="none" stroke="#F59E0B" stroke-width="2" /><circle cx="550" cy="292" r="145" fill="none" stroke="#38BDF8" stroke-width="34" opacity="0.22"/><circle cx="550" cy="292" r="145" fill="none" stroke="#38BDF8" stroke-width="2" /><circle cx="550" cy="292" r="95" fill="none" stroke="#2DD4BF" stroke-width="30" opacity="0.22"/><circle cx="550" cy="292" r="95" fill="none" stroke="#2DD4BF" stroke-width="2" /><circle cx="550" cy="292" r="50" fill="none" stroke="#94A3B8" stroke-width="26" opacity="0.22"/><circle cx="550" cy="292" r="50" fill="none" stroke="#94A3B8" stroke-width="2" stroke-dasharray="5 6"/><circle cx="408.5786437626905" cy="150.57864376269052" r="14" fill="#F59E0B"/><text x="408.5786437626905" y="155.57864376269052" text-anchor="middle" class="lbl" font-size="13" font-weight="700" fill="#0F1117">1</text><circle cx="652.5304832720494" cy="189.46951672795063" r="14" fill="#38BDF8"/><text x="652.5304832720494" y="194.46951672795063" text-anchor="middle" class="lbl" font-size="13" font-weight="700" fill="#0F1117">2</text><circle cx="617.175144212722" cy="359.175144212722" r="14" fill="#2DD4BF"/><text x="617.175144212722" y="364.175144212722" text-anchor="middle" class="lbl" font-size="13" font-weight="700" fill="#0F1117">3</text><circle cx="514.6446609406727" cy="327.3553390593274" r="14" fill="#94A3B8"/><text x="514.6446609406727" y="332.3553390593274" text-anchor="middle" class="lbl" font-size="13" font-weight="700" fill="#0F1117">4</text>
+
+  <!-- protected core: the consequential action -->
+  <circle cx="550" cy="292" r="30" fill="url(#core)"/>
+  <path d="M 542 290 v -7 a8 8 0 0 1 16 0 v 7" fill="none" stroke="#0F1117" stroke-width="2.5"/>
+  <rect x="538" y="290" width="24" height="17" rx="3" fill="#0F1117"/>
+
+  <line x1="408.5786437626905" y1="150.57864376269052" x2="330" y2="71" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+      <rect x="30" y="30" width="300" height="82" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+      <text x="180" y="62" text-anchor="middle" class="lbl" font-size="15" font-weight="700">1. Untrusted content is data</text>
+      <text x="180" y="86" text-anchor="middle" class="sub" font-size="12">Read external content, never obey it</text><line x1="652.5304832720494" y1="189.46951672795063" x2="770" y2="71" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+      <rect x="770" y="30" width="300" height="82" rx="10" fill="#1A1D27" stroke="#38BDF8" stroke-width="2"/>
+      <text x="920" y="62" text-anchor="middle" class="lbl" font-size="15" font-weight="700">2. Least-privilege tools</text>
+      <text x="920" y="86" text-anchor="middle" class="sub" font-size="12">Only the tool access this task needs</text><line x1="617.175144212722" y1="359.175144212722" x2="770" y2="489" stroke="#2DD4BF" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+      <rect x="770" y="448" width="300" height="82" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+      <text x="920" y="480" text-anchor="middle" class="lbl" font-size="15" font-weight="700">3. Human approval gate</text>
+      <text x="920" y="504" text-anchor="middle" class="sub" font-size="12">Consequential actions wait for a human</text><line x1="514.6446609406727" y1="327.3553390593274" x2="330" y2="489" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+      <rect x="30" y="448" width="300" height="82" rx="10" fill="#1A1D27" stroke="#94A3B8" stroke-width="2"/>
+      <text x="180" y="480" text-anchor="middle" class="lbl" font-size="15" font-weight="700">4. Logging</text>
+      <text x="180" y="504" text-anchor="middle" class="sub" font-size="12">Every action is recorded and reviewable</text>
+</svg>
