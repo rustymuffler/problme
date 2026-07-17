@@ -257,6 +257,10 @@ Committing code?
 Before any PR merge?
   → Semgrep (full / auto mode) + Trivy + Gitleaks confirmation
   → Checkov if .github/ files changed
+
+Content pipeline PR touches site code (not just src/content/posts/)?
+  → Run: Aikido + Semgrep on the changed files before the PR opens
+  → Applies even to minor-looking changes (e.g. a CSS fix) — see Decision 12
 ```
 
 ---

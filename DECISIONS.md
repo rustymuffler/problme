@@ -199,6 +199,30 @@
 
 ---
 
+## Decision 12: Prompt-Injection Defenses Added to probl.me's Own Agent Pipeline
+
+**Date:** 2026-07-16
+
+**Decision:** Close two real gaps found while researching and writing the C8 article, rather than just writing about them: (1) content PRs that touch site code can ship without a security scan, and (2) no documented rule for how much untrusted content an agent should process versus how much capability it should be granted while doing so. `AGENTS.md` and `SECURITY_SCANNING.md` are updated with process rules addressing both, and a live example of gap (1) was retroactively scanned and confirmed clean.
+
+**Context:** probl.me's existing 8-layer security stack (`SECURITY_SCANNING.md`) covers code, dependencies, secrets, and IaC. None of it addressed the exact risk category C8 is about: how an agent should behave when it processes untrusted external content, and how much capability a content-fetching agent should be granted. A live example of the gap surfaced in the same session: a manual-review fix to `src/pages/blog/[slug].astro` (table CSS, PR #72) shipped without Aikido or Semgrep ever running on it, even though `SECURITY_SCANNING.md`'s own trigger table requires both for "writing or editing code." The content workflow and code workflow in `AGENTS.md` are documented as separate tracks, and this PR crossed both without either track's security step firing.
+
+**Reason:** A blog that runs its own content pipeline through Claude agents fetching untrusted web content, per the C8 article itself, has a direct obligation to apply the defenses the article recommends to its own operation. Writing about defense-in-depth without checking whether our own pipeline practices it would be a credibility gap, not just a missed opportunity.
+
+**What changed:**
+1. **Workflow-seam rule** (`AGENTS.md`, Agent Interaction Rules): a content PR that touches anything outside `src/content/posts/[slug]/` or `public/assets/posts/[slug]/` now explicitly triggers the code workflow's Security Auditor Agent and Code Reviewer Agent steps, not just the content workflow's SEO Reviewer and Proofreader.
+2. **Untrusted-content and tool-scoping rules for the Research Agent** (`AGENTS.md`, Research Agent standards): fetched content is documented as untrusted data that must never be treated as instructions; every Research Agent prompt must include this framing; the Research Agent should be spawned with the most restrictive tool access that accomplishes its task (search/fetch/summarize only, no Bash/Edit/Write/git, findings returned in its response rather than written directly); `research-brief.md` is documented as the trust boundary between raw fetched content and the rest of the pipeline.
+3. **Provenance check** added to the Proofreader Agent's checklist (`AGENTS.md`): every claim, quote, code example, or embedded instruction in a draft must trace back to `interview-notes.md`, `research-brief.md`, or an explicit instruction from Richard.
+4. **Scanning trigger added** (`SECURITY_SCANNING.md`, Scanning Triggers — Quick Reference): a content PR touching site code now explicitly requires Aikido + Semgrep before the PR opens, regardless of how minor the change looks.
+
+**Retroactive scan result (the gap, closed for real, not just documented):** `src/pages/blog/[slug].astro` was scanned after the fact. Aikido (Opengrep engine via the Aikido MCP tool): 307 rules run, 0 findings. Semgrep (`--config auto`): 47 applicable rules run, 100% of lines parsed, 0 findings. Both scans are real, run this session, not assumed clean.
+
+**What was deferred:** Adopting an open-source prompt-injection scanning library (LLM Guard, Rebuff, Vigil) to automatically screen fetched content for injection patterns. See the Future Decision entry below for why and when to revisit.
+
+**Impact:** Future Research Agent spawns should reflect the tool-scoping change in practice (return findings, let the orchestrating session write `research-brief.md`), not just in the document. The next content pipeline run is the real test of whether this held.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
@@ -209,6 +233,19 @@
 **Why deferred:** Building a distribution workflow before there is a content pipeline to distribute would be premature. The agent should be built once the publishing cadence is stable and there is a clear sense of what tone and format works for each platform.
 
 **When to revisit:** Once 8+ articles are published and Phase 4 milestones are underway (M4.8 in MILESTONES.md).
+
+---
+
+## Future Decision: OSS Prompt-Injection Scanning Tools
+
+**Logged:** 2026-07-16 (see Decision 12)
+**Status:** Deferred — process and prompt-level fixes made now; automated scanning not adopted yet
+
+**What it is:** Adopting an open-source library (LLM Guard, Rebuff, or Vigil) to automatically pattern-scan content fetched by the Research Agent for injection attempts, rather than relying solely on prompt-level framing and human PR review.
+
+**Why deferred:** The pipeline is low-volume (a handful of articles a month) and every output already passes through human review before merge. A new dependency adds real maintenance surface (it would need to clear `rl-protect-scan`, get tracked in `THIRD-PARTY-NOTICES.md`, and be kept current) for a risk that the process changes in Decision 12 already address at the point that matters most: what the agent is allowed to do with fetched content, not just whether the content looks suspicious.
+
+**When to revisit:** If the content pipeline starts processing content that isn't reviewed by a human before publishing, or if fetch volume grows past what PR review can reasonably catch.
 
 ---
 
