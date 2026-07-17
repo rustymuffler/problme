@@ -199,6 +199,57 @@
 
 ---
 
+## Decision 12: Prompt-Injection Defenses Added to probl.me's Own Agent Pipeline
+
+**Date:** 2026-07-16
+
+**Decision:** Close two real gaps found while researching and writing the C8 article, rather than just writing about them: (1) content PRs that touch site code can ship without a security scan, and (2) no documented rule for how much untrusted content an agent should process versus how much capability it should be granted while doing so. `AGENTS.md` and `SECURITY_SCANNING.md` are updated with process rules addressing both, and a live example of gap (1) was retroactively scanned and confirmed clean.
+
+**Context:** probl.me's existing 8-layer security stack (`SECURITY_SCANNING.md`) covers code, dependencies, secrets, and IaC. None of it addressed the exact risk category C8 is about: how an agent should behave when it processes untrusted external content, and how much capability a content-fetching agent should be granted. A live example of the gap surfaced in the same session: a manual-review fix to `src/pages/blog/[slug].astro` (table CSS, PR #72) shipped without Aikido or Semgrep ever running on it, even though `SECURITY_SCANNING.md`'s own trigger table requires both for "writing or editing code." The content workflow and code workflow in `AGENTS.md` are documented as separate tracks, and this PR crossed both without either track's security step firing.
+
+**Reason:** A blog that runs its own content pipeline through Claude agents fetching untrusted web content, per the C8 article itself, has a direct obligation to apply the defenses the article recommends to its own operation. Writing about defense-in-depth without checking whether our own pipeline practices it would be a credibility gap, not just a missed opportunity.
+
+**What changed:**
+1. **Workflow-seam rule** (`AGENTS.md`, Agent Interaction Rules): a content PR that touches anything outside `src/content/posts/[slug]/` or `public/assets/posts/[slug]/` now explicitly triggers the code workflow's Security Auditor Agent and Code Reviewer Agent steps, not just the content workflow's SEO Reviewer and Proofreader.
+2. **Untrusted-content and tool-scoping rules for the Research Agent** (`AGENTS.md`, Research Agent standards): fetched content is documented as untrusted data that must never be treated as instructions; every Research Agent prompt must include this framing; the Research Agent should be spawned with the most restrictive tool access that accomplishes its task (search/fetch/summarize only, no Bash/Edit/Write/git, findings returned in its response rather than written directly); `research-brief.md` is documented as the trust boundary between raw fetched content and the rest of the pipeline.
+3. **Provenance check** added to the Proofreader Agent's checklist (`AGENTS.md`): every claim, quote, code example, or embedded instruction in a draft must trace back to `interview-notes.md`, `research-brief.md`, or an explicit instruction from Richard.
+4. **Scanning trigger added** (`SECURITY_SCANNING.md`, Scanning Triggers — Quick Reference): a content PR touching site code now explicitly requires Aikido + Semgrep before the PR opens, regardless of how minor the change looks.
+
+**Retroactive scan result (the gap, closed for real, not just documented):** `src/pages/blog/[slug].astro` was scanned after the fact. Aikido (Opengrep engine via the Aikido MCP tool): 307 rules run, 0 findings. Semgrep (`--config auto`): 47 applicable rules run, 100% of lines parsed, 0 findings. Both scans are real, run this session, not assumed clean.
+
+**What was deferred:** Adopting an open-source prompt-injection scanning library (LLM Guard, Rebuff, Vigil) to automatically screen fetched content for injection patterns. See the Future Decision entry below for why and when to revisit.
+
+**Impact:** Future Research Agent spawns should reflect the tool-scoping change in practice (return findings, let the orchestrating session write `research-brief.md`), not just in the document. The next content pipeline run is the real test of whether this held.
+
+---
+
+## Decision 13: Adopt @stackone/defender for Content-Pipeline Prompt-Injection Scanning
+
+**Date:** 2026-07-16
+
+**Decision:** Install `@stackone/defender` (npm) as the automated scanner Decision 12 deferred, wired into the exact trust boundary already identified: it scans the Research Agent's returned text before that text is written to `research-brief.md`, via `scripts/scan-untrusted-content.mjs`. This resolves the "Future Decision: OSS Prompt-Injection Scanning Tools" entry below.
+
+**Context:** Richard brought research proposing Vigil (`deadbits/vigil-llm`) as the tool to adopt. Verification (not taking the research at face value) found it unworkable: no PyPI package (clone-from-source only), a separate YARA v4.3.2 C-library install required, no CLI (server or Python-library only), and the project itself stale — last real commit 2024-01-31, still alpha, author moved to other work. The proposed integration code also didn't match the real API and assumed an architecture (a custom Python loop calling the Anthropic SDK directly) this repo doesn't have — probl.me has zero Python dependencies and runs its content pipeline through Claude Code subagents, not a custom inference loop we control.
+
+**Alternatives considered (all verified via GitHub API and/or the npm registry directly, not just search-result summaries):**
+- **LLM Guard** (`protectai/llm-guard`) — archived 2026-07-08, 8 days before this session. Was genuinely well-maintained until then.
+- **Rebuff** (`protectai/rebuff`) — archived since 2024, last real commit January 2024, confirmed prototype status.
+- **Guardrails AI** (`guardrails-ai/guardrails`) — actively maintained (pushed the same day as this research), but a broad general-purpose validation framework (PII, toxicity, format checking; prompt injection is one of many configurable Guards) with its dedicated prompt-injection validator historically dependent on the now-dead Rebuff. Python, heavier than needed.
+- **Meta's LlamaFirewall** (`meta-llama/PurpleLlama`) — real, actively maintained, Meta-backed. A much larger framework (fine-tuned BERT model, chain-of-thought auditing, code scanning) for a narrow use case.
+
+**Why `@stackone/defender` won:** actively maintained (release 9 days before this session, confirmed via GitHub API and a direct npm registry check, not just documentation claims), TypeScript/npm (matches this repo's actual runtime, no new Python/YARA toolchain), purpose-built for indirect prompt injection in fetched tool/agent content (exactly the Research Agent's job), lightweight (bundled ONNX model, CPU-only, no server, no external calls), real published benchmark (F1 ≈ 0.91).
+
+**Integration notes (a real bug found and fixed during setup, not assumed away):**
+- `@huggingface/transformers`, `onnxruntime-node`, and `fasttext.wasm` are optional peer dependencies npm does not auto-install. Without them, the ML classification tier (the actual F1 ≈ 0.91 stage) silently fails to load and the tool degrades to pattern-matching only, with no visible error in the result, just a `tier2SkipReason` field. All three were installed explicitly.
+- `@huggingface/transformers@3.8.1` hard-pins its own `onnxruntime-node@1.21.0`, separate from the `1.27.0` version that satisfies `@stackone/defender`'s own peer range. Installing the loose range created two conflicting native binary copies (`Current ORT Version: 1.21.0` vs. an API call expecting version 27), a real runtime error. Fixed by pinning the top-level `onnxruntime-node` install to `1.21.0` exactly, deduplicating to one shared copy.
+- With both tiers actually working, the tool **false-positived on this repo's own already-published, human-reviewed content** (`pin-github-actions-dependabot/research-brief.md`): zero Tier 1 pattern detections, but a Tier 2 ML score of 0.649 landed in the tool's documented "gray band" (`[0.3, 0.85)`, meant to escalate to a Tier 3 LLM adjudicator) and, with `blockHighRisk: true` and no Tier 3 provider configured, auto-blocked. The flagged sentence was benign commentary about Checkov policy check IDs. Richard's call: `blockHighRisk: false`. The tool is advisory — it always prints its result, never blocks the pipeline on its own. A Tier 1 pattern detection is treated as a strong signal worth stopping for; a Tier-2-only "high"/"critical" is a prompt for the orchestrating Claude Code session (or Richard) to read the flagged sentence before deciding, the same triage posture already used for Aikido/Semgrep WARN findings in this project.
+
+**rl-protect-scan results (real, run this session):** `@stackone/defender@0.7.2` and its dependency tree scanned clean except two accepted findings, both logged in `SECURITY_SCANNING.md`'s Accepted Risk Log: `onnxruntime-node` WARN (debugging symbols and hardening flags typical of a compiled native addon, same class as the already-accepted Playwright entries, 0 vulnerabilities/malware/tampering), and `tar@7.5.20` GOVERNANCE FAIL (a 5-day-old package, all six substantive checks passed, same recency-gate pattern as the already-accepted `yargs`/`@playwright/test` entries). Richard explicitly reviewed and approved both before install.
+
+**Impact:** `scripts/scan-untrusted-content.mjs` is now a real, tested step in the content pipeline (see `AGENTS.md` Research Agent — Untrusted Content Rules and `SECURITY_SCANNING.md` §9). It is advisory, not a hard gate, its real value is surfacing pattern-level detections and flagging ambiguous content for review, not auto-blocking.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
@@ -209,6 +260,19 @@
 **Why deferred:** Building a distribution workflow before there is a content pipeline to distribute would be premature. The agent should be built once the publishing cadence is stable and there is a clear sense of what tone and format works for each platform.
 
 **When to revisit:** Once 8+ articles are published and Phase 4 milestones are underway (M4.8 in MILESTONES.md).
+
+---
+
+## Future Decision: OSS Prompt-Injection Scanning Tools
+
+**Logged:** 2026-07-16 (see Decision 12)
+**Status:** Resolved 2026-07-16 — see Decision 13. Adopted `@stackone/defender`, not the three options named below (LLM Guard and Rebuff are both now archived/dead; Vigil, proposed separately, turned out to be stale and architecturally incompatible). Original deferral reasoning kept below for the record.
+
+**What it is:** Adopting an open-source library (LLM Guard, Rebuff, or Vigil) to automatically pattern-scan content fetched by the Research Agent for injection attempts, rather than relying solely on prompt-level framing and human PR review.
+
+**Why deferred:** The pipeline is low-volume (a handful of articles a month) and every output already passes through human review before merge. A new dependency adds real maintenance surface (it would need to clear `rl-protect-scan`, get tracked in `THIRD-PARTY-NOTICES.md`, and be kept current) for a risk that the process changes in Decision 12 already address at the point that matters most: what the agent is allowed to do with fetched content, not just whether the content looks suspicious.
+
+**When to revisit:** If the content pipeline starts processing content that isn't reviewed by a human before publishing, or if fetch volume grows past what PR review can reasonably catch.
 
 ---
 

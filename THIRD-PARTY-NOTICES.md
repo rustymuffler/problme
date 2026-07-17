@@ -97,6 +97,34 @@ Source: https://github.com/GoogleChrome/lighthouse-ci
 
 ---
 
+### Content pipeline security
+
+**@stackone/defender** `0.7.2`
+Prompt-injection detection — scans content the Research Agent fetches from external sources before it's written to a research brief. Content-pipeline tooling only, never bundled into the site output.
+License: Apache-2.0
+Copyright: © StackOne
+Source: https://github.com/StackOneHQ/defender
+
+**@huggingface/transformers** `3.8.1`
+ONNX-based model loading for `@stackone/defender`'s ML classification tier.
+License: Apache-2.0
+Copyright: © Hugging Face
+Source: https://github.com/huggingface/transformers.js
+
+**onnxruntime-node** `1.21.0`
+Native ONNX model runtime, pinned to match `@huggingface/transformers`'s exact requirement (see Accepted Risk Log in `SECURITY_SCANNING.md` for the version-conflict this resolves).
+License: MIT
+Copyright: © Microsoft Corporation
+Source: https://github.com/microsoft/onnxruntime
+
+**fasttext.wasm** `1.0.1`
+WASM-compiled language detection, used in `@stackone/defender`'s preprocessing.
+License: MIT
+Copyright: © DreamOfIce
+Source: https://github.com/DreamOfIce/fasttext.wasm
+
+---
+
 ## GitHub Actions
 
 These actions run in CI/CD pipelines on GitHub Actions. They are not bundled into the
