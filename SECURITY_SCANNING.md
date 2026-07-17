@@ -28,6 +28,7 @@ Each tool covers a distinct threat category. They are **not redundant** — do n
 | 6 | Gitleaks | Hardcoded secrets | Pre-commit hook + CI |
 | 7 | Checkov | IaC misconfigurations | When GitHub Actions workflows are written |
 | 8 | OpenSSF Scorecard | Supply-chain hygiene (pinning, token permissions, dangerous workflow patterns, dependency update tooling) | Weekly + on push to `main` + branch protection rule change |
+| 9 | `@stackone/defender` | Prompt injection in externally-fetched content (advisory, not a hard gate) | Before the Research Agent's findings are written to `research-brief.md` |
 
 ---
 
@@ -236,6 +237,32 @@ checkov -d . --quiet
 
 ---
 
+### 9. `@stackone/defender` — Prompt Injection in Fetched Content
+
+**Package:** `@stackone/defender` (npm, devDependency), plus its optional peer dependencies `@huggingface/transformers`, `onnxruntime-node`, `fasttext.wasm` — all three are required for the ML classification tier to actually run; without them the tool silently degrades to pattern-matching only. Added 2026-07-16, see Decision 13 in `DECISIONS.md` for why this tool specifically, and why two other well-known options (LLM Guard, Rebuff) were ruled out (both archived/dead).
+
+**When to run:**
+- After the Research Agent returns its findings, before that text is written to `research-brief.md` — this is the trust boundary established in Decision 12
+
+**Run locally:**
+```bash
+node scripts/scan-untrusted-content.mjs <file> [sourceLabel]
+```
+
+**What it catches:**
+- Tier 1 (~1ms, pattern-based): hidden role markers (`SYSTEM:`, `<system>`), instruction-override phrasing, encoded payloads, structural anomalies
+- Tier 2 (~10ms, ML classifier): sentence-level risk scoring, F1 ≈ 0.91 per the vendor's published benchmark
+
+**Advisory, not a hard gate:** the script always exits 0 and prints the full result; it never blocks the pipeline on its own (`blockHighRisk: false`). Tier 3 (an LLM adjudicator for ambiguous Tier-2 scores) is not wired up, since it requires supplying our own LLM classifier callback. Without it, a "high"/"critical" risk level from Tier 2 alone, with zero Tier 1 detections, is a weak signal — **verified during setup**: it false-positived on this repo's own already-published, human-reviewed `pin-github-actions-dependabot/research-brief.md`, flagging a sentence that was just discussing Checkov policy check IDs. Treat a Tier 1 pattern detection as a strong signal worth stopping for. Treat a Tier-2-only "high"/"critical" as a prompt to read the flagged sentence yourself, not an automatic block.
+
+**probl.me-specific focus:**
+- This tool only runs against content the Research Agent fetches for content-pipeline articles. It has no role in the code security stack (layers 1-8 above).
+
+**Suppressing false positives:**
+There's no suppression file — this is advisory output reviewed inline by whoever runs the pipeline (currently: the orchestrating Claude Code session, escalating to Richard if a flag can't be resolved as a false positive).
+
+---
+
 ## Scanning Triggers — Quick Reference
 
 ```
@@ -261,6 +288,10 @@ Before any PR merge?
 Content pipeline PR touches site code (not just src/content/posts/)?
   → Run: Aikido + Semgrep on the changed files before the PR opens
   → Applies even to minor-looking changes (e.g. a CSS fix) — see Decision 12
+
+Research Agent returns fetched content?
+  → Run: node scripts/scan-untrusted-content.mjs before writing research-brief.md
+  → Advisory — review the result yourself, see Section 9 above
 ```
 
 ---
@@ -384,6 +415,8 @@ Findings reviewed and accepted as out-of-scope or not actionable for a static si
 | 2026-06-26 | rl-protect-skills | `@astrojs/rss@4.0.18` — WARN: 1 undesirable develop dependency | GOVERNANCE | Official Astro RSS integration. All 7 security checks passed (no malware, no tampering, no CVEs, no secrets). WARN is the dev-dependency governance gate only. All 3 transitive deps (piccolore, fast-xml-parser, zod) pass cleanly. Richard explicitly acknowledged and approved. | Production dependency — ships to users as RSS feed generation. Risk is negligible: governance gate flags a dev dep in the package, not a runtime issue. |
 | 2026-06-26 | rl-protect-skills | `@astrojs/sitemap@3.7.3` — WARN: 1 undesirable develop dependency | GOVERNANCE | Official Astro sitemap integration. All 7 security checks passed (no malware, no tampering, no CVEs, no secrets). WARN is the dev-dependency governance gate only. All 3 transitive deps (stream-replace-string, sitemap, zod) pass cleanly. Richard explicitly acknowledged and approved. | Production dependency — ships to users as sitemap generation. Risk is negligible: governance gate flags a dev dep in the package, not a runtime issue. |
 | 2026-06-25 | Semgrep | 8 findings in `design_handoff_blog_site/support.js`: 4× `wildcard-postmessage-configuration` (BLOCKING), 1× `prototype-pollution-loop` (BLOCKING), 1× `insufficient-postmessage-origin-validation` (BLOCKING), 2× `unsafe-formatstring` (BLOCKING) | BLOCKING (in vendor file) | `design_handoff_blog_site/` is a Claude Design handoff package — static design-preview HTML files with a custom rendering runtime (`support.js`). This directory is not compiled into the Astro build (`astro.config.mjs` only processes `src/`), is not deployed to production, and is not importable from any `src/` file. All 8 findings are in the preview runtime's internal IPC and logging code. Semgrep scan of `src/` and `.github/` returned 0 findings. | `design_handoff_blog_site/` could be added to a `.semgrepignore` file to suppress these in future CI runs. Add `.semgrepignore` ignoring `design_handoff_blog_site/` before next code session to keep CI output clean. |
+| 2026-07-16 | rl-protect-skills | `onnxruntime-node@1.27.0` (transitive dep of `@stackone/defender`) — 2 debugging symbols found, 2 reduced-effectiveness mitigations, 1 suspicious application behavior | WARN | Native compiled binary (Microsoft's ONNX Runtime Node bindings) bundled for local ML inference. All 13 explicit policy checks passed; 0 vulnerabilities, 0 malware, 0 tampering evidence beyond the generic "suspicious behavior" flag common to compiled native addons. Same class of finding already accepted for Playwright's native binaries in this log. Richard explicitly acknowledged and approved. | Dev-only content-pipeline tooling — never shipped to the static site output. |
+| 2026-07-16 | rl-protect-skills | `tar@7.5.20` (transitive dep of `onnxruntime-node@1.21.0`, pinned to match `@huggingface/transformers`'s exact peer requirement) GOVERNANCE FAIL — version published 5 days ago (recency gate) | GOVERNANCE | All six substantive checks passed (no malware, no tampering, no CVEs, no secrets, no license issues, no hardening issues). The FAIL is the recency gate only, same pattern as the `yargs` and `@playwright/test` entries above. Richard explicitly acknowledged and approved. | Dev-only content-pipeline tooling — never shipped to the static site output. Recency gate will clear automatically. |
 
 ---
 
@@ -408,6 +441,7 @@ Gaps to be aware of:
 | Trivy | ✅ Operational 2026-06-25 — installed via winget (`trivy@0.71.2`); filesystem scan of `feat/astro-foundation` at HIGH,CRITICAL: 0 vulnerabilities found in `package-lock.json` (dev deps excluded by default) |
 | Checkov | ✅ Operational 2026-06-25 — installed via pip; run on `.github/workflows/` for `feat/astro-foundation` pre-PR: 180 checks passed, 0 failed (re-verified this session); 200 checks passed, 0 failed after `scorecard.yml` added 2026-07-12 |
 | OpenSSF Scorecard | ✅ Operational 2026-07-12 — `.github/workflows/scorecard.yml` added, weekly + push-to-main + branch-protection-rule triggers, results private (`publish_results: false`). Initial live score: 6.1/10 — see `SCORECARD_IMPROVEMENTS.md` |
+| `@stackone/defender` | ✅ Operational 2026-07-16 — installed via npm (`0.7.2`) with ML peer deps pinned (`@huggingface/transformers@^3.0.0`, `onnxruntime-node@1.21.0`, `fasttext.wasm@^1.0.0`); `scripts/scan-untrusted-content.mjs` tested against a real file, both tiers confirmed running (Tier 2 latency ~1.4s on a full research brief). Advisory only, `blockHighRisk: false` — see Section 9 and Decision 13 |
 
 Update this table as tools are configured during setup.
 

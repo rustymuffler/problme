@@ -223,6 +223,33 @@
 
 ---
 
+## Decision 13: Adopt @stackone/defender for Content-Pipeline Prompt-Injection Scanning
+
+**Date:** 2026-07-16
+
+**Decision:** Install `@stackone/defender` (npm) as the automated scanner Decision 12 deferred, wired into the exact trust boundary already identified: it scans the Research Agent's returned text before that text is written to `research-brief.md`, via `scripts/scan-untrusted-content.mjs`. This resolves the "Future Decision: OSS Prompt-Injection Scanning Tools" entry below.
+
+**Context:** Richard brought research proposing Vigil (`deadbits/vigil-llm`) as the tool to adopt. Verification (not taking the research at face value) found it unworkable: no PyPI package (clone-from-source only), a separate YARA v4.3.2 C-library install required, no CLI (server or Python-library only), and the project itself stale — last real commit 2024-01-31, still alpha, author moved to other work. The proposed integration code also didn't match the real API and assumed an architecture (a custom Python loop calling the Anthropic SDK directly) this repo doesn't have — probl.me has zero Python dependencies and runs its content pipeline through Claude Code subagents, not a custom inference loop we control.
+
+**Alternatives considered (all verified via GitHub API and/or the npm registry directly, not just search-result summaries):**
+- **LLM Guard** (`protectai/llm-guard`) — archived 2026-07-08, 8 days before this session. Was genuinely well-maintained until then.
+- **Rebuff** (`protectai/rebuff`) — archived since 2024, last real commit January 2024, confirmed prototype status.
+- **Guardrails AI** (`guardrails-ai/guardrails`) — actively maintained (pushed the same day as this research), but a broad general-purpose validation framework (PII, toxicity, format checking; prompt injection is one of many configurable Guards) with its dedicated prompt-injection validator historically dependent on the now-dead Rebuff. Python, heavier than needed.
+- **Meta's LlamaFirewall** (`meta-llama/PurpleLlama`) — real, actively maintained, Meta-backed. A much larger framework (fine-tuned BERT model, chain-of-thought auditing, code scanning) for a narrow use case.
+
+**Why `@stackone/defender` won:** actively maintained (release 9 days before this session, confirmed via GitHub API and a direct npm registry check, not just documentation claims), TypeScript/npm (matches this repo's actual runtime, no new Python/YARA toolchain), purpose-built for indirect prompt injection in fetched tool/agent content (exactly the Research Agent's job), lightweight (bundled ONNX model, CPU-only, no server, no external calls), real published benchmark (F1 ≈ 0.91).
+
+**Integration notes (a real bug found and fixed during setup, not assumed away):**
+- `@huggingface/transformers`, `onnxruntime-node`, and `fasttext.wasm` are optional peer dependencies npm does not auto-install. Without them, the ML classification tier (the actual F1 ≈ 0.91 stage) silently fails to load and the tool degrades to pattern-matching only, with no visible error in the result, just a `tier2SkipReason` field. All three were installed explicitly.
+- `@huggingface/transformers@3.8.1` hard-pins its own `onnxruntime-node@1.21.0`, separate from the `1.27.0` version that satisfies `@stackone/defender`'s own peer range. Installing the loose range created two conflicting native binary copies (`Current ORT Version: 1.21.0` vs. an API call expecting version 27), a real runtime error. Fixed by pinning the top-level `onnxruntime-node` install to `1.21.0` exactly, deduplicating to one shared copy.
+- With both tiers actually working, the tool **false-positived on this repo's own already-published, human-reviewed content** (`pin-github-actions-dependabot/research-brief.md`): zero Tier 1 pattern detections, but a Tier 2 ML score of 0.649 landed in the tool's documented "gray band" (`[0.3, 0.85)`, meant to escalate to a Tier 3 LLM adjudicator) and, with `blockHighRisk: true` and no Tier 3 provider configured, auto-blocked. The flagged sentence was benign commentary about Checkov policy check IDs. Richard's call: `blockHighRisk: false`. The tool is advisory — it always prints its result, never blocks the pipeline on its own. A Tier 1 pattern detection is treated as a strong signal worth stopping for; a Tier-2-only "high"/"critical" is a prompt for the orchestrating Claude Code session (or Richard) to read the flagged sentence before deciding, the same triage posture already used for Aikido/Semgrep WARN findings in this project.
+
+**rl-protect-scan results (real, run this session):** `@stackone/defender@0.7.2` and its dependency tree scanned clean except two accepted findings, both logged in `SECURITY_SCANNING.md`'s Accepted Risk Log: `onnxruntime-node` WARN (debugging symbols and hardening flags typical of a compiled native addon, same class as the already-accepted Playwright entries, 0 vulnerabilities/malware/tampering), and `tar@7.5.20` GOVERNANCE FAIL (a 5-day-old package, all six substantive checks passed, same recency-gate pattern as the already-accepted `yargs`/`@playwright/test` entries). Richard explicitly reviewed and approved both before install.
+
+**Impact:** `scripts/scan-untrusted-content.mjs` is now a real, tested step in the content pipeline (see `AGENTS.md` Research Agent — Untrusted Content Rules and `SECURITY_SCANNING.md` §9). It is advisory, not a hard gate, its real value is surfacing pattern-level detections and flagging ambiguous content for review, not auto-blocking.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
@@ -239,7 +266,7 @@
 ## Future Decision: OSS Prompt-Injection Scanning Tools
 
 **Logged:** 2026-07-16 (see Decision 12)
-**Status:** Deferred — process and prompt-level fixes made now; automated scanning not adopted yet
+**Status:** Resolved 2026-07-16 — see Decision 13. Adopted `@stackone/defender`, not the three options named below (LLM Guard and Rebuff are both now archived/dead; Vigil, proposed separately, turned out to be stale and architecturally incompatible). Original deferral reasoning kept below for the record.
 
 **What it is:** Adopting an open-source library (LLM Guard, Rebuff, or Vigil) to automatically pattern-scan content fetched by the Research Agent for injection attempts, rather than relying solely on prompt-level framing and human PR review.
 
