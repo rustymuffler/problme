@@ -1,0 +1,55 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+  </style>
+    <marker id="wArrow" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <text x="550" y="46" text-anchor="middle" class="lbl" font-size="20">What broke first, and what caught it</text>
+
+  <!-- row template repeated three times -->
+  <g>
+    <!-- row 1: prompt-injection research -->
+    <text x="60" y="120" class="lbl" font-size="15">Prompt-injection research</text>
+    <rect x="60" y="140" width="330" height="70" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+    <text x="80" y="165" class="sub" font-size="12" fill="#F59E0B">before</text>
+    <text x="80" y="188" class="sub" font-size="12">content shipped, no security scan</text>
+    <line x1="405" y1="175" x2="450" y2="175" stroke="#94A3B8" stroke-width="2" marker-end="url(#wArrow)"/>
+    <rect x="465" y="140" width="330" height="70" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+    <text x="485" y="165" class="sub" font-size="12" fill="#2DD4BF">after</text>
+    <text x="485" y="188" class="sub" font-size="12">scanning tool added, rule documented</text>
+    <text x="850" y="180" class="sub" font-size="12">caught by: no-self-review</text>
+  </g>
+
+  <g>
+    <!-- row 2: supply-chain gate -->
+    <text x="60" y="270" class="lbl" font-size="15">Supply-chain gate</text>
+    <rect x="60" y="290" width="330" height="70" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+    <text x="80" y="315" class="sub" font-size="12" fill="#F59E0B">before</text>
+    <text x="80" y="338" class="sub" font-size="12">package flagged, recency gate fails</text>
+    <line x1="405" y1="325" x2="450" y2="325" stroke="#94A3B8" stroke-width="2" marker-end="url(#wArrow)"/>
+    <rect x="465" y="290" width="330" height="70" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+    <text x="485" y="315" class="sub" font-size="12" fill="#2DD4BF">after</text>
+    <text x="485" y="338" class="sub" font-size="12">evidence reviewed, override logged</text>
+    <text x="850" y="330" class="sub" font-size="12">caught by: governance scan</text>
+  </g>
+
+  <g>
+    <!-- row 3: article publish date -->
+    <text x="60" y="420" class="lbl" font-size="15">Article publish date</text>
+    <rect x="60" y="440" width="330" height="70" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+    <text x="80" y="465" class="sub" font-size="12" fill="#F59E0B">before</text>
+    <text x="80" y="488" class="sub" font-size="12">planned date shown as live date</text>
+    <line x1="405" y1="475" x2="450" y2="475" stroke="#94A3B8" stroke-width="2" marker-end="url(#wArrow)"/>
+    <rect x="465" y="440" width="330" height="70" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+    <text x="485" y="465" class="sub" font-size="12" fill="#2DD4BF">after</text>
+    <text x="485" y="488" class="sub" font-size="12">date corrected, same day</text>
+    <text x="850" y="480" class="sub" font-size="12">caught by: noticed on the live site</text>
+  </g>
+</svg>

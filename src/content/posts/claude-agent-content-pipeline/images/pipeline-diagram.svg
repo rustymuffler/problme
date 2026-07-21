@@ -1,0 +1,77 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+    .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+  </style>
+    <linearGradient id="node" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <marker id="pArrow" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/>
+    </marker>
+    <marker id="loopArrow" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#F59E0B"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <text x="550" y="46" text-anchor="middle" class="lbl" font-size="20">The probl.me content pipeline</text>
+  <text x="550" y="72" text-anchor="middle" class="sub" font-size="13">six agent roles, defined in AGENTS.md, handed off in sequence</text>
+
+  <!-- six stage boxes -->
+  <g class="lbl" font-size="13" text-anchor="middle">
+    <g>
+      <rect x="40" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#38BDF8" stroke-width="2"/>
+      <circle cx="115" cy="180" r="12" fill="url(#node)"/>
+      <text x="115" y="215" fill="#F1F5F9">Interview</text>
+    </g>
+    <g>
+      <rect x="215" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+      <circle cx="290" cy="180" r="12" fill="url(#node)" opacity="0.9"/>
+      <text x="290" y="215" fill="#F1F5F9">Research</text>
+    </g>
+    <g>
+      <rect x="390" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+      <circle cx="465" cy="180" r="12" fill="url(#node)" opacity="0.8"/>
+      <text x="465" y="215" fill="#F1F5F9">Writer</text>
+    </g>
+    <g>
+      <rect x="565" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+      <circle cx="640" cy="180" r="12" fill="url(#node)" opacity="0.7"/>
+      <text x="640" y="209" fill="#F1F5F9">SEO</text>
+      <text x="640" y="225" fill="#F1F5F9">Reviewer</text>
+    </g>
+    <g>
+      <rect x="740" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+      <circle cx="815" cy="180" r="12" fill="url(#node)" opacity="0.6"/>
+      <text x="815" y="215" fill="#F1F5F9">Proofreader</text>
+    </g>
+    <g>
+      <rect x="915" y="150" width="150" height="80" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+      <circle cx="990" cy="180" r="12" fill="url(#node)" opacity="0.5"/>
+      <text x="990" y="215" fill="#F1F5F9">Publisher</text>
+    </g>
+  </g>
+
+  <!-- forward arrows -->
+  <g stroke="#94A3B8" stroke-width="2">
+    <line x1="190" y1="190" x2="212" y2="190" marker-end="url(#pArrow)"/>
+    <line x1="365" y1="190" x2="387" y2="190" marker-end="url(#pArrow)"/>
+    <line x1="540" y1="190" x2="562" y2="190" marker-end="url(#pArrow)"/>
+    <line x1="715" y1="190" x2="737" y2="190" marker-end="url(#pArrow)"/>
+    <line x1="890" y1="190" x2="912" y2="190" marker-end="url(#pArrow)"/>
+  </g>
+
+  <!-- revision loop, SEO/Proofreader back to Writer -->
+  <path d="M740 260 C 620 340, 540 340, 465 262" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 5" marker-end="url(#loopArrow)"/>
+  <text x="602" y="352" text-anchor="middle" class="sub" font-size="13" fill="#F59E0B">revision loop, max 3 passes</text>
+
+  <!-- no self-review rule note -->
+  <rect x="215" y="430" width="670" height="70" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+  <text x="550" y="460" text-anchor="middle" class="lbl" font-size="14">The rule underneath the roster:</text>
+  <text x="550" y="484" text-anchor="middle" class="sub" font-size="13">no agent reviews its own work</text>
+</svg>

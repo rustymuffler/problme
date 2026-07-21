@@ -1,0 +1,133 @@
+---
+title: "How I Built a Claude Agent Content Pipeline (and What Broke)"
+description: "I built an AI content pipeline with Claude agents defined in a single markdown file, no framework. Here's how it works and the three things that broke first."
+category: ai-development
+tags:
+  - claude-code
+  - ai-agents
+  - content-pipeline
+  - agentic-workflows
+date: 2026-07-21
+readTime: "9 min"
+heroImage: /assets/posts/claude-agent-content-pipeline/hero.png
+imageCredit: "AI-generated with Claude"
+faq:
+  - question: "What is a markdown-based AI agent pipeline?"
+    answer: "It's a multi-step workflow where each stage, research, writing, review, is handled by a separate AI agent role, and the whole thing is defined in a plain markdown file instead of an orchestration platform. My probl.me content pipeline is defined entirely in one file, AGENTS.md, that lists each agent's job and the order they hand off to each other."
+  - question: "Do I need a framework like LangGraph or CrewAI to run multiple AI agents?"
+    answer: "Not necessarily, especially if you're one person running a low-volume pipeline. I run mine on Claude Code and a single AGENTS.md file with no orchestration framework installed. Frameworks earn their complexity at scale, with many contributors or high request volume. If you're starting out, a markdown file that Claude Code reads is a legitimate, working starting point."
+  - question: "How do you handle security risks when AI agents pull in dependencies automatically?"
+    answer: "I run every new package through a supply-chain security scan before it's installed, and the scan can fail a package outright. I've overridden that failure exactly once, when a package was flagged only for being recently published, not for any malware signal, and I checked the evidence myself before deciding. The gate stays on. The override was a judgment call, not a bypass."
+  - question: "What real problems happened while building this pipeline?"
+    answer: "Three things, so far. A no-self-review rule caught a real security gap during an article about prompt injection. A supply-chain scan flagged a package I had to evaluate and override deliberately. And a planning file's proposed publish date silently became an article's actual live publish date, so one article briefly showed the wrong date on the site."
+  - question: "Should I build something like this if I'm just starting out with AI agents?"
+    answer: "Yes, start with something simple, even if it's not hardened yet. I don't think my process is done, I still need to figure out how to keep it from deviating. But waiting until you fully understand AI before building anything means you never start. The gaps only show up once something real is running through the pipeline."
+---
+
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: I built an AI content pipeline with Claude agents defined in one markdown file, AGENTS.md, no orchestration framework. It's not fully hardened yet. Three real incidents in one week (a caught security gap, a deliberate supply-chain override, and a wrong publish date) taught me more than the setup itself did. Start simple, harden as you go.
+</Callout>
+
+I run probl.me, this blog, almost entirely through Claude agents. An idea gets interviewed out of me, researched, drafted, reviewed for SEO, proofread, and opened as a pull request, and every one of those steps is a different agent role defined in a single file at the root of the repo. No LangGraph, no CrewAI, no orchestration platform. Just Claude Code reading a markdown file and following it.
+
+That setup isn't a finished product. It's a first pass, and it's still rough in ways I can point to directly. This article is about what that pipeline actually looks like, why I built it without a framework, and the three specific things that broke in the first few weeks of running it for real.
+
+## What does the probl.me content pipeline actually look like?
+
+AGENTS.md defines every role in the pipeline: an Interview Agent that asks me structured questions about a topic, a Research Agent that gathers sources and checks a competitive content scan, a Writer Agent that drafts the article in my voice, an SEO Reviewer, a Proofreader, and a Publisher Agent that opens the pull request. Each one is a short block of markdown describing what that role does and what it hands off next, nothing more elaborate than that.
+
+![Diagram of the probl.me content pipeline showing six agent roles in sequence, Interview, Research, Writer, SEO Reviewer, Proofreader, Publisher, with a dashed revision loop arrow from Proofreader back to Writer, and a note that no agent reviews its own work](/assets/posts/claude-agent-content-pipeline/pipeline-diagram.png)
+
+If the SEO Reviewer or Proofreader sends an article back, the Writer Agent revises and resubmits, up to three passes before it escalates back to me instead of looping forever. That cap exists because I learned early that "let the agents keep iterating" isn't the same as "let the agents keep improving it." Past a certain point, more passes just meant more rewriting without more correctness.
+
+There's a rule underneath all of it that matters more than the roster: no agent reviews its own work. The agent that writes an article can't be the one that approves it for SEO or proofreading. That single rule is what caught the first real incident, more on that below.
+
+## Why markdown instead of a framework?
+
+I'm not the only person doing this. Brad Feld's [CompanyOS](https://adventuresinclaude.ai/posts/2026-02-21-running-a-company-on-markdown-files/) runs an entire company, not just a blog, on about 2,000 lines of markdown across twelve skill files, five commands, and two agents, connected to eight external tools.
+
+His framing is the same as mine: Claude Code is already an agent with tool access and memory, so it doesn't need another orchestration layer stacked on top. It needs domain knowledge written down instead.
+
+That's the real argument for the markdown approach, not that frameworks are wrong, but that they solve a problem you might not have yet. Tools like LangGraph and CrewAI exist because large, multi-contributor systems need state management, conditional branching, and observability that a plain file can't give you. A one-person pipeline publishing two articles a week doesn't have that problem. It has a much smaller one: keeping a process consistent enough that it's worth improving.
+
+The tradeoff is real, though, and worth naming instead of glossing over. A framework gives you retries, structured state, and logging out of the box. My markdown file gives me none of that automatically, and when something goes wrong in my pipeline, I find out because I noticed, not because a dashboard told me.
+
+That's the exact gap the three incidents below expose. It's a tradeoff I'm choosing deliberately for now, not one I'm unaware of.
+
+| Approach | Setup cost | Right for |
+|---|---|---|
+| Markdown file (AGENTS.md) | Low, no install, just a file Claude Code reads | Solo or small-team pipelines, low volume, fast iteration |
+| Orchestration framework (LangGraph, CrewAI, etc.) | Higher, new dependency, new mental model | Multi-contributor systems, high volume, complex branching |
+
+## What about dedicated workflow tools like n8n or Temporal?
+
+I checked before writing this, since it's a fair question. probl.me already runs n8n for its analytics stack, so the tool isn't unfamiliar. n8n does have a real AI agent node now, with multi-agent orchestration and tool access built in.
+
+But n8n is a hosted service I'd have to maintain, Docker updates, SSL renewal, backup testing, something like two to five hours a month even for a small instance. For a pipeline that runs six steps in a straight line with no branching, that's real ongoing cost for very little gained.
+
+Claude Code itself has a feature called Dynamic Workflows, which generates orchestration scripts on the fly and fans work out across parallel subagents. It's built for hours-or-days-long engineering work: security audits, large migrations, architecture analysis. Anthropic's own docs warn it burns "substantially more tokens than a typical Claude Code session." Neither the shape nor the cost fits a sequential, six-role pipeline that runs twice a week.
+
+The one honest counterargument I found came from [Temporal](https://temporal.io/blog/of-course-you-can-build-dynamic-ai-agents-with-temporal), a durable-execution platform. Their case: a markdown-file, single-session pipeline has no crash recovery. If Claude Code gets interrupted mid-pipeline, say after the Writer Agent finishes but before the SEO Reviewer starts, there's no automatic resume from that exact point. A rerun could make different decisions than the interrupted run did.
+
+Temporal's own example is a travel-booking agent that restarts and books a different destination than the first attempt. That's a real gap in my setup, not a made-up one.
+
+<Callout type="tip">For now, the honest fix for that gap is manual: rerun the step, or add a lightweight checkpoint file per pipeline stage, not stand up a durable-execution platform for two articles a week. That calculus changes if the volume or complexity grows.</Callout>
+
+| Tool | Built for | Verdict for probl.me |
+|---|---|---|
+| n8n | Visual multi-step automation, already used for analytics | Real hosting and maintenance overhead for a linear six-step flow |
+| Claude Code Dynamic Workflows | Parallel fan-out on hours- or days-long engineering tasks | Wrong shape and token cost for a sequential weekly pipeline |
+| Temporal | Durable execution, crash-safe resume | Solves a real gap, no resume on crash, but built for production scale |
+| LangGraph / CrewAI | Branching, multi-contributor orchestration | Overkill without branching or multiple contributors |
+
+![Diagram comparing a markdown pipeline that crashes and reruns from scratch, possibly diverging, against a durable-execution engine like Temporal that checkpoints and resumes exactly where it left off](/assets/posts/claude-agent-content-pipeline/workflow-tools-diagram.png)
+
+## What broke first?
+
+Three incidents happened inside about a week of actually running this pipeline. None of them were caught because the system was well-designed. They were caught because a specific rule happened to be in the right place, or they weren't caught at all until after the fact.
+
+### The no-self-review rule caught a real gap
+
+While researching and writing an earlier article about prompt injection, the pipeline itself became the test case. That article's own research step meant an agent was fetching real, untrusted content from the open web, which is exactly the risk category the article was about. Asking "are we actually protecting ourselves the way this article says you should" surfaced two real gaps. A content update had shipped a code change without a security scan ever running on it. And there was no documented rule for how much untrusted content an agent should process, or how much tool access it should be trusted with while doing it.
+
+Both gaps got fixed, and a follow-up review added an actual scanning tool to check content agents pull from the web before it goes into an article. Neither gap would have surfaced without the no-self-review rule forcing a second pass on the article's own claims.
+
+<Callout type="note">The fix wasn't "add more AI." It was writing down a rule that was missing, then checking whether the current process actually followed it.</Callout>
+
+### The supply-chain gate override
+
+Adding a new package for the pipeline's scanning tool, my supply-chain scanner flagged it as failing. Not for malware, for being too recently published to clear the standard maturity window. An older version wouldn't work because of dependency constraints, and waiting several weeks for the package to age wasn't realistic.
+
+I overrode the failure, but not by turning the check off. Instead, I checked the scan results for any actual malware indicator (there was none) and the publishing community's track record on previous releases (clean). That's the distinction I care about: the override was a decision made after looking at evidence, not a reflex to make a red flag go away.
+
+Supply-chain attacks on AI tooling are not hypothetical right now. More than [140 npm packages were compromised](https://labs.cloudsecurityalliance.org/research/alt-ciso-briefing-2026-06-22/) in a campaign Microsoft attributed to a North Korean state actor in June 2026, the first confirmed nation-state attribution to a targeted AI-framework supply chain campaign. That's the landscape a recency-gate override happens in, which is exactly why it has to be a judgment call and not a habit.
+
+### The article-date bug
+
+This one wasn't a security incident, it was a process gap I built myself. Article ideas get planned in markdown files with a proposed publish date attached. I didn't realize that proposed date would also become the actual date shown on the live article once its pull request merged, no matter what day the merge actually happened.
+
+One article, ["Why I SHA-Pin Every GitHub Action"](/blog/pin-github-actions-dependabot/), merged on July 15, 2026, but still carried its originally planned date of July 17, 2026. For a couple of hours, the live site showed a post dated two days in the future. It got caught and fixed the same day. That's a clean example of a mistake that had nothing to do with the AI, and everything to do with a step I never defined clearly enough for either of us to follow.
+
+| Incident | What broke | How it was caught | Fix |
+|---|---|---|---|
+| Prompt-injection research | Content shipped without a security scan; no untrusted-content rule | No-self-review pass on the article's own claims | Added scanning tool, documented the rule |
+| Supply-chain gate | New package flagged for being too recently published | Governance scan surfaced the flag before install | Manual evidence review, deliberate override |
+| Article publish date | Planned date silently became live date | Noticed after merge, on the live site | Corrected the date, same day |
+
+## Should you build one like this?
+
+Honestly, I don't know if this is the right structure yet, and I'd rather say that than pretend otherwise. I know there are people just getting started with AI pipelines and people far more experienced than I am, who have probably already outgrown a single markdown file for something more structured. I'd genuinely like to hear what that looks like for them, because comparing notes is how I'd actually improve my own setup, not by guessing in isolation.
+
+What I do believe is that starting with something simple, testable, and imperfect beats waiting until you understand AI well enough to build the "right" system first. You learn what the right system looks like by running the wrong one and watching where it breaks. If I'd waited to fully understand agent orchestration before writing a single line of AGENTS.md, none of the three incidents above would have happened. But neither would the fixes, and I'd still be planning instead of publishing.
+
+![Diagram of the three incidents, prompt-injection research, the supply-chain gate, and the article publish date, each shown as a before-and-after pair with what caught it](/assets/posts/claude-agent-content-pipeline/what-broke-diagram.png)
+
+That belief comes from a place outside of software, too. Plans rarely survive contact with what actually happens, and the people who act tend to end up ahead of the people still perfecting the plan on paper. Structure still matters. It just can't be so rigid that it can't bend the first time something real hits it.
+
+## Key Takeaways
+
+None of this pipeline's three incidents were caught because the system was airtight. They were caught because specific, narrow rules (no self-review, a supply-chain gate, a live site someone actually reads) happened to be in place when something went wrong.
+
+The lesson isn't "build a perfect pipeline before you start." It's "build a pipeline good enough to catch its own mistakes, then go fix what it finds." I'm still hardening mine, and if you're running something similar, I'd genuinely like to hear what your version looks like.
