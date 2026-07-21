@@ -12,6 +12,7 @@
     "test:links": "lychee dist/**/*.html"
   },
   "dependencies": {
+    "@astrojs/markdown-remark": "^7.2.1",
     "@astrojs/mdx": "^7.0.0",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.3",
@@ -32,7 +33,7 @@
     "typescript": "^6.0.3"
   },
   "overrides": {
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.0",
     "tmp": "^0.2.6",
     "uuid": "^11.1.1"
   }
