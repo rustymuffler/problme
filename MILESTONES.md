@@ -86,7 +86,7 @@
 | 3.5 | Create `retros/` folder in repository | ✅ | `retros/.gitkeep` committed to main — 2026-06-26 |
 | 3.6 | Define initial content calendar (first 4 articles) | ✅ | First idea batch run 2026-06-26; Richard selected 7 articles — see Content Calendar below |
 | 3.7 | Article 1: Interview → Research → Draft → Review → Proofread → PR | ✅ | C7 "Why I SHA-Pin Every GitHub Action" ran the full pipeline end-to-end — PR [#55](https://github.com/rustymuffler/problme/pull/55) open, pending Richard's review/merge — 2026-07-12 |
-| 3.8 | Article 2: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
+| 3.8 | Article 2: Interview → Research → Draft → Review → Proofread → PR | ✅ | C8 "Prompt Injection Is Already Hiding in What AI Agents Read" ran the full pipeline end-to-end, plus a follow-up PR closing real security gaps it surfaced — PR [#72](https://github.com/rustymuffler/problme/pull/72) + [#73](https://github.com/rustymuffler/problme/pull/73) merged, live at probl.me/blog/prompt-injection-ai-agents — 2026-07-16 |
 | 3.9 | Article 3: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
 | 3.10 | Article 4: Interview → Research → Draft → Review → Proofread → PR | ⬜ | |
 | 3.11 | First monthly retrospective | ⬜ | Run after first full month of publishing — RETRO filed in `retros/` |
@@ -166,7 +166,7 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 | C5 | Scheduled Claude agents: setting up autonomous loops that don't need babysitting | ai-development | ⬜ Queued | TBD |
 | C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
 | C7 | Why I SHA-Pin Every GitHub Action (and Automate Updates) | tech-tools | ✅ Published | 2026-07-15 |
-| C8 | Prompt injection: the attack that's already hiding in the pages, DNS records, and inboxes AI agents read | ai-development | ⬜ Queued | TBD |
+| C8 | Prompt Injection Is Already Hiding in What AI Agents Read | ai-development | ✅ Published | 2026-07-16 |
 
 **Pipeline status key:** ⬜ Queued → 🔄 Interview → 🔄 Research → 🔄 Draft → 🔄 Review → 🔄 Proofread → 🔑 PR Open → ✅ Published
 
@@ -175,3 +175,5 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 ---
 
 *Last updated: 2026-07-15 — PM Agent, end-of-session close-out. C7 published, live at probl.me/blog/pin-github-actions-dependabot (confirmed HTTP 200). PR [#55](https://github.com/rustymuffler/problme/pull/55) merged. The session also produced ten supporting infra/docs PRs, all merged: [#48](https://github.com/rustymuffler/problme/pull/48) Dependabot for github-actions, [#49](https://github.com/rustymuffler/problme/pull/49)–[#53](https://github.com/rustymuffler/problme/pull/53) Dependabot's first automated version bumps, [#54](https://github.com/rustymuffler/problme/pull/54) OpenSSF Scorecard + Checkov correction, [#56](https://github.com/rustymuffler/problme/pull/56)/[#57](https://github.com/rustymuffler/problme/pull/57) doc corrections + SECURITY.md, [#58](https://github.com/rustymuffler/problme/pull/58) lychee config fix + missing resume PDF, [#59](https://github.com/rustymuffler/problme/pull/59)/[#61](https://github.com/rustymuffler/problme/pull/61) Scorecard tracking updates, [#60](https://github.com/rustymuffler/problme/pull/60) Semgrep SARIF upload, [#62](https://github.com/rustymuffler/problme/pull/62) content calendar close-out, [#63](https://github.com/rustymuffler/problme/pull/63) README badges/diagrams, [#64](https://github.com/rustymuffler/problme/pull/64) third-party notices + credits page. A branch protection ruleset was also added directly by Richard (not a PR), and two stale branches (`feat/phase-2-completion`, `revert-16-master`) were deleted. OpenSSF Scorecard score improved 6.1 → 7.0 over the session. C8 (prompt injection) added to the queue for next session, see note above. No blockers hit.*
+
+*Update 2026-07-21 — PM Agent. C8 confirmed published: PR [#72](https://github.com/rustymuffler/problme/pull/72) merged 2026-07-16, live at probl.me/blog/prompt-injection-ai-agents. Follow-up PR [#73](https://github.com/rustymuffler/problme/pull/73) closed two real process gaps the article surfaced (a content PR that shipped code without a security scan, and no documented rule for untrusted-content/tool-scoping) and adopted `@stackone/defender` for content-pipeline scanning (Decisions 12–13). M3.8 marked complete. Milestones and content calendar were out of sync with `main` at session start (local branch was behind); synced via `git pull origin main` before editing.*

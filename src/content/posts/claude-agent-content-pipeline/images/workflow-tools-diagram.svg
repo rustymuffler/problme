@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+  </style>
+    <marker id="tArrow" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <text x="550" y="46" text-anchor="middle" class="lbl" font-size="20">A markdown pipeline vs. a durable-execution engine</text>
+  <text x="550" y="72" text-anchor="middle" class="sub" font-size="13">the one real gap Temporal's argument points to</text>
+
+  <!-- top track: markdown pipeline, crashes and restarts -->
+  <text x="60" y="140" class="lbl" font-size="15">Markdown pipeline (AGENTS.md)</text>
+  <g stroke="#2E3147" stroke-width="2">
+    <line x1="60" y1="180" x2="1020" y2="180" marker-end="url(#tArrow)"/>
+  </g>
+  <circle cx="150" cy="180" r="10" fill="#38BDF8"/>
+  <circle cx="330" cy="180" r="10" fill="#38BDF8"/>
+  <circle cx="510" cy="180" r="10" fill="#F59E0B"/>
+  <text x="510" y="150" text-anchor="middle" class="sub" font-size="12" fill="#F59E0B">crash</text>
+  <line x1="500" y1="170" x2="520" y2="190" stroke="#EF4444" stroke-width="3"/>
+  <line x1="520" y1="170" x2="500" y2="190" stroke="#EF4444" stroke-width="3"/>
+  <path d="M510 180 C 560 240, 640 240, 690 180" fill="none" stroke="#EF4444" stroke-width="2" stroke-dasharray="4 5"/>
+  <text x="600" y="255" text-anchor="middle" class="sub" font-size="12" fill="#EF4444">reruns from scratch, may diverge</text>
+
+  <!-- bottom track: durable execution -->
+  <text x="60" y="340" class="lbl" font-size="15">Durable execution (Temporal)</text>
+  <g stroke="#2E3147" stroke-width="2">
+    <line x1="60" y1="380" x2="1020" y2="380" marker-end="url(#tArrow)"/>
+  </g>
+  <circle cx="150" cy="380" r="10" fill="#2DD4BF"/>
+  <circle cx="330" cy="380" r="10" fill="#2DD4BF"/>
+  <rect x="495" y="365" width="30" height="30" rx="6" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+  <text x="510" y="350" text-anchor="middle" class="sub" font-size="12" fill="#2DD4BF">checkpoint</text>
+  <circle cx="690" cy="380" r="10" fill="#2DD4BF"/>
+  <path d="M510 395 C 560 440, 640 440, 690 395" fill="none" stroke="#2DD4BF" stroke-width="2"/>
+  <text x="600" y="455" text-anchor="middle" class="sub" font-size="12" fill="#2DD4BF">resumes exactly where it left off</text>
+
+  <rect x="215" y="490" width="670" height="55" rx="10" fill="#1A1D27" stroke="#2E3147" stroke-width="2"/>
+  <text x="550" y="522" text-anchor="middle" class="sub" font-size="13">real gap, low volume for now, worth revisiting if that changes</text>
+</svg>
