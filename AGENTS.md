@@ -58,6 +58,10 @@ The agent that writes code cannot be the sole reviewer of that code. The agent t
 
 If a content pipeline run modifies anything outside `src/content/posts/[slug]/` and `public/assets/posts/[slug]/` — a shared component, page template, or global stylesheet — the Publisher Agent must also run the code workflow's Security Auditor Agent and Code Reviewer Agent steps on those specific files before opening the PR, in addition to the content workflow's SEO Reviewer and Proofreader Agent steps. The two workflows are documented separately below, but a single PR can cross both tracks. (Added 2026-07-16, after a content PR shipped a template CSS fix with no security scan — see Decision 12 in `DECISIONS.md`.)
 
+### Infra-only PRs (dependency bumps, CI/security tool fixes)
+
+A PR that only bumps a dependency version or fixes a CI/security-tool failure (no feature work, no content) does not need the full Developer → Test Writer → Security Auditor → Code Reviewer pipeline. It does need a second look before merge: a fresh Claude Code session or agent reviews the diff (what changed, what was verified, whether the fix is scoped to what broke) before Richard merges. The agent that pushed the fix cannot be the only one to declare it safe, same principle as the No self-review rule above, applied at a lighter weight for infra-sized changes. (Added 2026-07-22, after a same-session Trivy dependency chase touched six PRs with no second reviewer on any of them — see Decision 14 in `DECISIONS.md`.)
+
 ### Content workflow — sequential handoffs
 
 The content pipeline runs on a **scheduled cadence** (see the Scheduling & Loops section below). Richard only needs to participate at two points: the interview step and the final PR merge.
@@ -191,10 +195,15 @@ When generating article ideas, the Content Strategist Agent must:
 
 Every article must ship with visuals. No article publishes as pure text: the minimum is a hero image plus **one in-article image per ~500 words of body text** (diagram, chart, screenshot, artwork, or photo) — a 2,000-word article carries the hero plus roughly four in-article visuals. (Ratio raised 2026-07-15 from "at least one in-article image", based on image-frequency research; see CONTENT_STANDARDS.md → Images.)
 
-Images may come from either source:
+Images may come from any of three sources:
 
-1. **Claude Design generation** — original artwork, diagrams, charts, or illustrations, created natively.
-2. **Royalty-free stock images** — sourced online from libraries that grant free commercial use with no attribution required (e.g., Unsplash, Pexels, Pixabay). Before using a stock image, the Image Creator Agent must confirm the license permits commercial use and redistribution, and record the source URL.
+1. **Claude Design generation** — original artwork, diagrams, charts, or illustrations, created natively. Requires Claude Design to be connected in the working session; not always available.
+2. **Hand-built diagram pipeline (SVG + rasterization)** — the default when Claude Design isn't connected. Original SVG diagrams matching `BRAND.md`'s palette, rasterized to PNG. This is a real, proven method, not a fallback of last resort: it produced all of C2's images (`scripts/render-article-images.mjs`, using Playwright) and the README's animated pipeline diagram (`public/assets/readme/generate-pipeline-frames.cjs`, using `sharp`). Either rasterizer is fine; `sharp` is already a project dependency. For a static image, render one SVG frame. For an **animated GIF**, generate a sequence of SVG frames (a script, not hand-drawn individually), rasterize each to PNG, then assemble with `ffmpeg` using a two-pass palette for quality (see the README script for the exact pattern). Keep the frame-generation script alongside the article's other source files for provenance and future edits, same as a static source SVG.
+3. **Royalty-free stock images** — sourced online from libraries that grant free commercial use with no attribution required (e.g., Unsplash, Pexels, Pixabay for stills; GIPHY or a similarly licensed source for pre-made GIFs). Before using a stock image, the Image Creator Agent must confirm the license permits commercial use and redistribution, and record the source URL.
+
+**Emotion and photographic content:** the hand-built diagram pipeline is geometric — nodes, lines, cards, brand-palette shapes. It cannot produce human expression or photographic realism. When an article calls for that (a personal moment, a reaction, something a diagram can't convey), use stock photography (source #3) instead of forcing a diagram to do a photo's job.
+
+**Animated images (GIFs):** use sparingly, only where motion actually clarifies something a static image can't (a sequence, a state change, a pipeline in motion). Keep file size reasonable — the README's 9-stage animation is ~115KB; treat that as the target range, not a hard ceiling. GIFs autoplay and loop by default with no built-in pause control, so keep them short and subtle rather than attention-grabbing, and always write alt text that describes what the animation shows, a screen reader won't perceive the motion itself. (Added 2026-07-22, after confirming this project already had a working SVG-frames → sharp → ffmpeg GIF pipeline from the README, and formalizing it for article use — see Decision 15 in `DECISIONS.md`.)
 
 When creating or sourcing images:
 
@@ -205,7 +214,7 @@ When creating or sourcing images:
 - **Source design files** (editable SVGs, working files) may still be kept alongside the article at `src/content/posts/[article-slug]/images/` for provenance. They are not served directly and are not required, but are worth keeping if the image was hand-built rather than sourced externally.
 - Name images descriptively: `hero.png`, `agent-workflow-diagram.png`, `before-after-component.png`
 - Set the frontmatter `imageCredit` field to match the actual source:
-  - `imageCredit: "AI-generated with Claude"` — Claude Design generated
+  - `imageCredit: "AI-generated with Claude"` — Claude Design generated, or hand-built via the SVG + rasterization pipeline (source #2 above)
   - `imageCredit: "Stock photo — [Source name], royalty-free"` — sourced stock image, e.g. `"Stock photo — Unsplash, royalty-free"`
   - `imageCredit: "Personal screenshot"` or `imageCredit: "Personal photo"` — Richard's own material
 
