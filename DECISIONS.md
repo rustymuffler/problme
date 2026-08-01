@@ -250,6 +250,34 @@
 
 ---
 
+## Decision 14: Lightweight Second-Pass Review for Infra-Only PRs
+
+**Date:** 2026-07-22
+
+**Decision:** A PR that only bumps a dependency version or fixes a CI/security-tool failure (no feature or content changes) requires a second look before merge, a fresh Claude Code session or agent reviewing the diff, without needing the full Developer → Test Writer → Security Auditor → Code Reviewer pipeline reserved for feature/content-crossing code. Added to `AGENTS.md` under Agent Interaction Rules.
+
+**Context:** A single session chasing a cascading Trivy failure (js-yaml, then sharp/svgo/fast-xml-parser once main moved forward) touched PRs #74, #76, #85, #86, and triggered Dependabot rebases on #77-84, all as one agent acting alone: writing the fix, running the security scans, and merging the reasoning together with no separate reviewer at any point. That's exactly the self-review gap the existing "no agent reviews its own work" rule exists to prevent for code and content, it just hadn't been extended to infra-only changes.
+
+**Why lightweight, not the full pipeline:** most of these changes are one-line version bumps with an `rl-protect` scan and a build/Trivy check already run. Routing every dependency bump through four sequential agent roles would be disproportionate overhead for a solo operator. A second pass that actually reads the diff and the verification steps catches the same class of mistake (an unscoped fix, a missed edge case, a fix that doesn't actually address the failure) without the ceremony.
+
+**Impact:** `AGENTS.md` — new "Infra-only PRs" subsection under Agent Interaction Rules.
+
+---
+
+## Decision 15: Formalize the Hand-Built Diagram and Animation Pipeline
+
+**Date:** 2026-07-22
+
+**Decision:** Document the SVG + rasterization method (already used twice, for C2's article images and the README's animated pipeline diagram) as a first-class image source for the Image Creator Agent, not an implicit fallback. Covers both static diagrams (SVG → PNG via `sharp` or Playwright) and animated GIFs (a script-generated SVG frame sequence → PNG via `sharp` → assembled with `ffmpeg`'s two-pass palette). Added to `AGENTS.md`'s Image Creator Agent section and `BRAND.md`'s Image Standards.
+
+**Context:** Richard asked whether the project's agent roster had the right tooling for images, specifically wanting emotional and animated imagery. Investigation found two real precedents already existed in the repo, `scripts/render-article-images.mjs` (C2, Playwright-based static rendering) and `public/assets/readme/generate-pipeline-frames.cjs` (README, `sharp` + `ffmpeg` animation), but neither was documented as a standing method in `AGENTS.md` or `BRAND.md`. Claude Design generation, the documented default, isn't always connected in a given session, and when it isn't, the Image Creator Agent had no fallback method on record even though a working one already existed in the codebase.
+
+**Scope and limits:** this pipeline is geometric (nodes, lines, cards, brand-palette shapes). It cannot produce human expression or photographic realism, that gap is covered by the existing Stock Images allowance (Unsplash/Pexels for stills, GIPHY for pre-made GIFs), not by trying to force a diagram to do a photo's job.
+
+**Impact:** `AGENTS.md` — Image Creator Agent — Image Rules, new source #2 plus emotion/animation guidance. `BRAND.md` — new "Hand-Built Diagrams and Animation" subsection under Image Standards, plus a cross-reference from Stock Images on when to reach for a photo instead of a diagram.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22
