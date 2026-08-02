@@ -1,7 +1,7 @@
 # probl.me — Active Blockers
 
 > Living log maintained by the PM Agent. Update when blockers are found or resolved.
-> Last updated: 2026-07-15 (Umami analytics live — blockers 5–7 resolved; no active blockers remain)
+> Last updated: 2026-08-02 (content queue below target — blocker 9 added)
 
 ---
 
@@ -9,6 +9,7 @@
 
 | # | Blocker | Blocked Item | Owner | Date Added | Status |
 |---|---|---|---|---|---|
+| 9 | Content queue below 4-article target: only C3, C5, C6 (3 articles) remain Queued after C1 published | M3.14 | Richard | 2026-08-02 | ⬜ Not started — needs new ideas or an early Content Strategist idea-batch run |
 | 1 | ~~GitHub repository not yet created~~ | ~~All of Phase 1~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~2~~ | ~~probl.me DNS: CNAME needs to point to rustymuffler.github.io~~ | ~~M1.14~~ | Richard | 2026-06-22 | ✅ Resolved |
 | ~~3~~ | ~~Aikido plugin not yet installed in Claude Code~~ | ~~SECURITY_SCANNING.md — Tool 1 (Aikido)~~ | Richard | 2026-06-22 | ✅ Resolved |
