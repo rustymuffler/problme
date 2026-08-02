@@ -1,0 +1,45 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+  <style>
+    .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+    .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+    .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+  </style>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F1117"/>
+      <stop offset="100%" stop-color="#1A1D27"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1100" height="560" fill="url(#bg2)"/>
+
+  <text x="550" y="55" text-anchor="middle" class="lbl" font-size="24" font-weight="700">The Same Gap, Twice</text>
+
+  <!-- timeline base line -->
+  <line x1="100" y1="280" x2="1000" y2="280" stroke="#2E3147" stroke-width="3"/>
+
+  <!-- event 1: C8 PR merges -->
+  <circle cx="180" cy="280" r="12" fill="#38BDF8"/>
+  <text x="180" y="240" text-anchor="middle" class="lbl" font-size="15">C8 PR merges</text>
+  <text x="180" y="330" text-anchor="middle" class="sub" font-size="13">calendar row</text>
+  <text x="180" y="348" text-anchor="middle" class="sub" font-size="13">stays "Queued"</text>
+
+  <!-- event 2: gap found later -->
+  <circle cx="380" cy="280" r="10" fill="#F59E0B"/>
+  <text x="380" y="240" text-anchor="middle" class="lbl" font-size="15">gap noticed,</text>
+  <text x="380" y="258" text-anchor="middle" class="lbl" font-size="15">fixed manually</text>
+
+  <!-- event 3: C2 PR merges -->
+  <circle cx="620" cy="280" r="12" fill="#38BDF8"/>
+  <text x="620" y="240" text-anchor="middle" class="lbl" font-size="15">C2 PR merges</text>
+  <text x="620" y="330" text-anchor="middle" class="sub" font-size="13">same instruction,</text>
+  <text x="620" y="348" text-anchor="middle" class="sub" font-size="13">same silent skip</text>
+
+  <!-- event 4: PR 92 -->
+  <circle cx="900" cy="280" r="14" fill="#EF4444"/>
+  <text x="900" y="240" text-anchor="middle" class="lbl" font-size="15" font-weight="700">PR #92</text>
+  <text x="900" y="330" text-anchor="middle" class="sub" font-size="13">gap caught again,</text>
+  <text x="900" y="348" text-anchor="middle" class="sub" font-size="13">still no built-in check</text>
+
+  <text x="550" y="450" text-anchor="middle" class="sub" font-size="16">the instruction was clear both times. nothing verified it ran.</text>
+</svg>

@@ -1,0 +1,45 @@
+# Research Brief: Writing a spec your AI agent can actually follow
+Date: 2026-08-01
+
+## Key Statistics and Data
+- Early adopter reports from GitHub and AWS describe meaningfully higher first-pass success rates for AI agents working from a spec versus loose prompts, with error reductions described as "on the order of tens of percent." Source: [Spec-Driven Development Boosts Agent Reliability](https://blockchain.news/ainews/spec-driven-development-boosts-agent-reliability) (2026, secondary aggregation, no primary study named). `[UNVERIFIED — needs source]`: treat as "early adopter reports," not a hard number, if used at all.
+- Over 90% of organizations now use AI to assist with coding; 86% have moved past experimentation into production use; enterprises lead at 91%. Source: [AI Coding Adoption 2026: 50 Statistics From 7 Surveys](https://www.digitalapplied.com/blog/ai-coding-adoption-statistics-2026-50-data-points) (2026).
+- 90% of developers regularly use at least one AI coding tool at work; 74% have adopted a specialized AI tool. Same source as above.
+- LLMs generate vulnerable code at rates cited between 9.8% and 42.1% across benchmarks, with AI-introduced issues surviving in production repositories reportedly topping 110,000 by February 2026. Source: [AI Coding Statistics — Adoption, Productivity & Market Metrics](https://www.getpanto.ai/blog/ai-coding-assistant-statistics) (2026). `[UNVERIFIED — needs source]`: wide range, secondary aggregator, not the original benchmark paper. Not core to this article's thesis, likely skip.
+- No verifiable, named statistic exists for how often AI agents drift from a written spec across multi-session work, which is this article's core claim. It rests on qualitative community reports (Hacker News, dev blogs), not a measured study. The article should frame this as an observed pattern, illustrated by our own PR #92 incident, not a numeric drift rate.
+- Anthropic's "2026 State of AI Agents Report" exists as a primary source PDF but was not fetched for this brief: https://resources.anthropic.com/hubfs/The%202026%20State%20of%20AI%20Agents%20Report.pdf. Worth a follow-up pull if a harder stat is needed later.
+
+## Documentation References
+- Claude Code memory docs (official) — explains the CLAUDE.md hierarchy and the `@path/to/import` syntax, and states plainly that CLAUDE.md is loaded as context, not enforced as hard policy. https://code.claude.com/docs/en/memory — this is the technical grounding for the article's core argument: a written instruction is not the same as a verified one.
+- GitHub Spec-Kit — open-source toolkit formalizing a Spec → Plan → Tasks → Code workflow for coding agents. https://github.com/github/spec-kit and announcement: https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/
+- AWS Kiro — Amazon's spec-driven agentic IDE. Generates user stories, acceptance criteria, technical design, and a task list from a natural-language spec, and includes "Agent Hooks" triggered by file changes to enforce consistency, a built-in analog to the self-verification this article argues for. https://repost.aws/articles/AROjWKtr5RTjy6T2HbFJD_Mw/
+- Microsoft for Developers — Spec-Driven Development, treats the spec as the primary executable artifact and code as regenerable output. https://developer.microsoft.com/blog/spec-driven-development-ai-native-engineering/
+
+## Competitive Content Scan
+- "How to Write a Good Spec for AI Agents" — Addy Osmani, also on O'Reilly Radar. https://addyosmani.com/blog/good-spec/ — roughly 7,500-8,000 words. A comprehensive PRD-style guide with three-tier boundaries (Always / Ask first / Never) that already mentions self-verification as one tip among many. The closest existing competitor. What it misses: it doesn't address *recurring* drift, the same instruction silently failing across multiple separate sessions because the check itself wasn't built to catch its own skip. It's prescriptive, not incident-driven. Our differentiation: a first-person, incident-grounded piece built on a real repeat failure (PR #92, the C8/C2 milestone-tracking gap).
+- GitHub Spec-Kit overview posts (dev.to, MarkTechPost, Microsoft, Knightli) — roughly 1,000-2,000 words each, tool-specific how-tos. Miss the reliability/verification angle almost entirely.
+- "Vibe Coding vs Spec-Driven Development" cluster (MindStudio, Augment Code, InfoWorld, TurboDocx, DevOps.com) — roughly 1,500-2,500 words each. Stay at "should you write a spec," never get to "how do you make the spec self-checking."
+- "Validation Is the Bottleneck: Why Your Claude Agent Keeps Drifting" — dev.to, https://dev.to/whoffagents/validation-is-the-bottleneck-why-your-claude-agent-keeps-drifting-14jn — shorter piece, nearest thesis-level competitor, likely light on concrete before/after examples.
+- AGENTS.md/CLAUDE.md practice guides (marmelab "Agent Experience," betterclaw.io, redreamality) — roughly 1,500-3,000 words, tactical structure advice. Don't address drift recurrence.
+
+**Recommended target length: 1,800-2,000 words.** The topic supports depth, but our angle is a focused incident-driven argument, not a reference doc. The comparison cluster and AGENTS.md guides that rank well here land in the 1,500-2,500 range; going shorter than 1,800 would undersell the concrete example needed to land the argument.
+
+## Credible Sources to Cite
+- Claude Code memory docs — https://code.claude.com/docs/en/memory — official confirmation that CLAUDE.md is context, not enforced policy.
+- GitHub Blog, Spec-Driven Development launch post — https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/ — names the "vibe coding" failure mode the article responds to.
+- Addy Osmani, "How to Write a Good Spec for AI Agents" — https://addyosmani.com/blog/good-spec/ — state of the art on spec structure; article's angle differs (incident-driven vs. prescriptive).
+- AWS, Kiro spec-driven agentic IDE — https://repost.aws/articles/AROjWKtr5RTjy6T2HbFJD_Mw/ — concrete existing-tool analog for built-in verification via Agent Hooks.
+- Hacker News, "Validation is the bottleneck" thread — https://news.ycombinator.com/item?id=45786738 — direct community validation of the article's thesis from a highly-upvoted primary discussion.
+
+## Counterarguments to Address
+- "Specs slow you down, vibe coding is faster for prototypes." Documented across the vibe-coding-vs-SDD comparison cluster. Fair counter: vibe coding's speed is front-loaded, fast initial output, slower debugging and rework later. Worth acknowledging honestly: for a true throwaway prototype, a heavy spec-plus-verification setup probably is overkill.
+- "The problem is overstated, good project structure already prevents this." Raised directly on Hacker News by commenter `ashirviskas`, who argued a persistent-markdown drift-prevention approach "manufactures a problem to sell a solution." https://news.ycombinator.com/item?id=47402125 — Counter: PR #92 and the earlier C8 gap are a concrete, reproducible counterexample. The instruction existed and was well-structured, and it still silently failed twice. That is exactly the "not self-verifying" gap the article argues for.
+- Self-verification has real limits. General engineering commentary on AI self-verification holds that self-checks cannot catch errors the model consistently makes, and verification requires the same capabilities as generation, meaning it narrows the failure surface rather than eliminating it. `[UNVERIFIED — needs source]`: not tied to one specific paper, paraphrase without a numbered claim. Worth a caveat paragraph so the article doesn't overclaim.
+
+## Community Discussions
+- Hacker News, Show HN: "I solved Claude Code's context drift with persistent Markdown files" — https://news.ycombinator.com/item?id=47402125 — divided reception, some skepticism the problem is overstated, others recognizing related but distinct multi-agent file-conflict issues.
+- Hacker News, top comment on a widely-read Claude Code thread — https://news.ycombinator.com/item?id=45786738 — "Fancy orchestration is mostly a waste, validation is the bottleneck." Strong pull-quote candidate for the article's thesis.
+- Hacker News, "In my experience, neither Claude nor any other agent actually reads AGENTS.md..." — https://news.ycombinator.com/item?id=45791391 — related but distinct flavor of instruction drift (CLAUDE.md/AGENTS.md diverging across tools), worth a passing mention.
+
+## Note on source review
+This brief was built from a Research Agent pass over web sources; all fetched content was treated as untrusted data per AGENTS.md, and no embedded instructions directed at an AI agent were found in any source. The returned research text was also run through `scripts/scan-untrusted-content.mjs`, which returned a "high" ML-tier risk score with zero Tier 1 pattern detections, a known false-positive profile for dense, statistic-heavy technical writing (see Decision 13). The flagged sentence was reviewed manually and contains only ordinary citation text; no injection risk found.
