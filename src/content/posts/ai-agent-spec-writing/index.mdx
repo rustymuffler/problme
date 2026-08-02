@@ -1,0 +1,112 @@
+---
+title: "Writing a Spec Your AI Agent Can Actually Keep Following"
+description: "Most specs tell an AI agent what to do once, then get quietly ignored next session. Here's how to write one that verifies itself, from a real drift incident."
+category: pm-craft
+tags: ["ai-agents", "product-management", "spec-writing", "claude-code", "agents-md"]
+date: 2026-08-01
+readTime: "8 min"
+heroImage: /assets/posts/ai-agent-spec-writing/hero.png
+imageCredit: "AI-generated with Claude"
+faq:
+  - question: "What makes a spec different when the reader is an AI agent instead of a person?"
+    answer: "A person carries context across a meeting, a Slack thread, and a follow-up email. An AI agent often starts a fresh session with none of that. A good spec for an AI agent has to be self-contained: the task, the constraints, and a way to check the work, all written down, because there's no shared memory to fall back on between sessions."
+  - question: "Why isn't it enough to just tell the AI agent what to do?"
+    answer: "Because a written instruction is not the same as a verified one. Claude Code's own documentation describes CLAUDE.md as context that gets loaded, not a hard policy that gets enforced. If a spec only states the task, a future session can skip a step and nothing catches it. The fix is building a check into the spec itself, not just trusting the instruction will be followed."
+  - question: "What's an example of a spec instruction that failed even though it was written down clearly?"
+    answer: "On probl.me, the content calendar spec says to update an article's status to Published after its PR merges. That instruction failed twice, once for article C8 and again for article C2, because nothing in the spec forced a session-end check against it. The instruction was clear. It just wasn't self-verifying."
+  - question: "Does writing detailed specs slow down AI-assisted development?"
+    answer: "For a true throwaway prototype, yes, a heavy spec is probably overkill. But for anything that needs to survive more than one session, the slowdown is front-loaded. Vibe coding feels faster at first and then costs you in rework and drift later. A spec with a built-in check costs a little more upfront and saves you from finding the same gap twice."
+  - question: "Can AI agents review their own compliance with a spec?"
+    answer: "Partially. Self-verification narrows the failure surface, it doesn't eliminate it, because a self-check requires the same capabilities as the work it's checking. That's why probl.me's own process pairs self-checks with a second agent doing an independent review. No single agent, human or AI, should be the only one confirming its own work met the spec."
+---
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: A spec that only tells an AI agent what to do gets followed once and forgotten the next session. The fix is building a verification step into the spec itself, not just adding another instruction. I learned this the hard way when the same content-calendar update got missed twice on this site, most recently in PR #92.
+</Callout>
+
+I've spent roughly 12 years as a technical writer and over 12 years in product management. Across both, my work has always centered on documentation: end-user docs after engineers ship something new, and product requirements specs that tell engineers what to build. Writing specs for AI agents felt familiar the first time I tried it. Getting a spec to actually stick across sessions took me longer to get right.
+
+Here's what changed my thinking: I recently caught a real gap in [PR #92](https://github.com/rustymuffler/problme/pull/92). The spec for this content pipeline says that once an article's PR merges, its row in the content calendar gets updated from "Queued" to "Published." That instruction is clear. It's written down in `MILESTONES.md`.
+
+And it still got missed, not once, but twice, for two different articles, in two different sessions.
+
+That's the core problem with spec writing for AI agents: a spec that states a task is not the same as a spec that verifies the task happened. If you want an AI agent to actually follow your spec across sessions, you have to build the check into the spec, not just the instruction.
+
+## Why did a clear instruction still get missed twice?
+
+The instruction to update the content calendar wasn't vague. It named the file, the field, and the trigger condition: when a PR merges, flip the status. By any normal reading, that's a good spec.
+
+What it lacked was a way for a fresh session to verify the check had actually happened. [Claude Code's own documentation on memory files](https://code.claude.com/docs/en/memory) describes something worth sitting with: CLAUDE.md and similar files are loaded as context, not enforced as policy. The agent reads the instruction each session, but nothing forces it to cross-reference "did I do the thing I was told to do" against the actual repo state before moving on.
+
+That's exactly what happened here. Article C8 published, and its calendar row stayed marked "Queued" until someone noticed later. The same thing happened again with article C2. Two separate sessions, two separate agents, the same spec, the same silent gap.
+
+I clearly communicate expectations in every spec I write, and I still hit this. The lesson wasn't "write a clearer instruction." The instruction was already clear. The lesson was that a spec needs its own built-in way to catch when it's been skipped.
+
+![Timeline showing the same content-calendar update instruction being silently skipped after two separate article PRs (C8 and C2), then caught a third time in PR #92, with no built-in check added after either miss](/assets/posts/ai-agent-spec-writing/drift-timeline-diagram.png)
+
+## What does a self-verifying spec actually look like?
+
+A self-verifying spec doesn't just say what to do. It says how a fresh session, one with no memory of the last one, checks that the task was actually done.
+
+For the content calendar problem, that means the spec shouldn't just say "update the status after merge." It should say something closer to: "before ending a content session, diff the calendar table against the list of merged content PRs; if any published article's row still says Queued, fix it before closing out." That's a check the next session can run cold, without having to trust that a previous session did its job.
+
+This distinction matters because AI agents don't carry the same kind of continuity a person does. A developer who forgets to update a spreadsheet might remember two days later in the shower. An AI agent starting a new session has no shower moment.
+
+It has whatever's written down, and nothing else. If the verification step isn't written down, it doesn't exist.
+
+I've found real value in using AI to help poke holes in my own specs before this ever becomes a problem in production. It's worth going a step further: have the agent draft the verification step for its own task, not just the task itself. If it can't describe how a future session would confirm the work was done, the spec isn't finished yet.
+
+![Three-step diagram: an instruction, a task run that may or may not complete the instruction, and a verification step that diffs the actual repo state against the spec before a session closes, with a loop back to fix any mismatch](/assets/posts/ai-agent-spec-writing/verification-loop-diagram.png)
+
+## How does agile practice fit into spec writing for AI agents?
+
+I agree with spec writing as a discipline, and I also believe in applying agile practices to how AI agents work, not just how human teams do. In practice this looks like research happening in parallel with drafting, agents assigned to specific slices of a problem so they can work on it together. Then, critically, agents review each other's output instead of a single agent grading its own work.
+
+That last part is the same principle [probl.me's own multi-agent content pipeline](/blog/claude-agent-content-pipeline) applies to content and code: the agent that writes something is never the only one that approves it. A Writer Agent doesn't get to also be its own SEO Reviewer, and a Developer Agent doesn't get to be its own Code Reviewer. It's genuinely interesting to watch two agents push back on each other's work and refine it further, and it catches things a single pass, human or AI, tends to miss.
+
+Self-verification and independent review aren't competing approaches. They're two different layers. A self-check catches the agent skipping its own step. Only a separate reviewing agent catches the self-check itself being wrong, because a self-check can only find the kinds of mistakes the same model is capable of noticing in the first place.
+
+A widely-read Hacker News comment on a Claude Code thread put the same idea more bluntly: [orchestration setups aren't the point](https://news.ycombinator.com/item?id=45786738), "validation is the bottleneck." I'd narrow that slightly. Validation is one bottleneck. The other is whether the spec even wrote down what validation should check for in the first place.
+
+![Two-layer diagram: layer one shows an agent checking its own work, layer two shows a second, independent agent reviewing the first agent's output, illustrating why a self-check alone cannot replace independent review](/assets/posts/ai-agent-spec-writing/self-check-vs-review-diagram.png)
+
+## Are there tools already doing this for you?
+
+Some of it, yes. [GitHub's Spec-Kit](https://github.com/github/spec-kit) formalizes a Spec → Plan → Tasks → Code workflow, so the spec becomes a real artifact the agent works from at each stage instead of a paragraph typed once and forgotten. [AWS's Kiro](https://repost.aws/articles/AROjWKtr5RTjy6T2HbFJD_Mw/) goes a step further with "Agent Hooks," automated checks that fire when a file changes, enforcing consistency between what the spec says and what the code actually does.
+
+Those are useful analogs, but I'd be careful not to treat tooling as a substitute for the habit. [Addy Osmani's widely-cited guide to writing specs for AI agents](https://addyosmani.com/blog/good-spec/) already recommends having the agent verify its own work against the spec, and it's one of the most thorough references out there.
+
+What I haven't seen addressed as directly is the failure mode I hit. The same well-written instruction got quietly skipped more than once, in separate sessions, because the check itself was never written down as its own step. You don't need Spec-Kit or Kiro to fix that. The verification step needs to live inside the spec you're already writing.
+
+## Isn't this all overkill for a quick prototype?
+
+Not every task needs this level of structure. If you're spinning up a one-off script or a disposable prototype, a full spec with a built-in verification step is probably more ceremony than the work deserves. The tradeoff shows up in the comparison people usually draw between "vibe coding" and spec-driven development: vibe coding feels faster because the first output arrives sooner, but that speed is front-loaded. Rework shows up later, in debugging, when nobody wrote down what "done" was supposed to look like.
+
+The line I'd draw is durability. If a task lives inside one session and gets thrown away, skip the ceremony. But if the outcome needs to survive into a future session, a future PR, or a future person reading it, write the check. The 10 extra minutes it takes is cheaper than finding the same gap twice.
+
+![Decision diagram: does this task's outcome need to survive past the current session? If no, skip the verification ceremony for a one-off script or throwaway prototype. If yes, write the check, since it costs less than finding the same gap twice](/assets/posts/ai-agent-spec-writing/durability-decision-diagram.png)
+
+There's a fair pushback worth naming directly: some engineers argue that persistent instruction files and drift-prevention tooling manufacture a problem to sell a solution, that good project structure should already prevent this. I'd have agreed with that before PR #92.
+
+The instruction existed. It was well-structured, and it still failed twice. That's not a hypothetical. It's the exact failure mode the pushback assumes shouldn't happen.
+
+It's also worth being honest about the limits here. Self-verification narrows the failure surface. It doesn't close it. A check written by the same kind of model doing the work can miss the same category of error the model is prone to making in the first place.
+
+That's an argument for pairing self-checks with independent review, not an argument against writing the check at all.
+
+## What would I tell someone starting from zero?
+
+Write your spec so the AI's next self can verify compliance without re-reading the whole conversation. That's the single habit that would have caught the C2 and C8 gap the first time, not the second.
+
+Concretely: for every instruction in a spec that a future session needs to follow, ask "how would a fresh session, with zero memory of right now, confirm this actually happened?" If you can't answer that in one or two sentences, the spec isn't done. You've written a task. You haven't written a way to catch when the task gets missed.
+
+This isn't a one-time fix, either. `MILESTONES.md` on this site has now been updated twice for the exact same class of gap. The next version of that spec should include the verification step directly, so a third instance doesn't happen quietly a third time.
+
+## Key Takeaways
+
+A spec for an AI agent needs to do two things: describe the task, and describe how a future session checks the task was actually completed. Writing the instruction clearly isn't enough on its own, because an AI agent has no continuity between sessions beyond what's written down. Self-verification narrows failures but doesn't eliminate them, which is why independent review by a separate agent still matters alongside it.
+
+The real cost of skipping this isn't dramatic. It's quiet: the same small gap, missed twice, discovered only by accident.
+
+My 12 years writing product specs and 12 years writing documentation taught me the same lesson from two different directions: a requirement nobody checks isn't really a requirement. That's just as true when the reader is an AI agent as when it was an engineer.

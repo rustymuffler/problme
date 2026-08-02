@@ -155,11 +155,11 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 ## Content Calendar
 
 > Maintained by the PM Agent. Updated when articles enter or exit the pipeline.
-> Last updated: 2026-06-26
+> Last updated: 2026-08-01
 
 | # | Working Title | Category | Status | Target Publish |
 |---|---|---|---|---|
-| C1 | Writing a spec your AI agent can actually follow | pm-craft | ⬜ Queued | TBD |
+| C1 | Writing a Spec Your AI Agent Can Actually Keep Following | pm-craft | 🔑 PR Open — [#93](https://github.com/rustymuffler/problme/pull/93) | TBD |
 | C2 | How I Built a Claude Agent Content Pipeline (and What Broke) | ai-development | ✅ Published | 2026-07-21 |
 | C3 | Multi-agent workflows without an orchestration framework: the AGENTS.md approach | ai-development | ⬜ Queued | TBD |
 | C4 | How Context Limits Changed the Way I Build with AI | ai-development | ✅ Published | 2026-06-26 |
@@ -179,3 +179,5 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 *Update 2026-07-21 — PM Agent. C8 confirmed published: PR [#72](https://github.com/rustymuffler/problme/pull/72) merged 2026-07-16, live at probl.me/blog/prompt-injection-ai-agents. Follow-up PR [#73](https://github.com/rustymuffler/problme/pull/73) closed two real process gaps the article surfaced (a content PR that shipped code without a security scan, and no documented rule for untrusted-content/tool-scoping) and adopted `@stackone/defender` for content-pipeline scanning (Decisions 12–13). M3.8 marked complete. Milestones and content calendar were out of sync with `main` at session start (local branch was behind); synced via `git pull origin main` before editing.*
 
 *Update 2026-08-01 — PM Agent. C2 confirmed published: PR [#76](https://github.com/rustymuffler/problme/pull/76) merged 2026-07-21, live at probl.me/blog/claude-agent-content-pipeline. M3.9 and M3.12 marked complete. The Content Calendar row for C2 was never flipped after the merge, same class of drift as the C8 gap found the prior session, worth watching for going forward. The same session also produced two agent-roster governance changes (Decisions 14–15: a lightweight second-review rule for infra-only PRs, and a formalized hand-built diagram/animation image pipeline for the Image Creator Agent) and closed out a cascading Trivy dependency chase across roughly a dozen PRs (js-yaml, sharp, svgo, fast-xml-parser, postcss), all logged in `SECURITY_SCANNING.md`'s Accepted Risk Log and `DECISIONS.md`. Remaining queue: C1, C3, C5, C6, all still Queued — below the 4-ahead target once C2's slot is accounted for, worth flagging per M3.14.*
+
+*Update 2026-08-01 (later same-day session) — PM Agent. C1 ran the full content pipeline end to end: interview, research brief, MDX draft, hand-built SVG image set (hero plus four in-article diagrams), SEO review (two passes), and proofreading review (two passes). Draft PR [#93](https://github.com/rustymuffler/problme/pull/93) opened, pending Richard's review and merge. The article's own subject is the C2/C8 calendar-drift gap noted above: PR #92 fixed the specific missed status flip, but the underlying spec still has no built-in verification step, so the same class of gap remains structurally possible for a future article. Recommend a follow-up task: add an explicit end-of-session check to this file's maintenance instructions, one a fresh session can run without re-reading prior conversation, closing the loop the article itself argues for. Queue after C1 enters review: C3, C5, C6, still Queued.*
