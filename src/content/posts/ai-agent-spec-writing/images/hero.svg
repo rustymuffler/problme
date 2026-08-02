@@ -48,6 +48,7 @@
     <path d="M40,-55 A 75 75 0 0 1 40,55" fill="none" stroke="#38BDF8" stroke-width="2" stroke-dasharray="2 6" opacity="0.5" marker-end="url(#arrow)"/>
   </g>
 
-  <text x="600" y="80" text-anchor="middle" class="lbl" font-size="34" font-weight="700">Writing a Spec Your AI Agent Can Follow</text>
+  <text x="600" y="65" text-anchor="middle" class="lbl" font-size="30" font-weight="700">Writing a Spec Your AI Agent Can</text>
+  <text x="600" y="105" text-anchor="middle" class="lbl" font-size="30" font-weight="700">Actually Keep Following</text>
   <text x="600" y="560" text-anchor="middle" class="sub" font-size="16">a task written down is not the same as a task verified</text>
 </svg>
