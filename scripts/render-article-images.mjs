@@ -7,10 +7,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 
 const targets = [
-  { svg: 'src/content/posts/claude-agent-content-pipeline/images/hero.svg', out: 'public/assets/posts/claude-agent-content-pipeline/hero.png', width: 1200, height: 630 },
-  { svg: 'src/content/posts/claude-agent-content-pipeline/images/pipeline-diagram.svg', out: 'public/assets/posts/claude-agent-content-pipeline/pipeline-diagram.png', width: 1100, height: 560 },
-  { svg: 'src/content/posts/claude-agent-content-pipeline/images/what-broke-diagram.svg', out: 'public/assets/posts/claude-agent-content-pipeline/what-broke-diagram.png', width: 1100, height: 560 },
-  { svg: 'src/content/posts/claude-agent-content-pipeline/images/workflow-tools-diagram.svg', out: 'public/assets/posts/claude-agent-content-pipeline/workflow-tools-diagram.png', width: 1100, height: 560 },
+  { svg: 'src/content/posts/prompt-injection-lessons-applied/images/hero.svg', out: 'public/assets/posts/prompt-injection-lessons-applied/hero.png', width: 1200, height: 630 },
+  { svg: 'src/content/posts/prompt-injection-lessons-applied/images/research-agent-trust-boundary-diagram.svg', out: 'public/assets/posts/prompt-injection-lessons-applied/research-agent-trust-boundary-diagram.png', width: 1100, height: 560 },
 ];
 
 const browser = await chromium.launch();

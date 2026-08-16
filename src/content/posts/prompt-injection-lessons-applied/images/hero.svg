@@ -1,0 +1,81 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+      .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+      .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+    </style>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F1117"/>
+      <stop offset="100%" stop-color="#1A1D27"/>
+    </linearGradient>
+    <linearGradient id="node" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+    <marker id="heroArrow" markerWidth="9" markerHeight="9" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#38BDF8"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="600" y="42" text-anchor="middle" class="sub" font-size="14" letter-spacing="2">SELF-AUDIT: MY OWN AGENT PIPELINE</text>
+
+  <!-- pipeline: five stages connected left to right -->
+  <g stroke="#2E3147" stroke-width="2">
+    <line x1="150" y1="430" x2="1050" y2="430"/>
+  </g>
+  <g stroke="#38BDF8" stroke-width="2" stroke-dasharray="3 6" opacity="0.7">
+    <line x1="150" y1="430" x2="1050" y2="430" marker-end="url(#heroArrow)"/>
+  </g>
+
+  <!-- node 1: Interview -->
+  <circle cx="150" cy="430" r="32" fill="url(#node)"/>
+  <circle cx="150" cy="430" r="10" fill="#0F1117"/>
+  <text x="150" y="500" text-anchor="middle" class="sub" font-size="13">Interview</text>
+
+  <!-- node 2: Research (gap found here) -->
+  <circle cx="375" cy="430" r="46" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 5" opacity="0.6"/>
+  <circle cx="375" cy="430" r="32" fill="url(#node)"/>
+  <circle cx="375" cy="430" r="10" fill="#0F1117"/>
+  <g transform="translate(406,398)">
+    <circle r="17" fill="#22C55E"/>
+    <path d="M-8 0 l6 6 l10 -12" fill="none" stroke="#0F1117" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="375" y="500" text-anchor="middle" class="sub" font-size="13">Research</text>
+  <text x="375" y="518" text-anchor="middle" class="mono" font-size="10" fill="#22C55E">trust boundary fixed</text>
+
+  <!-- node 3: Draft -->
+  <circle cx="600" cy="430" r="32" fill="url(#node)"/>
+  <circle cx="600" cy="430" r="10" fill="#0F1117"/>
+  <text x="600" y="500" text-anchor="middle" class="sub" font-size="13">Draft</text>
+
+  <!-- node 4: Review / PR (gap found here) -->
+  <circle cx="825" cy="430" r="46" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 5" opacity="0.6"/>
+  <circle cx="825" cy="430" r="32" fill="url(#node)"/>
+  <circle cx="825" cy="430" r="10" fill="#0F1117"/>
+  <g transform="translate(856,398)">
+    <circle r="17" fill="#22C55E"/>
+    <path d="M-8 0 l6 6 l10 -12" fill="none" stroke="#0F1117" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="825" y="500" text-anchor="middle" class="sub" font-size="13">Review / PR</text>
+  <text x="825" y="518" text-anchor="middle" class="mono" font-size="10" fill="#22C55E">workflow seam fixed</text>
+
+  <!-- node 5: Publish -->
+  <circle cx="1050" cy="430" r="32" fill="url(#node)"/>
+  <circle cx="1050" cy="430" r="10" fill="#0F1117"/>
+  <text x="1050" y="500" text-anchor="middle" class="sub" font-size="13">Publish</text>
+
+  <!-- watching eye, standing apart from the pipeline, not touching any stage -->
+  <path d="M 470 210 Q 600 148 730 210 Q 600 272 470 210 Z" fill="#161B25" stroke="#38BDF8" stroke-width="7"/>
+  <circle cx="600" cy="210" r="46" fill="url(#node)"/>
+  <circle cx="600" cy="210" r="18" fill="#0F1117"/>
+  <circle cx="589" cy="197" r="6" fill="#F1F5F9" opacity="0.8"/>
+
+  <line x1="490" y1="255" x2="380" y2="380" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.55"/>
+  <line x1="710" y1="255" x2="820" y2="380" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.55"/>
+
+  <text x="600" y="325" text-anchor="middle" class="lbl" font-size="18" font-weight="700">Two real gaps</text>
+  <text x="600" y="350" text-anchor="middle" class="sub" font-size="14">found in my own pipeline</text>
+</svg>

@@ -1,0 +1,108 @@
+---
+title: "I Audited My Own Pipeline for Prompt Injection Gaps"
+description: "I wrote about prompt injection, then audited my own AI content pipeline and found two real gaps. Here's exactly what I found, and what I changed to fix them."
+category: ai-development
+tags: ["prompt-injection", "ai-agents", "ai-security", "agents-md", "process"]
+date: 2026-08-15
+readTime: "7 min"
+heroImage: /assets/posts/prompt-injection-lessons-applied/hero.png
+imageCredit: "AI-generated with Claude"
+faq:
+  - question: "What gap did probl.me's own AI pipeline have around prompt injection?"
+    answer: "Two gaps. First, a real content PR (#72, a table CSS fix) touched shared site code and shipped without Aikido or Semgrep ever running on it. That's because the content and code workflows were documented as separate tracks, and the PR crossed both without triggering either one's security step. Second, there was no documented rule for how much untrusted web content a Research Agent should process versus how much tool access it should have while doing it, the exact mechanism the original article warned about."
+  - question: "Why does an advisory-only prompt-injection scanner still count as real security?"
+    answer: "Because nothing that blocks reliably actually exists yet. A 2026 paper called 'The Attacker Moves Second' tested 12 published prompt-injection defenses against adaptive attackers and bypassed all 12, most with over 90% success. EdgeLabs found six of eight market detection tools also stop at a verdict instead of enforcing anything. Advisory scanning plus a human reading the flag is the honest version of where the industry actually is, not a corner cut."
+  - question: "What is the workflow-seam rule added to probl.me's AGENTS.md?"
+    answer: "Any content PR that touches code outside src/content/posts/[slug]/ or public/assets/posts/[slug]/ now automatically triggers the code workflow's Security Auditor and Code Reviewer steps, in addition to the content workflow's SEO Reviewer and Proofreader. It closes the exact gap PR #72 slipped through, where a change crossed both workflows and got neither's checks."
+  - question: "How much should a Research Agent trust the web content it fetches?"
+    answer: "None of it, by default. probl.me's Research Agent now runs with the most restrictive tool access that accomplishes its job: search, fetch, and summarize only, no Bash, Edit, Write, or git access. It returns findings in its response instead of writing files directly. Its output passes through scripts/scan-untrusted-content.mjs before a human-reviewed research-brief.md gets written, which is documented as the trust boundary between raw fetched content and everything downstream."
+---
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: After publishing an article about prompt injection, I audited my own AI content pipeline and found two real gaps: a code PR that skipped a security scan, and no written rule for how much a Research Agent should trust fetched web content. I closed both. The scan gap was easy. The missing rule was the scarier one.
+</Callout>
+
+Writing about a security problem doesn't count for much if you haven't checked whether your own systems have it. That's the thought that stuck with me after publishing [my last article on prompt injection](/blog/prompt-injection-ai-agents), where I described how hidden instructions in fetched web content can hijack what an AI agent does next.
+
+So I checked. I found two real gaps in probl.me's own agent pipeline, not hypothetical ones. Both are fixed now, and I want to walk through what they were, which one actually worried me more, and what changed as a result.
+
+## What gap did I find in my own pipeline?
+
+While researching and writing that article, I went looking for the same problem in my own process. I found it fast.
+
+PR #72 was a small, unremarkable fix: table CSS in the blog post template, `src/pages/blog/[slug].astro`. It shipped without Aikido or Semgrep ever running on it, even though my own `SECURITY_SCANNING.md` requires both for any code change.
+
+Here's how it slipped through. probl.me runs two separate documented workflows: a content pipeline (Interview Agent, Writer Agent, SEO Reviewer, and so on) and a code pipeline (Developer Agent, Security Auditor, Code Reviewer). I filed PR #72 as a content-adjacent fix, but it touched shared site code. It crossed both tracks and triggered neither one's security step, because nothing in `AGENTS.md` said what should happen when a PR does that.
+
+I also realized something else while writing the article: I had no documented rule for how much untrusted content a Research Agent should be allowed to process versus how much capability it should have while doing it. That's not a tangential issue. It's the exact mechanism the article is about, and it was sitting undocumented in my own `AGENTS.md` the whole time.
+
+![Diagram of the probl.me content pipeline and code pipeline shown as two parallel tracks, with a PR icon crossing between them; on the left labeled "before," the crossing PR passes through a gap with no security checkpoint on either track; on the right labeled "after," the same crossing PR hits a shared security checkpoint icon representing the workflow-seam rule triggering both tracks' Security Auditor and Code Reviewer steps](/assets/posts/prompt-injection-lessons-applied/workflow-seam-diagram.png)
+
+## Which gap actually worried me more?
+
+Not the one you'd expect. The scarier one wasn't the missing security scan. It was the missing rule.
+
+That scan gap was a process bug. Easy to name, easy to fix: add a trigger to `AGENTS.md` and `SECURITY_SCANNING.md` so a content PR touching code pulls in the code workflow's checks too. Done.
+
+The missing rule was worse because it was invisible. I'd never actually written down what a Research Agent is allowed to do with content it fetches from the open web. It was implicitly trusted, by default, with no one ever having decided that on purpose.
+
+That's a much easier thing to miss, because there's no failed check to point at, no PR that visibly skipped a step. It's just a gap in a document nobody had reason to reread.
+
+A lot of security advice, in my experience, gets written by people who care and who have actually run into the walls themselves, not people repeating a principle secondhand. I didn't want to be the person who wrote the prompt-injection article and then never lived through the work of finding and fixing the thing it warned about.
+
+## What did I actually change?
+
+Three things, all logged in `DECISIONS.md` (Decision 12 and Decision 13) and reflected in `AGENTS.md` and `SECURITY_SCANNING.md`.
+
+First, the workflow-seam rule: a content PR that touches anything outside `src/content/posts/[slug]/` or `public/assets/posts/[slug]/` now explicitly triggers the code workflow's Security Auditor Agent and Code Reviewer Agent steps. That's on top of the content workflow's own SEO Reviewer and Proofreader. I retroactively scanned `src/pages/blog/[slug].astro` too: Aikido ran 307 rules and found zero issues, Semgrep ran 47 applicable rules and found zero issues. The gap is closed for real, not just documented.
+
+Second, the untrusted-content rule for the Research Agent. I now explicitly document fetched content as data, never instructions, and every Research Agent prompt has to include that framing. The agent runs with the most restrictive tool access that gets the job done: search, fetch, summarize, no Bash, no Edit, no Write, no git.
+
+It returns its findings in its response text, and the orchestrating session is what actually writes `research-brief.md`. That file is the trust boundary, the line between raw fetched content and everything the Writer Agent, Image Creator, and everyone downstream actually works from.
+
+Third, an actual scanner sitting at that boundary. Before this change, whatever the Research Agent returned went straight into `research-brief.md`, no check in between. Now that output runs through `scripts/scan-untrusted-content.mjs`, using `@stackone/defender`, before the file gets written, and I read the result myself.
+
+![Before-and-after diagram of the Research Agent's data flow: on the left labeled "before," fetched web content flows directly into research-brief.md with no checkpoint; on the right labeled "after," the same fetched content flows through a scan-untrusted-content.mjs checkpoint icon representing the defender scan, then through a human-eye icon representing manual review, before reaching research-brief.md](/assets/posts/prompt-injection-lessons-applied/research-agent-trust-boundary-diagram.png)
+
+I looked at Vigil first, based on research I'd brought into the session, and it turned out to be unworkable: no PyPI package, a separate YARA (a pattern-matching engine used for malware detection) C-library dependency, no CLI, and stale since early 2024. LLM Guard and Rebuff are both archived now too. `@stackone/defender` won because it's actively maintained, runs on Node without a new Python toolchain, and is purpose-built for exactly this job: scanning fetched content for injection patterns before an agent acts on it.
+
+It's advisory, not a hard gate. `blockHighRisk` is set to false. It never blocks the pipeline on its own. The tool just prints a result, and I read it.
+
+Setting it up taught me its own lesson about that choice. It false-positived on one of my own already-published, human-reviewed research briefs, flagging a completely benign sentence about Checkov policy check IDs. Nothing malicious there.
+
+The pattern-matching tier found zero issues. It was the ML classifier tier that tripped on dense security-technical writing. That's a good argument for keeping a human in the loop reading the flag, not a reason to trust the score blindly in either direction.
+
+## Does advisory-only scanning actually count as security?
+
+That's the honest objection, and it's worth taking seriously instead of waving off: a scanner that never blocks anything isn't really enforcing anything.
+
+Here's why I don't think that's a corner I cut. A 2026 paper called ["The Attacker Moves Second"](https://simonw.substack.com/p/new-prompt-injection-papers-agents) tested 12 published prompt-injection defenses against adaptive attackers and got past all 12, most with over 90 percent success. That held even though the same defenses looked solid against static tests. [EdgeLabs' own comparison](https://edgelabs.ai/blog/prompt-injection-detection-tools) of eight prompt-injection detection tools found six of eight stop at a verdict rather than enforcing anything.
+
+Advisory-only isn't the exception in this space right now. It's closer to the norm.
+
+The [OWASP Top 10 for LLM Applications 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) keeps Prompt Injection at number one. It's a rationale I keep coming back to: instructions and data share one channel, the context window, and nothing like a parameterized query exists yet to separate them. That's the same problem SQL injection solves for databases, but nobody has built the equivalent fix for AI agents yet.
+
+OWASP's report also has Excessive Agency climbing from sixth place to third. That's the exact risk the tool-scoping change addresses directly: limit what an agent can do with untrusted content, don't just try to spot the bad content.
+
+OWASP puts the underlying philosophy well: "Stop trying to build a model that cannot be fooled. Build the system around it, so that when the model is fooled, and it will be, nothing important breaks." A scan that catches obvious patterns and flags ambiguous ones for a human, sitting behind an agent that already has minimal tool access, is one layer in that system.
+
+It was never supposed to be the whole wall.
+
+![Layered diagram showing the advisory scanner as one ring among several defense-in-depth layers around a protected research-brief.md core: outermost ring labeled "treat fetched content as data," next ring labeled "minimal Research Agent tool access," next ring labeled "@stackone/defender advisory scan (Tier 1 pattern match, Tier 2 ML classifier)," innermost ring labeled "human reads the flag," with a small callout noting this scan layer alone does not block anything](/assets/posts/prompt-injection-lessons-applied/advisory-scan-defense-layers-diagram.png)
+
+## What would I tell someone starting this audit themselves?
+
+Go look at the seam between your workflows, not just inside each one. My gap wasn't inside the content pipeline, and it wasn't inside the code pipeline. It was in the boundary between the two, where a PR could cross both and get checked by neither.
+
+If you're running more than one agent workflow, that boundary is worth a deliberate look. Ask what happens when a task touches both. In my case, that question is exactly where the untested path was sitting.
+
+I also want to push back gently on one likely reaction: that a solo, low-volume pipeline doesn't need this much process. The PR that shipped without a scan is proof that human review alone already missed it once. Adding a documented rule and a lightweight advisory check isn't overhead for its own sake. It's the same defense-in-depth idea the original article argued for, applied to the thing writing the article.
+
+## Key takeaways
+
+Writing about a security risk isn't the same as checking your own systems for it, and I found that out the direct way. probl.me's own content pipeline had a real code PR that skipped a required security scan, and a real, undocumented gap in how much a Research Agent should trust fetched web content. Both traced back to a seam between two workflows I'd designed and documented separately.
+
+The fix for the scan gap was mechanical: a trigger rule that pulls in the code workflow's checks whenever a content PR crosses into shared code. Fixing the trust gap took something structural: treat fetched content as data. Restrict what the Research Agent can do with it, and put an advisory scanner and a human reader at the boundary where that content turns into something the rest of the pipeline relies on.
+
+Neither fix promises the pipeline can't be fooled. Both are aimed at making sure it doesn't matter as much when it is.
