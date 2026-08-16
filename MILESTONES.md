@@ -167,7 +167,7 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 | C6 | Astro on GitHub Pages in 2026: what the docs don't tell you | tech-tools | ⬜ Queued | TBD |
 | C7 | Why I SHA-Pin Every GitHub Action (and Automate Updates) | tech-tools | ✅ Published | 2026-07-15 |
 | C8 | Prompt Injection Is Already Hiding in What AI Agents Read | ai-development | ✅ Published | 2026-07-16 |
-| C9 | What I Actually Changed After Reading My Own Prompt-Injection Article | ai-development | ⬜ Queued | TBD |
+| C9 | I Audited My Own Pipeline for Prompt Injection Gaps | ai-development | 🔄 Proofread | TBD |
 | C10 | Free Analytics Without Selling Your Readers: Supabase + Vercel + Umami | tech-tools | ⬜ Queued | TBD |
 | C11 | Writing PRDs for an AI Agent vs. Writing Them for a Team | pm-craft | ⬜ Queued | TBD |
 | C12 | Building probl.me in Public, Part 1: Why a Solo Founder Needs a Multi-Agent Team | ai-development | ⬜ Queued | TBD |

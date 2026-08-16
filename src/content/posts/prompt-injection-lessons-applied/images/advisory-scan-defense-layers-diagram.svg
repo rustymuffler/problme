@@ -1,0 +1,57 @@
+<svg viewBox="0 0 1100 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .lbl { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #F1F5F9; }
+      .sub { font-family: 'DejaVu Sans', Arial, sans-serif; fill: #94A3B8; }
+      .mono { font-family: 'DejaVu Sans Mono', 'Courier New', monospace; fill: #94A3B8; }
+    </style>
+    <linearGradient id="core2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1100" height="560" fill="#0F1117"/>
+
+  <text x="550" y="36" text-anchor="middle" class="lbl" font-size="18" font-weight="700">The advisory scan is one layer, not the whole wall</text>
+  <text x="550" y="56" text-anchor="middle" class="sub" font-size="12">four layers protecting research-brief.md at the center</text>
+
+  <circle cx="550" cy="300" r="195" fill="none" stroke="#94A3B8" stroke-width="32" opacity="0.20"/>
+  <circle cx="550" cy="300" r="195" fill="none" stroke="#94A3B8" stroke-width="2"/>
+  <circle cx="550" cy="300" r="142" fill="none" stroke="#F59E0B" stroke-width="32" opacity="0.20"/>
+  <circle cx="550" cy="300" r="142" fill="none" stroke="#F59E0B" stroke-width="2"/>
+  <circle cx="550" cy="300" r="92" fill="none" stroke="#38BDF8" stroke-width="30" opacity="0.20"/>
+  <circle cx="550" cy="300" r="92" fill="none" stroke="#38BDF8" stroke-width="2"/>
+  <circle cx="550" cy="300" r="48" fill="none" stroke="#2DD4BF" stroke-width="24" opacity="0.20"/>
+  <circle cx="550" cy="300" r="48" fill="none" stroke="#2DD4BF" stroke-width="2" stroke-dasharray="5 6"/>
+
+  <!-- protected core -->
+  <circle cx="550" cy="300" r="26" fill="url(#core2)"/>
+  <path d="M542 298 v-7 a8 8 0 0 1 16 0 v7" fill="none" stroke="#0F1117" stroke-width="2.5"/>
+  <rect x="538" y="298" width="24" height="16" rx="3" fill="#0F1117"/>
+  <text x="550" y="352" text-anchor="middle" class="mono" font-size="11">research-brief.md</text>
+
+  <!-- callout 1: outermost - treat as data -->
+  <line x1="435" y1="140" x2="330" y2="90" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+  <rect x="30" y="50" width="300" height="76" rx="10" fill="#1A1D27" stroke="#94A3B8" stroke-width="2"/>
+  <text x="180" y="80" text-anchor="middle" class="lbl" font-size="14" font-weight="700">1. Treat fetched content as data</text>
+  <text x="180" y="102" text-anchor="middle" class="sub" font-size="11">read it, never obey it</text>
+
+  <!-- callout 2: minimal tool access -->
+  <line x1="665" y1="180" x2="770" y2="90" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+  <rect x="770" y="50" width="300" height="76" rx="10" fill="#1A1D27" stroke="#F59E0B" stroke-width="2"/>
+  <text x="920" y="80" text-anchor="middle" class="lbl" font-size="14" font-weight="700">2. Minimal Research Agent access</text>
+  <text x="920" y="102" text-anchor="middle" class="sub" font-size="11">search, fetch, summarize only</text>
+
+  <!-- callout 3: defender scan -->
+  <line x1="630" y1="360" x2="770" y2="450" stroke="#38BDF8" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+  <rect x="770" y="420" width="300" height="86" rx="10" fill="#1A1D27" stroke="#38BDF8" stroke-width="2"/>
+  <text x="920" y="448" text-anchor="middle" class="lbl" font-size="14" font-weight="700">3. @stackone/defender scan</text>
+  <text x="920" y="468" text-anchor="middle" class="sub" font-size="11">Tier 1 pattern match, Tier 2 ML classifier</text>
+  <text x="920" y="486" text-anchor="middle" class="sub" font-size="11" fill="#F59E0B">advisory only, does not block</text>
+
+  <!-- callout 4: human reads the flag -->
+  <line x1="480" y1="335" x2="330" y2="450" stroke="#2DD4BF" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.8"/>
+  <rect x="30" y="420" width="300" height="76" rx="10" fill="#1A1D27" stroke="#2DD4BF" stroke-width="2"/>
+  <text x="180" y="450" text-anchor="middle" class="lbl" font-size="14" font-weight="700">4. Human reads the flag</text>
+  <text x="180" y="472" text-anchor="middle" class="sub" font-size="11">final call before the file is written</text>
+</svg>
