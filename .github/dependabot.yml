@@ -4,6 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Wait a week after a release before proposing it: a freshly published (or
+    # compromised) version gets time to be noticed. Applies to version updates;
+    # security updates are not delayed. Matches the rl-protect recency rule.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore(deps)"
       include: "scope"
