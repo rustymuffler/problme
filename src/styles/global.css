@@ -14,7 +14,7 @@
   /* Text — warm off-white ramp */
   --color-text-primary:   #F4EFE6;
   --color-text-secondary: #B6A88F;
-  --color-text-muted:     #8A7B64;
+  --color-text-muted:     #9A8B74;  /* was #8A7B64: 4.29:1 on surface, 4.01:1 on surface-alt (fails WCAG AA 4.5:1). Now >= 4.97:1 on all surfaces. */
 
   /* Accents — warm */
   --color-amber:      #F2A24B;

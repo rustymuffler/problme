@@ -67,6 +67,7 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
             excerpt={post.data.description}
             date={fmt.format(post.data.date)}
             readTime={post.data.readTime}
+            headingLevel={2}
           />
         ))}
       </div>

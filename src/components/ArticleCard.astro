@@ -10,6 +10,8 @@
  *   excerpt    string    — one- or two-sentence post description
  *   date       string    — human-readable publish date (e.g. "Jun 21, 2026")
  *   readTime   string    — estimated reading time (e.g. "8 min")
+ *   headingLevel 2 | 3   — heading level for the title; default 3. Use 2 when the
+ *                          card sits directly under the page <h1> (no skipped levels).
  */
 import CategoryPill, { type Category } from './CategoryPill.astro';
 
@@ -22,16 +24,18 @@ interface Props {
   excerpt: string;
   date: string;
   readTime: string;
+  headingLevel?: 2 | 3;
 }
 
-const { href, heroImage, heroAlt, category, title, excerpt, date, readTime } = Astro.props;
+const { href, heroImage, heroAlt, category, title, excerpt, date, readTime, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
 ---
 
 <a class="card" href={href}>
   <img src={heroImage} alt={heroAlt} class="card-img" />
   <div class="card-body">
     <CategoryPill category={category} />
-    <h3 class="card-title">{title}</h3>
+    <Heading class="card-title">{title}</Heading>
     <p class="card-excerpt">{excerpt}</p>
     <div class="card-meta">{date} &middot; {readTime}</div>
   </div>

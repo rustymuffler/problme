@@ -170,13 +170,14 @@ test.describe('Accessibility: blog index (/blog)', () => {
     expect(h1Count, 'Blog index must have exactly one h1 even with zero posts').toBe(1);
   });
 
-  test('filter pills are all keyboard focusable', async ({ page }) => {
+  test('category pills are all keyboard focusable', async ({ page }) => {
     await page.goto('/blog');
     await page.waitForLoadState('networkidle');
-    const pills = page.locator('[data-pill]');
+    // Category pills are links to /blog/tag/<category> (class "pill")
+    const pills = page.locator('a.pill[href^="/blog/tag/"]');
     const count = await pills.count();
-    // Must have at least the four category pills defined in the markup
-    expect(count, 'Expected at least 4 filter pills').toBeGreaterThanOrEqual(4);
+    // The three content categories: pm-craft, ai-development, tech-tools
+    expect(count, 'Expected at least 3 category pills').toBeGreaterThanOrEqual(3);
     for (let i = 0; i < count; i++) {
       const pill = pills.nth(i);
       // Each pill is an <a> tag so it must be in the tab order
@@ -213,5 +214,57 @@ test.describe('Accessibility: blog post (/blog/[slug])', () => {
     await page.goto(firstPostLink);
     await page.waitForLoadState('networkidle');
     await runAllChecks(page);
+  });
+});
+
+test.describe('Accessibility: credits page (/credits)', () => {
+  test('passes all a11y checks', async ({ page }) => {
+    await page.goto('/credits');
+    await page.waitForLoadState('networkidle');
+    await runAllChecks(page);
+  });
+});
+
+test.describe('Accessibility: tag page (/blog/tag/[tag])', () => {
+  test('passes all a11y checks', async ({ page }) => {
+    await page.goto('/blog/tag/ai-development');
+    await page.waitForLoadState('networkidle');
+    await runAllChecks(page);
+  });
+});
+
+test.describe('Accessibility: skip link (WCAG 2.4.1)', () => {
+  test('is the first focusable element and moves focus to main content', async ({ page }) => {
+    await page.goto('/');
+    await page.keyboard.press('Tab');
+    const skip = page.locator('a.skip-link');
+    await expect(skip).toBeFocused();
+    await expect(skip).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+  });
+});
+
+test.describe('Accessibility: every blog post', () => {
+  test('passes all a11y checks on every post', async ({ page }) => {
+    await page.goto('/blog');
+    await page.waitForLoadState('networkidle');
+    const hrefs = await page
+      .locator('a[href^="/blog/"]')
+      .evaluateAll((els) =>
+        Array.from(
+          new Set(
+            els
+              .map((e) => e.getAttribute('href') ?? '')
+              // post URLs only: /blog/<slug>, not /blog/tag/... or /blog itself
+              .filter((h) => /^\/blog\/[^/]+\/?$/.test(h)),
+          ),
+        ),
+      );
+    for (const href of hrefs) {
+      await page.goto(href);
+      await page.waitForLoadState('networkidle');
+      await runAllChecks(page);
+    }
   });
 });
