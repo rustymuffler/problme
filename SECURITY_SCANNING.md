@@ -127,6 +127,8 @@ semgrep --config auto .
 - Maintainer account takeover attacks
 - Typosquatting and dependency confusion
 
+**CI job (added 2026-11-18, advisory):** the `rl-protect` job in `.github/workflows/security.yml` runs `reversinglabs/gh-action-rl-protect-scan` (pinned to a full commit SHA) with the `baseline` profile against `package.json`. It is **non-blocking** (`continue-on-error`) because the baseline profile fails any version published within the last few days, which would turn fresh Dependabot PRs red. Read the findings in the run log and job summary. Limits: the CLI rejects `package-lock.json` ("unsupported manifest file"), so only direct dependencies are scanned; it needs the `RL_TOKEN` secret set under both Actions secrets and Dependabot secrets. Revisit making it blocking once a custom profile without the recency rule exists.
+
 ---
 
 ### 5. Trivy — Dependency CVE Scanning (SCA)
