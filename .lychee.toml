@@ -46,6 +46,11 @@ exclude = [
   # Bunny Fonts CDN -- always up and not something we control
   "^https://fonts\\.bunny\\.net",
 
+  # microsoft/onnxruntime (THIRD-PARTY-NOTICES.md source link) returned 404 on
+  # 2026-11-18, including via the GitHub API. Temporary exclude for this one
+  # URL only; remove once the upstream repo is reachable again.
+  "^https://github\\.com/microsoft/onnxruntime/?$",
+
   # The site's own domain -- OG/canonical meta tags reference it but the
   # domain may not reflect the current PR build, so skip self-references
   "^https://probl\\.me",
