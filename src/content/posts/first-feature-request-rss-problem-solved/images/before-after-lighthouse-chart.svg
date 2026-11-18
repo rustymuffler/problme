@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="660" viewBox="0 0 1200 660" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <pattern id="hatch" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="12" height="12" fill="#E8674A"/><rect width="5" height="12" fill="#15120E" opacity="0.55"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="660" fill="#15120E"/>
+  <text x="60" y="56" font-size="26" font-weight="700" fill="#F4EFE6">Lighthouse performance score</text>
+  <text x="60" y="84" font-size="18" fill="#B6A88F">Higher is better, scale 0 to 100</text>
+  <text x="840" y="56" font-size="26" font-weight="700" fill="#F4EFE6">Largest Contentful Paint</text>
+  <text x="840" y="84" font-size="18" fill="#B6A88F">Slowest post, lower is better</text>
+  <line x1="800" y1="40" x2="800" y2="570" stroke="#3D3322" stroke-width="2"/>
+  <line x1="110" y1="520" x2="740" y2="520" stroke="#9A8B74" stroke-width="2"/>
+  <line x1="110" y1="130" x2="110" y2="520" stroke="#3D3322" stroke-width="2"/>
+  <text x="100" y="525" font-size="16" text-anchor="end" fill="#B6A88F">0</text>
+  <text x="100" y="135" font-size="16" text-anchor="end" fill="#B6A88F">100</text>
+  <rect x="160" y="204.1" width="110" height="315.9" fill="url(#hatch)" stroke="#E8674A" stroke-width="2"/>
+  <rect x="280" y="130" width="110" height="390" fill="#9DB066"/>
+  <text x="215" y="194" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">81</text>
+  <text x="335" y="120" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">100</text>
+  <rect x="475" y="247" width="110" height="273" fill="url(#hatch)" stroke="#E8674A" stroke-width="2"/>
+  <rect x="595" y="130" width="110" height="390" fill="#9DB066"/>
+  <text x="530" y="237" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">70</text>
+  <text x="650" y="120" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">100</text>
+  <text x="215" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">Before</text>
+  <text x="335" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">After</text>
+  <text x="530" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">Before</text>
+  <text x="650" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">After</text>
+  <text x="275" y="580" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Blog index</text>
+  <text x="590" y="580" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Slowest post page</text>
+  <line x1="110" y1="169" x2="740" y2="169" stroke="#F2A24B" stroke-width="3" stroke-dasharray="12 8"/>
+  <text x="116" y="160" font-size="18" font-weight="700" fill="#F2A24B">CI gate: 90</text>
+  <line x1="830" y1="520" x2="1150" y2="520" stroke="#9A8B74" stroke-width="2"/>
+  <rect x="850" y="149.5" width="110" height="370.5" fill="url(#hatch)" stroke="#E8674A" stroke-width="2"/>
+  <rect x="1010" y="422.5" width="110" height="97.5" fill="#9DB066"/>
+  <text x="905" y="139" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">5.7 s</text>
+  <text x="1065" y="412" font-size="24" font-weight="700" text-anchor="middle" fill="#F4EFE6">1.5 s</text>
+  <line x1="830" y1="357.5" x2="1150" y2="357.5" stroke="#F2A24B" stroke-width="3" stroke-dasharray="12 8"/>
+  <text x="1150" y="346" font-size="18" font-weight="700" text-anchor="end" fill="#F2A24B">Good: 2.5 s</text>
+  <text x="905" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">Before</text>
+  <text x="1065" y="548" font-size="17" text-anchor="middle" fill="#B6A88F">After</text>
+  <rect x="60" y="618" width="28" height="22" fill="url(#hatch)" stroke="#E8674A" stroke-width="2"/>
+  <text x="100" y="636" font-size="18" fill="#B6A88F">Before (hatched)</text>
+  <rect x="290" y="618" width="28" height="22" fill="#9DB066"/>
+  <text x="330" y="636" font-size="18" fill="#B6A88F">After (solid)</text>
+  <line x1="480" y1="629" x2="524" y2="629" stroke="#F2A24B" stroke-width="3" stroke-dasharray="8 5"/>
+  <text x="536" y="636" font-size="18" fill="#B6A88F">Threshold</text>
+</svg>

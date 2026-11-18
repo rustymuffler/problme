@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="aO" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto"><path d="M0 1 L15 8 L0 15 z" fill="#9DB066"/></marker>
+    <marker id="aM" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto"><path d="M0 1 L15 8 L0 15 z" fill="#9A8B74"/></marker>
+  </defs>
+  <rect width="1200" height="600" fill="#15120E"/>
+  <!-- BEFORE lane -->
+  <text x="60" y="60" font-size="28" font-weight="700" fill="#E8674A">BEFORE</text>
+  <rect x="60" y="90" width="280" height="90" rx="12" fill="#241E15" stroke="#3D3322" stroke-width="2"/>
+  <text x="200" y="128" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Accessibility test suite</text>
+  <text x="200" y="154" font-size="17" text-anchor="middle" fill="#B6A88F">sits in the repository</text>
+  <rect x="470" y="90" width="280" height="90" rx="12" fill="#241E15" stroke="#3D3322" stroke-width="2"/>
+  <text x="610" y="128" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">CI pipeline</text>
+  <text x="610" y="154" font-size="17" text-anchor="middle" fill="#B6A88F">no accessibility job</text>
+  <rect x="880" y="90" width="260" height="90" rx="12" fill="#241E15" stroke="#3D3322" stroke-width="2"/>
+  <text x="1010" y="128" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Pull request</text>
+  <text x="1010" y="154" font-size="17" text-anchor="middle" fill="#B6A88F">no result shown</text>
+  <path d="M340 135 L385 135" stroke="#E8674A" stroke-width="4" stroke-dasharray="8 6" fill="none"/>
+  <path d="M425 135 L470 135" stroke="#E8674A" stroke-width="4" stroke-dasharray="8 6" fill="none"/>
+  <path d="M393 120 L417 150 M417 120 L393 150" stroke="#E8674A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M750 135 L880 135" stroke="#9A8B74" stroke-width="4" fill="none" marker-end="url(#aM)"/>
+  <text x="600" y="224" font-size="19" text-anchor="middle" fill="#B6A88F">No arrow from the suite into CI, so a result never reaches a pull request.</text>
+  <line x1="60" y1="260" x2="1140" y2="260" stroke="#3D3322" stroke-width="2"/>
+  <!-- AFTER lane -->
+  <text x="60" y="306" font-size="28" font-weight="700" fill="#9DB066">AFTER</text>
+  <rect x="60" y="336" width="240" height="90" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="180" y="374" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Test suite</text>
+  <text x="180" y="400" font-size="17" text-anchor="middle" fill="#B6A88F">accessibility tests</text>
+  <rect x="360" y="336" width="250" height="90" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="485" y="374" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">CI job</text>
+  <text x="485" y="400" font-size="17" text-anchor="middle" fill="#B6A88F">runs on every pull request</text>
+  <rect x="670" y="336" width="250" height="90" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="795" y="374" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Required status check</text>
+  <text x="795" y="400" font-size="17" text-anchor="middle" fill="#B6A88F">on the main branch</text>
+  <rect x="980" y="336" width="160" height="90" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="1060" y="374" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">Merge</text>
+  <text x="1060" y="400" font-size="17" text-anchor="middle" fill="#B6A88F">blocked on fail</text>
+  <path d="M300 381 L355 381" stroke="#9DB066" stroke-width="4" fill="none" marker-end="url(#aO)"/>
+  <path d="M610 381 L665 381" stroke="#9DB066" stroke-width="4" fill="none" marker-end="url(#aO)"/>
+  <path d="M920 381 L975 381" stroke="#9DB066" stroke-width="4" fill="none" marker-end="url(#aO)"/>
+  <rect x="60" y="476" width="500" height="56" rx="28" fill="#241E15" stroke="#E8674A" stroke-width="2"/>
+  <text x="310" y="511" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">4 tests failed the first time they ran</text>
+  <rect x="600" y="476" width="540" height="56" rx="28" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="870" y="511" font-size="20" font-weight="600" text-anchor="middle" fill="#F4EFE6">10 of 10 pass after the fixes</text>
+</svg>
