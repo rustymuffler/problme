@@ -1,0 +1,5 @@
+# picomatch DoS via repeated extglob patterns. No fixed version exists upstream
+# (2.3.2 and 4.0.7 are both affected). Dev-tooling dependency only; not shipped
+# in the built static site. Added 2026-11-18. Re-check when picomatch publishes
+# a fix, then delete this entry.
+CVE-2026-112366
