@@ -13,8 +13,10 @@ const postLastmod = new Map();
 for (const entry of readdirSync(POSTS_DIR, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
   const src = readFileSync(new URL(`${entry.name}/index.mdx`, POSTS_DIR), 'utf8');
-  const field = (name) => src.match(new RegExp(String.raw`^${name}:\s*"?([0-9-]+)"?\s*$`, 'm'))?.[1];
-  const date = field('updatedDate') ?? field('date');
+  // Hardcoded regexes (no RegExp built from variables), one per frontmatter field.
+  const updated = src.match(/^updatedDate:\s*"?([0-9-]+)"?\s*$/m)?.[1];
+  const published = src.match(/^date:\s*"?([0-9-]+)"?\s*$/m)?.[1];
+  const date = updated ?? published;
   if (date) postLastmod.set(`https://probl.me/blog/${entry.name}/`, new Date(date).toISOString());
 }
 
