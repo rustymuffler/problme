@@ -291,7 +291,8 @@
 3. **Tag pages are `noindex, follow` and excluded from the sitemap.** They are thin, near-duplicate listings. Links still pass crawl paths to posts. Revisit if tag pages gain unique content (intro text, curated order).
 4. **`<title>` length:** posts append " — probl.me" only when the full title fits in 60 characters.
 5. **Sitemap `lastmod` only for posts** (from `updatedDate`, else `date`). Other pages have no reliable modified date, and an inaccurate `lastmod` is worse than none.
-6. **Lighthouse CI scope:** home, blog index, one post, about. Accessibility, best practices, and SEO are hard gates at the documented minimums; performance is an error below 0.60 and a warning below 0.90. The documented performance gate of 90 is **not yet met** on blog and post pages (measured 70-98 locally; post-page LCP is the ~200KB PNG hero). Follow-up: serve WebP heroes (keep PNG for Open Graph).
+6. **Lighthouse CI scope:** home, blog index, one post, about. Accessibility, best practices, and SEO are hard gates at the documented minimums; performance is also a hard gate at the documented 0.90 (raised from an interim 0.60 once WebP heroes landed). Measured locally before: 70-98 on blog and post pages, post-page LCP 4.7-5.7s (a ~200KB PNG hero, plus ~650KB of eager in-article diagrams competing for bandwidth). After: 100 on all tested pages, LCP 0.9-1.5s.
+7. **Hero images ship as WebP plus PNG.** `scripts/generate-webp-heroes.mjs` writes `hero.webp` (1200px) and `hero-640.webp` next to each `hero.png` (about 90% smaller); pages render `<picture>` with the PNG as fallback. The PNG stays as the Open Graph and JSON-LD image because social crawlers do not reliably support WebP. In-article markdown/MDX images are lazy-loaded by a small rehype plugin in `astro.config.mjs`.
 
 ---
 

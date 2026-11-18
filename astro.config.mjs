@@ -20,6 +20,22 @@ for (const entry of readdirSync(POSTS_DIR, { withFileTypes: true })) {
   if (date) postLastmod.set(`https://probl.me/blog/${entry.name}/`, new Date(date).toISOString());
 }
 
+// In-article images (markdown/MDX) are below the fold. Mark them lazy so they
+// do not compete with the hero image for bandwidth (this is what held the
+// ai-agent-spec-writing post at 83 on Lighthouse performance). No dependencies:
+// a minimal hast walker.
+function rehypeLazyImages() {
+  return (tree) => {
+    const visit = (node) => {
+      if (node.type === 'element' && node.tagName === 'img') {
+        node.properties = { ...node.properties, loading: 'lazy', decoding: 'async' };
+      }
+      node.children?.forEach(visit);
+    };
+    visit(tree);
+  };
+}
+
 export default defineConfig({
   site: 'https://probl.me',
   // One URL per page: every canonical, sitemap entry, JSON-LD url and internal
@@ -39,6 +55,7 @@ export default defineConfig({
   ],
   markdown: {
     rehypePlugins: [
+      rehypeLazyImages,
       // External links open in a new tab; internal links are untouched.
       [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }],
     ],

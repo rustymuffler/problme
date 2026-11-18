@@ -268,3 +268,22 @@ test.describe('Accessibility: every blog post', () => {
     }
   });
 });
+
+test.describe('Layout: <picture> wrappers do not break their parents', () => {
+  test('featured card image sits beside its text on desktop and uses WebP', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/blog/');
+    await page.waitForLoadState('networkidle');
+    const img = page.locator('.feat-card img').first();
+    const body = page.locator('.feat-body').first();
+    const imgBox = await img.boundingBox();
+    const bodyBox = await body.boundingBox();
+    expect(imgBox, 'featured image should render').not.toBeNull();
+    expect(bodyBox, 'featured body should render').not.toBeNull();
+    // Two-column grid: image left, text right, same row (not stacked or pushed to column 2).
+    expect(imgBox!.x).toBeLessThan(bodyBox!.x);
+    expect(Math.abs(imgBox!.y - bodyBox!.y)).toBeLessThan(4);
+    // Served as WebP where a variant exists.
+    expect(await img.evaluate((el: HTMLImageElement) => el.currentSrc)).toMatch(/\.webp$/);
+  });
+});
