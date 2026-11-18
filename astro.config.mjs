@@ -6,7 +6,11 @@ import rehypeExternalLinks from 'rehype-external-links';
 
 export default defineConfig({
   site: 'https://probl.me',
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    // Tag pages are noindex (thin, near-duplicate listings), so keep them out of the sitemap.
+    sitemap({ filter: (page) => !page.includes('/blog/tag/') }),
+  ],
   markdown: {
     rehypePlugins: [
       // External links open in a new tab; internal links are untouched.

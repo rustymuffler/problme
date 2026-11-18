@@ -9,6 +9,8 @@ interface Props {
   ogImage?: string;
   ogType?: 'website' | 'article';
   jsonLd?: object[];
+  /** Thin/utility pages: ask search engines not to index, but still follow links. */
+  noindex?: boolean;
 }
 
 const {
@@ -17,6 +19,7 @@ const {
   ogImage = '/assets/og/og-default.svg',
   ogType = 'website',
   jsonLd = [],
+  noindex = false,
 } = Astro.props;
 
 const pathname = new URL(Astro.request.url).pathname;
@@ -43,6 +46,7 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, follow" />}
   <link rel="canonical" href={`${siteUrl}${pathname}`} />
 
   <!-- Open Graph -->
