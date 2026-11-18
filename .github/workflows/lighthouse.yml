@@ -22,6 +22,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        env:
+          # onnxruntime-node downloads a CUDA GPU binary on Linux x64 by default;
+          # that release asset now 404s and CI has no GPU. Skip it.
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
         run: npm ci
 
       - name: Build site
