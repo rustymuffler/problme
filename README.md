@@ -64,6 +64,12 @@ See [`AGENTS.md`](AGENTS.md) for the full roster and workflow, and [`CONTENT_STA
 
 ---
 
+## Contributing, Testing, and Reporting Bugs
+
+Found a bug, broken link, or accessibility problem? Open an [issue](https://github.com/rustymuffler/problme/issues). Security issues go through [`SECURITY.md`](SECURITY.md), not public issues. To contribute a change or run the test suite (`npm run check`, `npm run build`, `npm run test:a11y`), see [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+---
+
 ## License
 
 The code, framework, layouts, and design elements of this repository are licensed under the [MIT License](LICENSE).
