@@ -233,21 +233,26 @@ probl.me is **dark mode by default**. The color palette is designed for dark mod
 
 Light mode support is optional and can be added in a future phase. If added, it must use a clearly defined light palette and never look broken or inconsistent. Until light mode is explicitly built and tested, do not write code that assumes a light theme.
 
-**CSS variable convention:**
+**CSS variable convention** (actual tokens in `src/styles/global.css`, the source of truth):
+
+> **Updated 2026-11-18:** the site ships the warm "Workshop" palette below. The blue/teal values in the palette tables earlier in this document (`#0F1117`, `#38BDF8`, etc.) predate that and are out of date; reconcile them when the palette is next revisited. Do not copy colors from those tables into new code.
+
 ```css
 :root {
-  --color-bg: #0F1117;
-  --color-surface: #1A1D27;
-  --color-surface-alt: #252836;
-  --color-border: #2E3147;
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-  --color-accent-blue: #38BDF8;
-  --color-accent-teal: #2DD4BF;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
+  --color-bg: #15120E;
+  --color-surface: #1C1812;
+  --color-surface-alt: #241E15;
+  --color-border: #2E261B;
+  --color-border-strong: #3D3322;
+  --color-text-primary: #F4EFE6;
+  --color-text-secondary: #B6A88F;
+  --color-text-muted: #9A8B74;
+  --color-amber: #F2A24B;
+  --color-terracotta: #E8674A;
+  --color-olive: #9DB066;
+  --color-success: #7FB069;
+  --color-warning: #E8B04B;
+  --color-danger: #D64933;
 }
 ```
 
@@ -258,11 +263,21 @@ Light mode support is optional and can be added in a future phase. If added, it 
 All design decisions must meet WCAG 2.1 AA standards at minimum.
 
 - **Color contrast:** Body text on backgrounds must meet a 4.5:1 contrast ratio. Large text (18px+ bold or 24px+) must meet 3:1.
-- **Verify:** `#F1F5F9` (Text Primary) on `#0F1117` (Background) = 16.9:1 ✅
-- **Verify:** `#94A3B8` (Text Secondary) on `#0F1117` (Background) = 7.1:1 ✅
-- **Verify:** `#38BDF8` (Accent Blue) on `#0F1117` (Background) = 6.2:1 ✅
+- **Measured contrast** (2026-11-18, current tokens; columns are page background / surface / surface-alt):
+
+| Text color | on bg `#15120E` | on surface `#1C1812` | on surface-alt `#241E15` |
+|---|---|---|---|
+| Text Primary `#F4EFE6` | 16.3:1 | 15.4:1 | 14.4:1 |
+| Text Secondary `#B6A88F` | 8.0:1 | 7.6:1 | 7.1:1 |
+| Text Muted `#9A8B74` | 5.6:1 | 5.3:1 | 5.0:1 |
+| Amber `#F2A24B` | 8.9:1 | 8.5:1 | 7.9:1 |
+| Terracotta `#E8674A` | 5.8:1 | 5.4:1 | 5.1:1 |
+| Olive `#9DB066` | 7.9:1 | 7.4:1 | 6.9:1 |
+
+  All pass AA (4.5:1). Text Muted was `#8A7B64` until 2026-11-18 and failed on surface (4.29:1) and surface-alt (4.01:1); never go darker than the current value for text. The axe suite (`npm run test:a11y`, run in CI) enforces this.
 - **Hit targets:** All interactive elements (links, buttons, cards) must be at minimum 44×44px.
-- **Focus states:** All interactive elements must have a visible focus ring using the Accent Blue color.
+- **Focus states:** All interactive elements must have a visible focus ring (2px Amber outline via `:focus-visible` in `global.css`).
+- **Skip link:** Every page starts with a "Skip to main content" link targeting `#main-content` (WCAG 2.4.1). Do not remove it from `Layout.astro`.
 - **No color-only information:** Never convey information using color alone. Pair color with text or icons.
 
 ---

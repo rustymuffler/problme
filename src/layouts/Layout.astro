@@ -9,6 +9,8 @@ interface Props {
   ogImage?: string;
   ogType?: 'website' | 'article';
   jsonLd?: object[];
+  /** Thin/utility pages: ask search engines not to index, but still follow links. */
+  noindex?: boolean;
 }
 
 const {
@@ -17,6 +19,7 @@ const {
   ogImage = '/assets/og/og-default.svg',
   ogType = 'website',
   jsonLd = [],
+  noindex = false,
 } = Astro.props;
 
 const pathname = new URL(Astro.request.url).pathname;
@@ -43,6 +46,7 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex, follow" />}
   <link rel="canonical" href={`${siteUrl}${pathname}`} />
 
   <!-- Open Graph -->
@@ -118,6 +122,9 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 
 <body>
 
+  <!-- WCAG 2.4.1 Bypass Blocks: first focusable element, visible on focus -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
   <!-- ─── HEADER ───────────────────────────────────────────────────────── -->
   <header class="site-header">
     <div class="header-inner">
@@ -130,8 +137,8 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
       <!-- Desktop / tablet inline nav (hidden at ≤639px by CSS + JS) -->
       <nav class="desktop-nav" aria-label="Main navigation">
         <a class={`dn-link${isHome  ? ' dn-active' : ''}`} href="/">home</a>
-        <a class={`dn-link${isBlog  ? ' dn-active' : ''}`} href="/blog">blog</a>
-        <a class={`dn-link${isAbout ? ' dn-active' : ''}`} href="/about">about</a>
+        <a class={`dn-link${isBlog  ? ' dn-active' : ''}`} href="/blog/">blog</a>
+        <a class={`dn-link${isAbout ? ' dn-active' : ''}`} href="/about/">about</a>
         <a
           class="dn-link dn-gh"
           href="https://github.com/rustymuffler"
@@ -159,8 +166,8 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
     <!-- Mobile nav dropdown panel (full-width, anchored below header-inner row) -->
     <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
       <a class={`mn-link${isHome  ? ' mn-active' : ''}`} href="/">home</a>
-      <a class={`mn-link${isBlog  ? ' mn-active' : ''}`} href="/blog">blog</a>
-      <a class={`mn-link${isAbout ? ' mn-active' : ''}`} href="/about">about</a>
+      <a class={`mn-link${isBlog  ? ' mn-active' : ''}`} href="/blog/">blog</a>
+      <a class={`mn-link${isAbout ? ' mn-active' : ''}`} href="/about/">about</a>
       <a
         class="mn-link"
         href="https://github.com/rustymuffler"
@@ -171,7 +178,7 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
   </header>
 
   <!-- ─── PAGE CONTENT ─────────────────────────────────────────────────── -->
-  <main>
+  <main id="main-content" tabindex="-1">
     <slot />
   </main>
 
@@ -189,11 +196,11 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 
       <!-- Footer nav — credits link lives here only, never in the top nav -->
       <nav class="footer-nav" aria-label="Footer navigation">
-        <a class="fn-link" href="/blog">blog</a>
-        <a class="fn-link" href="/about">about</a>
+        <a class="fn-link" href="/blog/">blog</a>
+        <a class="fn-link" href="/about/">about</a>
         <a class="fn-link" href="https://github.com/rustymuffler" target="_blank" rel="noopener noreferrer">github</a>
         <a class="fn-link" href="/rss.xml">rss</a>
-        <a class="fn-link" href="/credits">credits</a>
+        <a class="fn-link" href="/credits/">credits</a>
         <span class="fn-copy">&copy; 2026</span>
       </nav>
 
@@ -411,6 +418,24 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 .fn-link:hover { color: var(--color-text-primary); }
 
 .fn-copy { color: var(--color-text-muted); }
+
+/* Skip link: off-screen until focused, then pinned top-left above the header */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -100px;
+  z-index: 1000;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-amber);
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.skip-link:focus { top: 12px; }
+main:focus { outline: none; }
 
 /* ─── Responsive ──────────────────────────────────────────────────────── */
 @media (max-width: 639px) {

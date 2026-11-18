@@ -23,7 +23,7 @@ import Callout from '../../../components/Callout.astro';
 TL;DR: After publishing an article about prompt injection, I audited my own AI content pipeline and found two real gaps: a code PR that skipped a security scan, and no written rule for how much a Research Agent should trust fetched web content. I closed both. The scan gap was easy. The missing rule was the scarier one.
 </Callout>
 
-Writing about a security problem doesn't count for much if you haven't checked whether your own systems have it. That's the thought that stuck with me after publishing [my last article on prompt injection](/blog/prompt-injection-ai-agents), where I described how hidden instructions in fetched web content can hijack what an AI agent does next.
+Writing about a security problem doesn't count for much if you haven't checked whether your own systems have it. That's the thought that stuck with me after publishing [my last article on prompt injection](/blog/prompt-injection-ai-agents/), where I described how hidden instructions in fetched web content can hijack what an AI agent does next.
 
 So I checked. I found two real gaps in probl.me's own agent pipeline, not hypothetical ones. Both are fixed now, and I want to walk through what they were, which one actually worried me more, and what changed as a result.
 

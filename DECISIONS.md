@@ -278,6 +278,23 @@
 
 ---
 
+## Decision 16: Accessibility, URL, and Indexing Policy (2026-11-18 Audit)
+
+**Date:** 2026-11-18
+**Status:** Accepted
+
+**Context:** An audit of the built site against WCAG 2.1 AA, SEO, and GEO/AEO (see `GEO_MEASUREMENT.md`) found: real contrast failures, no skip link, skipped heading levels on tag pages, an axe suite that never ran in CI, internal links without trailing slashes (each a 301 hop on GitHub Pages), 33 thin tag pages making up most of the sitemap, and a Lighthouse CI config that only tested the homepage with a performance floor of 0.50 against the documented 90.
+
+**Decisions:**
+1. **Accessibility is enforced in CI.** The axe suite runs as the `a11y` job in `ci.yml` on every PR; it covers every page type and every post. The muted text token is `#9A8B74` (see `BRAND.md` §8 for measured ratios).
+2. **One URL per page.** `trailingSlash: 'always'`; every canonical, `og:url`, sitemap entry, JSON-LD URL, RSS link, and internal link ends in a slash. Slugs stay lowercase, hyphenated, and keyword-bearing. http to https and www to apex are already 301 on the live domain.
+3. **Tag pages are `noindex, follow` and excluded from the sitemap.** They are thin, near-duplicate listings. Links still pass crawl paths to posts. Revisit if tag pages gain unique content (intro text, curated order).
+4. **`<title>` length:** posts append " — probl.me" only when the full title fits in 60 characters.
+5. **Sitemap `lastmod` only for posts** (from `updatedDate`, else `date`). Other pages have no reliable modified date, and an inaccurate `lastmod` is worse than none.
+6. **Lighthouse CI scope:** home, blog index, one post, about. Accessibility, best practices, and SEO are hard gates at the documented minimums; performance is an error below 0.60 and a warning below 0.90. The documented performance gate of 90 is **not yet met** on blog and post pages (measured 70-98 locally; post-page LCP is the ~200KB PNG hero). Follow-up: serve WebP heroes (keep PNG for Open Graph).
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22

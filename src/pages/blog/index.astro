@@ -29,10 +29,10 @@ const featuredPost = allPosts[0] ?? null;
 
     <!-- Filter pills — "all" is active; others link to pre-rendered tag pages -->
     <div class="pills" role="list">
-      <a class="pill is-active--amber" href="/blog"                    role="listitem">all</a>
-      <a class="pill"                  href="/blog/tag/pm-craft"       role="listitem">pm-craft</a>
-      <a class="pill"                  href="/blog/tag/ai-development" role="listitem">ai-development</a>
-      <a class="pill"                  href="/blog/tag/tech-tools"     role="listitem">tech-tools</a>
+      <a class="pill is-active--amber" href="/blog/"                    role="listitem">all</a>
+      <a class="pill"                  href="/blog/tag/pm-craft/"       role="listitem">pm-craft</a>
+      <a class="pill"                  href="/blog/tag/ai-development/" role="listitem">ai-development</a>
+      <a class="pill"                  href="/blog/tag/tech-tools/"     role="listitem">tech-tools</a>
     </div>
   </section>
 
@@ -41,12 +41,16 @@ const featuredPost = allPosts[0] ?? null;
     <section class="feat-wrap">
       <a
         class="feat-card"
-        href={`/blog/${featuredPost.id.replace(/\.(md|mdx)$/, '')}`}
+        href={`/blog/${featuredPost.id.replace(/\.(md|mdx)$/, '')}/`}
       >
         <img
           src={featuredPost.data.heroImage ?? '/assets/og/og-default.svg'}
           alt={featuredPost.data.title}
           class="feat-img"
+          width="1200"
+          height="630"
+          fetchpriority="high"
+          decoding="async"
         />
         <div class="feat-body">
           <div class="feat-meta-row">
@@ -71,7 +75,7 @@ const featuredPost = allPosts[0] ?? null;
           const slug = post.id.replace(/\.(md|mdx)$/, '');
           return (
             <ArticleCard
-              href={`/blog/${slug}`}
+              href={`/blog/${slug}/`}
               heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
               heroAlt={post.data.title}
               category={post.data.category as Category}

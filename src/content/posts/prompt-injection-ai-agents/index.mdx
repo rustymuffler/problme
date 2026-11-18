@@ -117,7 +117,7 @@ Meta arrived at a similar structure from a different angle. Its [Agents Rule of 
 
 ## What changes when your own AI pipeline reads untrusted content?
 
-This isn't hypothetical for me. probl.me's own content pipeline runs on Claude agents that fetch real, external web pages as part of researching and writing articles, this one included. I've already [written about designing that same pipeline around context limits](/blog/context-limits-design-constraint). Every page an agent pulls in for a brand reference, a statistic, or a competitive scan is untrusted content by definition.
+This isn't hypothetical for me. probl.me's own content pipeline runs on Claude agents that fetch real, external web pages as part of researching and writing articles, this one included. I've already [written about designing that same pipeline around context limits](/blog/context-limits-design-constraint/). Every page an agent pulls in for a brand reference, a statistic, or a competitive scan is untrusted content by definition.
 
 lawsofux.com is proof it's not abstract. A benign version of exactly the payload this article is about was sitting in a page I pointed Claude at for something as low-stakes as a brand guide. If that page had aimed at something with real consequences instead, getting an agent to run a destructive command, or leak something from this repository, it could have gone differently.
 
