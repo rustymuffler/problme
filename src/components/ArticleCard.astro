@@ -32,7 +32,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
 ---
 
 <a class="card" href={href}>
-  <img src={heroImage} alt={heroAlt} class="card-img" />
+  <img src={heroImage} alt={heroAlt} class="card-img" width="1200" height="630" loading="lazy" decoding="async" />
   <div class="card-body">
     <CategoryPill category={category} />
     <Heading class="card-title">{title}</Heading>

@@ -149,7 +149,7 @@ test.describe('Accessibility: homepage (/)', () => {
 
 test.describe('Accessibility: about page (/about)', () => {
   test('passes all a11y checks', async ({ page }) => {
-    await page.goto('/about');
+    await page.goto('/about/');
     await page.waitForLoadState('networkidle');
     await runAllChecks(page);
   });
@@ -157,13 +157,13 @@ test.describe('Accessibility: about page (/about)', () => {
 
 test.describe('Accessibility: blog index (/blog)', () => {
   test('passes all a11y checks', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/blog/');
     await page.waitForLoadState('networkidle');
     await runAllChecks(page);
   });
 
   test('empty state renders a single h1 when no posts exist', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/blog/');
     await page.waitForLoadState('networkidle');
     // The blog index always renders exactly one h1 regardless of post count
     const h1Count = await page.locator('h1').count();
@@ -171,7 +171,7 @@ test.describe('Accessibility: blog index (/blog)', () => {
   });
 
   test('category pills are all keyboard focusable', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/blog/');
     await page.waitForLoadState('networkidle');
     // Category pills are links to /blog/tag/<category> (class "pill")
     const pills = page.locator('a.pill[href^="/blog/tag/"]');
@@ -195,7 +195,7 @@ test.describe('Accessibility: blog post (/blog/[slug])', () => {
    */
   test('passes all a11y checks on the first available post', async ({ page }) => {
     // Fetch the blog index page and look for any post link
-    await page.goto('/blog');
+    await page.goto('/blog/');
     await page.waitForLoadState('networkidle');
 
     // Find the first link that points to a blog post URL (/blog/<slug>).
@@ -219,7 +219,7 @@ test.describe('Accessibility: blog post (/blog/[slug])', () => {
 
 test.describe('Accessibility: credits page (/credits)', () => {
   test('passes all a11y checks', async ({ page }) => {
-    await page.goto('/credits');
+    await page.goto('/credits/');
     await page.waitForLoadState('networkidle');
     await runAllChecks(page);
   });
@@ -227,7 +227,7 @@ test.describe('Accessibility: credits page (/credits)', () => {
 
 test.describe('Accessibility: tag page (/blog/tag/[tag])', () => {
   test('passes all a11y checks', async ({ page }) => {
-    await page.goto('/blog/tag/ai-development');
+    await page.goto('/blog/tag/ai-development/');
     await page.waitForLoadState('networkidle');
     await runAllChecks(page);
   });
@@ -247,7 +247,7 @@ test.describe('Accessibility: skip link (WCAG 2.4.1)', () => {
 
 test.describe('Accessibility: every blog post', () => {
   test('passes all a11y checks on every post', async ({ page }) => {
-    await page.goto('/blog');
+    await page.goto('/blog/');
     await page.waitForLoadState('networkidle');
     const hrefs = await page
       .locator('a[href^="/blog/"]')

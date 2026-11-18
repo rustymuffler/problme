@@ -137,8 +137,8 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
       <!-- Desktop / tablet inline nav (hidden at ≤639px by CSS + JS) -->
       <nav class="desktop-nav" aria-label="Main navigation">
         <a class={`dn-link${isHome  ? ' dn-active' : ''}`} href="/">home</a>
-        <a class={`dn-link${isBlog  ? ' dn-active' : ''}`} href="/blog">blog</a>
-        <a class={`dn-link${isAbout ? ' dn-active' : ''}`} href="/about">about</a>
+        <a class={`dn-link${isBlog  ? ' dn-active' : ''}`} href="/blog/">blog</a>
+        <a class={`dn-link${isAbout ? ' dn-active' : ''}`} href="/about/">about</a>
         <a
           class="dn-link dn-gh"
           href="https://github.com/rustymuffler"
@@ -166,8 +166,8 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
     <!-- Mobile nav dropdown panel (full-width, anchored below header-inner row) -->
     <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation" hidden>
       <a class={`mn-link${isHome  ? ' mn-active' : ''}`} href="/">home</a>
-      <a class={`mn-link${isBlog  ? ' mn-active' : ''}`} href="/blog">blog</a>
-      <a class={`mn-link${isAbout ? ' mn-active' : ''}`} href="/about">about</a>
+      <a class={`mn-link${isBlog  ? ' mn-active' : ''}`} href="/blog/">blog</a>
+      <a class={`mn-link${isAbout ? ' mn-active' : ''}`} href="/about/">about</a>
       <a
         class="mn-link"
         href="https://github.com/rustymuffler"
@@ -196,11 +196,11 @@ const schemas = [...(isHome ? [websiteSchema] : []), ...jsonLd];
 
       <!-- Footer nav — credits link lives here only, never in the top nav -->
       <nav class="footer-nav" aria-label="Footer navigation">
-        <a class="fn-link" href="/blog">blog</a>
-        <a class="fn-link" href="/about">about</a>
+        <a class="fn-link" href="/blog/">blog</a>
+        <a class="fn-link" href="/about/">about</a>
         <a class="fn-link" href="https://github.com/rustymuffler" target="_blank" rel="noopener noreferrer">github</a>
         <a class="fn-link" href="/rss.xml">rss</a>
-        <a class="fn-link" href="/credits">credits</a>
+        <a class="fn-link" href="/credits/">credits</a>
         <span class="fn-copy">&copy; 2026</span>
       </nav>
 

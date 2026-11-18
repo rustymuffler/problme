@@ -65,6 +65,11 @@ const faqSchema = faq.length > 0 && {
   })),
 };
 
+// <title> stays within ~60 characters so search results do not truncate it:
+// append the site name only when it fits.
+const fullTitle = `${post.data.title} — probl.me`;
+const pageTitle = fullTitle.length <= 60 ? fullTitle : post.data.title;
+
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
@@ -79,7 +84,7 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
 ---
 
 <Layout
-  title={`${post.data.title} — probl.me`}
+  title={pageTitle}
   description={post.data.description}
   ogImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
   ogType="article"
@@ -88,7 +93,7 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
 
   <!-- ─── ARTICLE HEAD ─────────────────────────────────────────────────── -->
   <div class="article-head">
-    <a class="back-link navlink" href="/blog">&larr; all posts</a>
+    <a class="back-link navlink" href="/blog/">&larr; all posts</a>
 
     <div class="head-pills">
       <CategoryPill category={post.data.category as Category} />
@@ -112,6 +117,10 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
         src={post.data.heroImage}
         alt={post.data.title}
         class="hero-img"
+        width="1200"
+        height="630"
+        fetchpriority="high"
+        decoding="async"
       />
       {post.data.imageCredit && (
         <p class="image-credit">{post.data.imageCredit}</p>
@@ -155,7 +164,7 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
   {post.data.tags.length > 0 && (
     <div class="tags-row">
       {post.data.tags.map((tag) => (
-        <a class="tag-pill" href={`/blog/tag/${tag}`}>#{tag}</a>
+        <a class="tag-pill" href={`/blog/tag/${tag}/`}>#{tag}</a>
       ))}
     </div>
   )}
@@ -178,7 +187,7 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
           probl.me and Celly in public.
         </p>
       </div>
-      <a class="author-link" href="/about">about &rarr;</a>
+      <a class="author-link" href="/about/">about &rarr;</a>
     </div>
   </div>
 
@@ -187,14 +196,14 @@ const jsonLd = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema]
     <div class="nav-wrap">
       <div class="nav-grid">
         {prevPost ? (
-          <a class="nav-card" href={`/blog/${prevPost.id.replace(/\.(md|mdx)$/, '')}`}>
+          <a class="nav-card" href={`/blog/${prevPost.id.replace(/\.(md|mdx)$/, '')}/`}>
             <div class="nav-label">&larr; previous</div>
             <div class="nav-title">{prevPost.data.title}</div>
           </a>
         ) : <div />}
 
         {nextPost ? (
-          <a class="nav-card nav-card--right" href={`/blog/${nextPost.id.replace(/\.(md|mdx)$/, '')}`}>
+          <a class="nav-card nav-card--right" href={`/blog/${nextPost.id.replace(/\.(md|mdx)$/, '')}/`}>
             <div class="nav-label">next &rarr;</div>
             <div class="nav-title">{nextPost.data.title}</div>
           </a>

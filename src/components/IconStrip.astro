@@ -42,7 +42,7 @@ const pillars: Pillar[] = [
       <!-- Primary pass — visible to AT and keyboard users -->
       <div class="icon-row">
         {pillars.map(({ src, label, tag, rounded }) => (
-          <a class="iconlink" href={`/blog/tag/${tag}`} aria-label={label}>
+          <a class="iconlink" href={`/blog/tag/${tag}/`} aria-label={label}>
             <img
               src={src}
               width="44"

@@ -32,8 +32,8 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
         I'd tell someone starting from zero.
       </p>
       <div class="hero-btns">
-        <Button href="/blog" variant="primary">Read the blog</Button>
-        <Button href="/about" variant="secondary">About me</Button>
+        <Button href="/blog/" variant="primary">Read the blog</Button>
+        <Button href="/about/" variant="secondary">About me</Button>
       </div>
     </div>
 
@@ -50,14 +50,14 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
         <div class="eyebrow">// latest</div>
         <h2 class="latest-h2">Fresh from the workbench</h2>
       </div>
-      <a class="navlink all-posts-link" href="/blog">all posts &rarr;</a>
+      <a class="navlink all-posts-link" href="/blog/">all posts &rarr;</a>
     </div>
 
     {allPosts.length > 0 ? (
       <div class="card-grid">
         {allPosts.map((post) => (
           <ArticleCard
-            href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}`}
+            href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}/`}
             heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
             heroAlt={post.data.title}
             category={post.data.category}

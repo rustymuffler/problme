@@ -42,15 +42,15 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
     <p class="page-sub mono">
       {filtered.length} {filtered.length === 1 ? 'post' : 'posts'}
       &nbsp;&middot;&nbsp;
-      <a class="clear-link" href="/blog">clear filter &times;</a>
+      <a class="clear-link" href="/blog/">clear filter &times;</a>
     </p>
 
     <!-- Filter pills — active state determined at build time -->
     <div class="pills" role="list">
-      <a class="pill"                                             href="/blog"                    role="listitem">all</a>
-      <a class={`pill${tag === 'pm-craft'       ? ' is-active--amber' : ''}`} href="/blog/tag/pm-craft"       role="listitem">pm-craft</a>
-      <a class={`pill${tag === 'ai-development' ? ' is-active--terra' : ''}`} href="/blog/tag/ai-development" role="listitem">ai-development</a>
-      <a class={`pill${tag === 'tech-tools'     ? ' is-active--olive' : ''}`} href="/blog/tag/tech-tools"     role="listitem">tech-tools</a>
+      <a class="pill"                                             href="/blog/"                    role="listitem">all</a>
+      <a class={`pill${tag === 'pm-craft'       ? ' is-active--amber' : ''}`} href="/blog/tag/pm-craft/"       role="listitem">pm-craft</a>
+      <a class={`pill${tag === 'ai-development' ? ' is-active--terra' : ''}`} href="/blog/tag/ai-development/" role="listitem">ai-development</a>
+      <a class={`pill${tag === 'tech-tools'     ? ' is-active--olive' : ''}`} href="/blog/tag/tech-tools/"     role="listitem">tech-tools</a>
     </div>
   </section>
 
@@ -60,7 +60,7 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
       <div class="card-grid">
         {filtered.map((post) => (
           <ArticleCard
-            href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}`}
+            href={`/blog/${post.id.replace(/\.(md|mdx)$/, '')}/`}
             heroImage={post.data.heroImage ?? '/assets/og/og-default.svg'}
             heroAlt={post.data.title}
             category={post.data.category as Category}
@@ -80,7 +80,7 @@ const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', 
         <p class="empty-body">
           This topic is on the roadmap. Check back soon, or browse everything.
         </p>
-        <a class="browse-all" href="/blog">browse all posts</a>
+        <a class="browse-all" href="/blog/">browse all posts</a>
       </div>
     )}
   </section>
