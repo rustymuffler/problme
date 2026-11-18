@@ -78,6 +78,42 @@ jobs:
       - name: Run Trivy filesystem scan
         run: trivy fs --exit-code 1 --severity HIGH,CRITICAL .
 
+  rl-protect:
+    name: rl-protect — Supply Chain Scan (advisory)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      # Advisory only: the baseline profile fails versions published in the last
+      # few days, which would block fresh Dependabot PRs. Findings show in the run
+      # log and job summary; they do not fail the job. The CLI does not accept
+      # package-lock.json, so this scans package.json (direct dependencies).
+      # RL_TOKEN must exist as an Actions secret, and as a Dependabot secret for
+      # Dependabot-triggered runs.
+      - name: Run rl-protect scan
+        id: rl-protect
+        continue-on-error: true
+        uses: reversinglabs/gh-action-rl-protect-scan@0bb13857dc6dceab3385341dcf19943e52fc88f3  # v2.0.2
+        env:
+          RL_TOKEN: ${{ secrets.RL_TOKEN }}
+        with:
+          scan-path: package.json
+          scan-profile: baseline
+          check-deps: release,develop
+
+      - name: Summarize result
+        if: always()
+        env:
+          RL_STATUS: ${{ steps.rl-protect.outcome }}
+          RL_DESCRIPTION: ${{ steps.rl-protect.outputs.description }}
+        run: |
+          {
+            echo "### rl-protect (advisory)"
+            echo "Step outcome: ${RL_STATUS}"
+            echo "${RL_DESCRIPTION}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   checkov:
     name: Checkov — IaC Scan
     runs-on: ubuntu-latest
