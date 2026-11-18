@@ -7,6 +7,17 @@ date: 2026-07-15
 readTime: "9 min"
 heroImage: /assets/posts/pin-github-actions-dependabot/hero.png
 imageCredit: "AI-generated with Claude"
+faq:
+  - question: "What is the difference between pinning a GitHub Action to a tag and to a commit SHA?"
+    answer: "A tag like @v4 is a pointer to whatever commit it currently names, and whoever controls the repository can repoint it. A full 40-character commit SHA points at one specific, unchangeable snapshot of code. GitHub's own documentation says pinning to a full-length commit SHA is currently the only way to use an action as an immutable release."
+  - question: "Why isn't pinning to a commit SHA enough on its own?"
+    answer: "Pinning without an update mechanism swaps \"silently vulnerable to a compromised tag\" for \"silently stuck on an old version forever.\" I set up Dependabot for the github-actions ecosystem. When a pinned action has a newer release, it opens a pull request that updates both the SHA and the version comment, and I review it like any other PR."
+  - question: "Which real incidents show why mutable tags are risky?"
+    answer: "In March 2025, an attacker retagged roughly 350 version tags of tj-actions/changed-files, used in over 23,000 repositories, to a malicious commit (CVE-2025-30066). Repos pinned to a commit SHA were untouched. In March 2026, 75 of the 76 version tags on aquasecurity/trivy-action were force-pushed to a malicious commit. The mechanism was the same both times: move the tag, wait for someone to trust it."
+  - question: "Does SHA-pinning protect me if the commit I pin is already compromised?"
+    answer: "No. If you pin a commit that is already backdoored, you have pinned the backdoor. SHA-pinning defends against a tag moving after you trust it, not against a bad decision at the moment you trust it. Review what you pin, especially the first time. It also does not cover unpinned actions that a trusted action calls internally."
+  - question: "Which tool checks that my GitHub Actions are pinned?"
+    answer: "I assumed Checkov did, and I was wrong. Its GitHub Actions checks, CKV_GHA_1 through CKV_GHA_7 plus CKV2_GHA_1, cover things like unsecure commands and shell injection, but none verify SHA pinning. OpenSSF Scorecard's Pinned-Dependencies check does. I added a weekly Scorecard workflow that uploads results to the repository's own Security tab."
 ---
 import Callout from '../../../components/Callout.astro';
 
@@ -90,7 +101,7 @@ One more thing, and it's the part of this whole process I actually want to under
 
 That's not a knock on the tooling. It's the point. If you're building with AI, don't outsource your judgment to it. Do some of your own research outside the session, and ask it to weigh its own recommendations against what you find.
 
-I wrote about the discipline that makes sessions like this one productive instead of chaotic in [how context limits changed the way I build with AI](/blog/context-limits-design-constraint). This article is a pretty direct example of that discipline paying off, twice, in the same afternoon.
+I wrote about the discipline that makes sessions like this one productive instead of chaotic in [how context limits changed the way I build with AI](/blog/context-limits-design-constraint/). This article is a pretty direct example of that discipline paying off, twice, in the same afternoon.
 
 ## Key takeaways
 
