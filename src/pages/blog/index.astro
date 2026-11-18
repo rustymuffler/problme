@@ -1,4 +1,5 @@
 ---
+import { heroWebp } from '../../lib/hero';
 import Layout from '../../layouts/Layout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import CategoryPill from '../../components/CategoryPill.astro';
@@ -11,6 +12,7 @@ const allPosts = (await getCollection('posts'))
 const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 
 const featuredPost = allPosts[0] ?? null;
+const featuredWebp = featuredPost?.data.heroImage ? heroWebp(featuredPost.data.heroImage) : null;
 ---
 
 <Layout
@@ -43,15 +45,20 @@ const featuredPost = allPosts[0] ?? null;
         class="feat-card"
         href={`/blog/${featuredPost.id.replace(/\.(md|mdx)$/, '')}/`}
       >
-        <img
-          src={featuredPost.data.heroImage ?? '/assets/og/og-default.svg'}
-          alt={featuredPost.data.title}
-          class="feat-img"
-          width="1200"
-          height="630"
-          fetchpriority="high"
-          decoding="async"
-        />
+        <picture>
+          {featuredWebp && (
+            <source type="image/webp" srcset={`${featuredWebp.small} 640w, ${featuredWebp.large} 1200w`} sizes="(min-width: 768px) 50vw, 100vw" />
+          )}
+          <img
+            src={featuredPost.data.heroImage ?? '/assets/og/og-default.svg'}
+            alt={featuredPost.data.title}
+            class="feat-img"
+            width="1200"
+            height="630"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
         <div class="feat-body">
           <div class="feat-meta-row">
             <CategoryPill category={featuredPost.data.category as Category} />

@@ -231,3 +231,9 @@ img, svg {
   .text-h2      { font-size: 22px; }
   .text-h3      { font-size: 18px; }
 }
+
+/* <picture> wrapper must not create a box (keeps <img> a direct layout child of
+   grids/flex parents). <source> is never rendered; Tailwind's base layer can make
+   it display:block, which would otherwise become an empty grid item. */
+picture { display: contents; }
+picture > source { display: none; }

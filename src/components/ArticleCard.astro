@@ -14,6 +14,7 @@
  *                          card sits directly under the page <h1> (no skipped levels).
  */
 import CategoryPill, { type Category } from './CategoryPill.astro';
+import { heroWebp } from '../lib/hero';
 
 interface Props {
   href: string;
@@ -29,10 +30,20 @@ interface Props {
 
 const { href, heroImage, heroAlt, category, title, excerpt, date, readTime, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const webp = heroWebp(heroImage);
 ---
 
 <a class="card" href={href}>
-  <img src={heroImage} alt={heroAlt} class="card-img" width="1200" height="630" loading="lazy" decoding="async" />
+  <picture>
+    {webp && (
+      <source
+        type="image/webp"
+        srcset={`${webp.small} 640w, ${webp.large} 1200w`}
+        sizes="(min-width: 1024px) 400px, (min-width: 640px) 50vw, 100vw"
+      />
+    )}
+    <img src={heroImage} alt={heroAlt} class="card-img" width="1200" height="630" loading="lazy" decoding="async" />
+  </picture>
   <div class="card-body">
     <CategoryPill category={category} />
     <Heading class="card-title">{title}</Heading>

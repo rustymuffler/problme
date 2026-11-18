@@ -188,7 +188,7 @@ tags:
   - static-site
 date: 2026-06-25
 readTime: "7 min"           # estimated reading time, matches the site's existing display convention
-heroImage: /assets/posts/[article-slug]/hero.png
+heroImage: /assets/posts/[article-slug]/hero.png   # keep PNG; also run `node scripts/generate-webp-heroes.mjs` so hero.webp and hero-640.webp exist (served via <picture>)
 imageCredit: "AI-generated with Claude"   # or "Stock photo — [Source name], royalty-free" or "Personal screenshot" or "Personal photo"
 faq:
   - question: "Does Astro work with GitHub Pages custom domains?"
