@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="aO" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="14" refY="8" orient="auto"><path d="M0 1 L15 8 L0 15 z" fill="#9DB066"/></marker>
+  </defs>
+  <rect width="1200" height="640" fill="#15120E"/>
+  <line x1="600" y1="40" x2="600" y2="540" stroke="#3D3322" stroke-width="2"/>
+  <!-- BEFORE -->
+  <text x="60" y="80" font-size="28" font-weight="700" fill="#E8674A">BEFORE</text>
+  <text x="60" y="108" font-size="18" fill="#B6A88F">rss.xml sits behind a hidden discovery tag</text>
+  <rect x="60" y="160" width="150" height="70" rx="12" fill="#241E15" stroke="#3D3322" stroke-width="2"/>
+  <text x="135" y="203" font-size="22" text-anchor="middle" font-weight="600" fill="#F4EFE6">Visitor</text>
+  <rect x="250" y="130" width="300" height="250" rx="14" fill="#1C1812" stroke="#3D3322" stroke-width="2"/>
+  <rect x="270" y="150" width="260" height="56" rx="8" fill="none" stroke="#9A8B74" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="400" y="174" font-size="15" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" fill="#B6A88F">&lt;link rel="alternate"&gt;</text>
+  <text x="400" y="196" font-size="15" text-anchor="middle" fill="#9A8B74">hidden tag in the page head</text>
+  <text x="400" y="262" font-size="18" text-anchor="middle" fill="#9A8B74">page content</text>
+  <text x="400" y="348" font-size="20" text-anchor="middle" fill="#B6A88F">footer:  github    credits</text>
+  <rect x="60" y="450" width="490" height="70" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="305" y="493" font-size="24" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" fill="#F4EFE6">rss.xml (the feed)</text>
+  <path d="M400 380 L400 450" stroke="#9A8B74" stroke-width="3" stroke-dasharray="6 6" fill="none"/>
+  <path d="M135 230 L135 320" stroke="#E8674A" stroke-width="4" fill="none"/>
+  <path d="M135 370 L135 440" stroke="#E8674A" stroke-width="4" fill="none"/>
+  <path d="M120 335 L150 355 M150 335 L120 355" stroke="#E8674A" stroke-width="5" stroke-linecap="round"/>
+  <text x="168" y="410" font-size="18" font-weight="600" fill="#E8674A">no link to follow</text>
+  <!-- AFTER -->
+  <text x="660" y="80" font-size="28" font-weight="700" fill="#9DB066">AFTER</text>
+  <text x="660" y="108" font-size="18" fill="#B6A88F">a visible "rss" link in the footer</text>
+  <rect x="660" y="160" width="150" height="70" rx="12" fill="#241E15" stroke="#3D3322" stroke-width="2"/>
+  <text x="735" y="203" font-size="22" text-anchor="middle" font-weight="600" fill="#F4EFE6">Visitor</text>
+  <rect x="850" y="130" width="300" height="250" rx="14" fill="#1C1812" stroke="#3D3322" stroke-width="2"/>
+  <rect x="870" y="150" width="260" height="56" rx="8" fill="none" stroke="#9A8B74" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="1000" y="174" font-size="15" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" fill="#B6A88F">&lt;link rel="alternate"&gt;</text>
+  <text x="1000" y="196" font-size="15" text-anchor="middle" fill="#9A8B74">still there, still hidden</text>
+  <text x="1000" y="262" font-size="18" text-anchor="middle" fill="#9A8B74">page content</text>
+  <text x="862" y="348" font-size="20" fill="#B6A88F">github</text>
+  <rect x="950" y="324" width="52" height="34" rx="17" fill="#F2A24B"/>
+  <text x="976" y="348" font-size="20" font-weight="700" text-anchor="middle" fill="#15120E">rss</text>
+  <text x="1030" y="348" font-size="20" fill="#B6A88F">credits</text>
+  <rect x="660" y="450" width="490" height="70" rx="12" fill="#241E15" stroke="#9DB066" stroke-width="2"/>
+  <text x="905" y="493" font-size="24" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" fill="#F4EFE6">rss.xml (the feed)</text>
+  <path d="M976 358 L976 440" stroke="#9DB066" stroke-width="4" fill="none" marker-end="url(#aO)"/>
+  <path d="M735 230 L735 440" stroke="#9DB066" stroke-width="4" fill="none" marker-end="url(#aO)"/>
+  <text x="753" y="345" font-size="18" font-weight="600" fill="#9DB066">clicks "rss"</text>
+  <text x="600" y="590" font-size="21" text-anchor="middle" fill="#B6A88F">The feed was first built June 26, 2026. The fix was a visible link, not a new feature.</text>
+</svg>

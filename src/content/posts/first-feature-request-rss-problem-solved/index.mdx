@@ -1,0 +1,135 @@
+---
+title: "Our First Feature Request Was RSS. Problem Solved."
+description: "My first reader request was an RSS feed. It already existed, just hidden. Here is what the fix, an accessibility audit, and my long gap away taught me."
+category: ai-development
+tags: ["rss", "accessibility", "claude-code", "building-in-public", "supply-chain-security"]
+date: 2026-11-19
+readTime: "7 min"
+heroImage: /assets/posts/first-feature-request-rss-problem-solved/hero.png
+imageCredit: "AI-generated with Claude"
+faq:
+  - question: "Where is the probl.me RSS feed?"
+    answer: "There is a small 'rss' link in the footer, between 'github' and 'credits.' The feed itself lives at /rss.xml. Each item carries the post description and its categories, so your reader shows a summary and you click through to read the full article on the site."
+  - question: "Why does the feed show descriptions instead of full articles?"
+    answer: "Full text would need a markdown renderer plus an HTML sanitizer, and the custom components in my MDX posts do not render through that path. I chose to keep the feed description-only for now and wrote that decision down in a code comment, so I remember why."
+  - question: "Why do you say a feature nobody can find does not exist?"
+    answer: "From a reader's side, that is simply true. The feed had been live since June, and a reader still asked for it, and I still assumed it was missing. In this case the fix was one visible word in the footer. If people cannot discover something, it does not help them."
+  - question: "How do I make sure my accessibility tests really run?"
+    answer: "Wire them into CI and make the check required on your main branch. Mine existed, but nothing ran them, and four failed the first time they did. Now they run on every pull request, and a failure blocks the merge. A test that nobody runs cannot protect you."
+  - question: "Are you posting on a schedule now?"
+    answer: "Not yet, and I do not want to promise one. I am working out how to protect time for the blog, including researching how to use Claude Code from my phone. Until that is settled, I would rather tell you it is in progress than promise a cadence I cannot keep."
+---
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: I am back after a gap of more than three months. The blog was not forgotten, and I am working out how to protect time for it. I shipped our first feature request, a reader's ask for an RSS feed. The feed already existed, but nobody could find it.
+</Callout>
+
+I owe you an explanation. My last post went up on August 15, and this one arrives more than three months later. It exists because someone asked whether probl.me had an RSS feed, and I thought the answer was no.
+
+The answer was yes. Claude reviewed the site and told me the RSS feed had existed since June. Nobody could see it, so for every reader, including the one who asked, it might as well not have existed.
+
+## Who asked for an RSS feed, and what did I assume?
+
+I met Srikar at a cybersecurity event we both attended. When I showed them the blog, I talked about using AI to augment my ability to research, build, and do many other things. That made them want to follow along, and they asked whether the blog had an RSS capability. RSS is a standard feed format that lets a feed reader app pull in new posts from the sites you follow.
+
+I looked for an RSS button on the site and did not see one. In that moment I concluded the feature was not built yet. I felt excited, "because I had an improvement to build that would add value for someone who wants to follow my work." As a product manager, I enjoy understanding the job someone needs done and finding ways to address it.
+
+## Did the RSS feed already exist?
+
+Yes, and I had forgotten. I asked Claude to help me build the RSS capability, and Claude reviewed the website and told me it already existed. The feed route, `src/pages/rss.xml.ts`, had been there since the original build. So had a discovery tag in the page head, the pattern the [Astro RSS guide](https://docs.astro.build/en/recipes/rss/) shows for advertising a feed.
+
+I was a bit embarrassed to have forgotten that the feature came from my own original requirements and build, but I was also happy. The fix was not a missing feature. It was a user experience issue, since nothing on the page showed the feature existed.
+
+Claude suggested improvements, and we built them in the same Claude Code session. The headline change was a visible "rss" link in the footer, between "github" and "credits." We also added a category element for each item (the content category, then the tags), an Atom self link that tells feed readers the feed's own address, and a README note.
+
+![Two-panel diagram of the RSS discoverability problem on probl.me. Left panel, labeled before: a feed file named rss.xml sits behind a hidden discovery tag in the page head. A visitor looking at the page finds no link, so the arrow from the visitor to the feed is broken. Right panel, labeled after: the same feed file now has a visible "rss" link in the footer between "github" and "credits," and the arrow from the visitor to the feed is complete. A caption notes the feed was first built on June 26, 2026, so the fix was a visible link, not a new feature.](/assets/posts/first-feature-request-rss-problem-solved/rss-discoverability-diagram.png)
+
+I left one thing out on purpose. The feed still carries post descriptions, not full articles, because full text would need a markdown renderer plus an HTML sanitizer, and my MDX components do not render through that path.
+
+What stuck with me was seeing the finished result in a preview of the site. Srikar's request came down to one small word, "rss," in the footer. The feature had been there for months. Only a way to find it was missing.
+
+## Is a footer link enough?
+
+A footer link is a small fix, and I know it is not the ideal one. For non-technical readers, a one-click subscribe control would work better. [Chris Aldrich made that point in 2020](https://boffosocko.com/2020/05/31/making-rss-more-visible-again-with-a-feeds-page-marcus-herrmann/) in reply to [Marcus Herrmann's proposal for a /feeds page](https://marcus.io/blog/making-rss-more-visible-again-with-slash-feeds), arguing that "/feeds" reads like code and that a button called "subscribe" or "follow" would be friendlier.
+
+I also know RSS usage is niche and hard to measure, and I could not find a reliable recent survey of feed reader usage, so I will not quote a number.
+
+## What else did the same session uncover?
+
+Fixing RSS took a small slice of that day. By the end, seven pull requests had merged, and the session had started with 17 open Dependabot pull requests, the automated updates I set up in [my post on pinning GitHub Actions](/blog/pin-github-actions-dependabot/). Along the way, the same session turned up problems I did not know I had.
+
+The biggest surprise was that the accessibility tests I thought were protecting the site had never run in CI, the automated checks that run on every pull request. They existed, and they had even started to fail against the current site, but nothing ran them, so nothing told me. When we ran them for the first time, four of them failed.
+
+Once we wired the suite in, it found real problems:
+
+| Finding | Before | After |
+|---|---|---|
+| Muted text contrast | 4.29:1 on card surfaces, 4.01:1 on the alternate surface | 4.97:1 or higher everywhere |
+| Skip link | None on any page | Added |
+| Heading order | 25 tag pages jumped from `h1` to `h3` | Fixed |
+| Accessibility tests in CI | Never run, four failing | 10 of 10 passing, now a required check on `main` |
+
+The contrast ratios matter because [WCAG 1.4.3](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) asks for at least 4.5:1 for normal text, and my muted color missed it. I changed it from `#8A7B64` to `#9A8B74`. A skip link is a link at the top of the page that lets keyboard and screen reader users jump past the navigation, and [WCAG 2.4.1](https://www.w3.org/WAI/WCAG21/Understanding/bypass-blocks.html) requires a way to bypass repeated blocks.
+
+These are common failures, not exotic ones. The [WebAIM Million 2026](https://webaim.org/projects/million/) found low-contrast text on 83.9% of 1,000,000 home pages and skipped heading levels on 41.8%. Only 17.1% had a skip link.
+
+It changed how I think about "done." A check that exists but never runs is a false sense of security. RSS taught me the same lesson. The feature was there, but because nobody could see it, it effectively wasn't.
+
+![Two-lane flow diagram of why the accessibility tests gave false confidence. Top lane, labeled before: an accessibility test suite sits in the repository with no arrow into the CI pipeline, so no result ever reaches a pull request. Bottom lane, labeled after: the suite runs as a CI job on every pull request and feeds a required status check on the main branch that blocks a merge when it fails. Callouts note that four tests failed the first time they ran and that 10 of 10 pass after the fixes.](/assets/posts/first-feature-request-rss-problem-solved/ci-check-never-ran-diagram.png)
+
+A personal site has less to lose, and I understand why accessibility checks can feel like overkill here. But contrast and skip links are baseline WCAG criteria, and once the check runs in CI it is cheap to keep.
+
+## Does performance matter on a small blog?
+
+A fair objection is that speed work is wasted on a small blog. Google's guidance treats a [Largest Contentful Paint](https://web.dev/articles/lcp) of 2.5 seconds or less as good, and anything above 4 seconds as poor. LCP measures how long the largest visible element takes to appear.
+
+My slowest post page had an LCP of 5.7 seconds. Hero images were about 194KB as PNG, and the WebP versions are about 23KB. Diagrams on one post, about 650KB, were loading eagerly, and they now load lazily. I measured locally with Lighthouse mobile defaults:
+
+| Page | Performance before | Performance after |
+|---|---|---|
+| Blog index | 81 | 100 |
+| Slowest post page | 70 | 100 |
+
+That post's LCP fell from 5.7 seconds to 1.5 seconds, and performance is now a CI gate at 90. Image format is a modest lever in general. An [independent 2020 test](https://www.ctrl.blog/entry/webp-flif-comparison/) found a median 24.3% saving for lossless WebP over PNG. My savings were larger because my hero images are flat diagrams re-encoded as lossy WebP.
+
+![Bar chart of Lighthouse performance scores before and after the optimization work, with hatched bars for before and solid bars for after. The blog index rises from 81 to 100 and the slowest post page rises from 70 to 100, with a dashed horizontal line marking the CI gate score of 90. A second small panel shows the slowest post's Largest Contentful Paint dropping from 5.7 seconds to 1.5 seconds, with a dashed line marking the 2.5 second threshold for a good score.](/assets/posts/first-feature-request-rss-problem-solved/before-after-lighthouse-chart.png)
+
+One bug taught me that green checks are not the whole story. Tailwind's base styles render a `<source>` element as a block, so inside a picture element it became an empty grid item and pushed the featured card's image into the wrong column. Neither the axe tests nor Lighthouse caught it. A browser screenshot did, and a Playwright test now guards against it.
+
+## Did I add supply chain scanning to the pipeline too?
+
+Full disclosure: I work at ReversingLabs, which builds rl-protect, so I have a stake in it working well. I like to use the products my company builds and delivers, because that is how I experience the value they provide, not just describe it. Running the [Spectra Assure Community GitHub Action](https://github.com/marketplace/actions/gh-action-rl-protect-scan) in my own CI/CD workflow lets me see supply chain scanning from the user's side, on a real project that is not a demo. I am excited to have it in my GitHub pipeline.
+
+Getting it running took two steps. The Action needs a Community token stored as a repository secret, and I added it again as a Dependabot secret so Dependabot-triggered runs can read it. On its first run it scanned my 17 direct dependencies.
+
+It failed three of them because they had been published only days earlier, which is what the baseline profile's recency rule is built to catch, and it raised warnings too. They included a [high-severity vulnerability flag on astro](https://secure.software/npm/packages/astro/7.4.13), traced to a dependency called http-cache-semantics. GitHub lists that [advisory as withdrawn](https://github.com/advisories/GHSA-ch52-4w7c-c8xp), and npm audit and Trivy report nothing, so I am treating it as something to look into, not an emergency.
+
+## Why did the blog go quiet for more than three months?
+
+I had been busy with my kids and their winter hockey seasons starting up. Two of our family dogs also passed away one month apart. I spent that time being there for my sons through their first experience of losing family pets who were like brothers to them.
+
+That explains the gap. It does not change what I believe about priorities.
+
+> Time needs to be committed to regularly posting. If you are passionate about something, then time will be made for it. In life and in work, we may not feel like we always put time to the most important items, but things derive their importance from how much time we dedicate to them. So dedicate time to your priorities, otherwise they are not actually priorities.
+
+## What is the plan to keep the blog moving?
+
+I am going to research how to build out my work with Claude Code and use my smartphone to work on the website remotely, so I can use the flexible moments in each day. There is still research and setup to do, "but it looks like I can do it and make it that much more accessible to work on the blog website at any moment."
+
+The [official Claude Code docs](https://code.claude.com/docs/en/mobile.md) describe the mobile app as a client, so the code does not run on the phone. They describe two paths: cloud sessions that Anthropic manages, and Remote Control, where the session runs on my own machine. I have not settled on a setup yet, so I am not promising a finished workflow or a posting schedule.
+
+## What would I tell someone who has fallen behind on their blog?
+
+If you have fallen behind and feel guilty, do not try to make up for lost time. Start with one small thing that adds value for someone who reads your work. I came back because someone asked for something, not because I forced a posting schedule.
+
+Be honest with yourself about priorities. If something matters, you give it time, and the time can be small and flexible. For me that may mean working from my phone in the gaps in my day, which I am still setting up.
+
+## Key takeaways
+
+- A feature nobody can find effectively does not exist. My RSS feed had been live since June, and a reader still could not find it.
+- Checks that never run give a false sense of security. My accessibility tests existed, and four failed the first time they ran.
+- Passing checks do not cover everything. A screenshot caught a layout bug that axe and Lighthouse missed.
+- Priorities show up in where your time goes, and a return can start with one small, useful thing.
+
+If you want to follow along, the RSS link is in the footer, between "github" and "credits."
