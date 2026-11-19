@@ -1,0 +1,198 @@
+name: Content pipeline
+
+# Phone-first content pipeline, interview stage (spec: PIPELINE_AUTOMATION_SPEC.md).
+#
+#   label  stage:interview   -> Interview Agent posts the questions
+#   owner comment            -> Interview Agent replies with follow-ups
+#   owner comment "@claude done" (alone on a line) -> notes are written, committed,
+#                               issue moves to stage:drafting
+#
+# Security model (public repo, so strangers can comment on any issue):
+#   * Job runs only for events triggered by the repo owner on issues the owner opened.
+#   * Claude never sees raw issue content. A deterministic step builds thread.md
+#     from owner-authored comments (and this workflow's own marked comments) only.
+#   * Claude has path-scoped Read/Write plus Glob: no shell, no web, no GitHub tools,
+#     and no access to /proc, .git, or the workflow files.
+#   * GH_TOKEN exists only on the plain steps that need it, never on the Claude step.
+#   * Everything that touches GitHub (comments, labels, commits) is done by plain
+#     workflow steps that validate what Claude produced. The commit is made in a
+#     pristine repository, so nothing Claude could have left in .git can run.
+#   * No event values are interpolated into shell; they pass through env.
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  interview:
+    name: Interview stage
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Owner-only gate, evaluated before any step (or secret) is available.
+    if: >-
+      github.event.issue.user.login == 'rustymuffler' &&
+      github.event.sender.login == 'rustymuffler' &&
+      github.event.issue.pull_request == null
+    # Job-level, so runs skipped by the gate above never enter the group (a stranger's
+    # comment cannot cancel or replace the owner's pending run). "@claude done" runs
+    # in its own group so a rapid follow-up comment cannot displace it.
+    concurrency:
+      group: pipeline-${{ github.event.issue.number }}-${{ contains(github.event.comment.body, '@claude done') }}
+      cancel-in-progress: false
+    permissions:
+      contents: write   # push the article branch with the interview notes
+      issues: write     # comment, label, assign
+      id-token: write   # required by the Claude action
+    env:
+      REPO: ${{ github.repository }}
+      OWNER: rustymuffler
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      BOT_MARKER: '<!-- pipeline:interview -->'
+    steps:
+      - name: Decide stage
+        id: route
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ACTION: ${{ github.event.action }}
+          LABEL_NAME: ${{ github.event.label.name }}
+          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          stage=none
+          tools='Read(.pipeline-tmp/**),Read(.github/pipeline/**),Glob,Write(.pipeline-tmp/**)'
+          if [ "$EVENT_NAME" = "issues" ] && [ "$EVENT_ACTION" = "labeled" ] && [ "$LABEL_NAME" = "stage:interview" ]; then
+            stage=start
+          elif [ "$EVENT_NAME" = "issue_comment" ] && printf ',%s,' "$ISSUE_LABELS" | grep -q ',stage:interview,'; then
+            # "@claude done" must be alone on its own line, so quoting or discussing it does not trigger finalize.
+            if printf '%s\n' "$COMMENT_BODY" | grep -qiE '^[[:space:]]*@claude[[:space:]]+done[[:space:][:punct:]]*$'; then
+              stage=finalize
+              tools="$tools,Write(src/content/posts/**)"
+            else
+              stage=turn
+            fi
+          fi
+          echo "stage=$stage" >> "$GITHUB_OUTPUT"
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+          echo "Stage: $stage"
+
+      - name: Checkout
+        if: steps.route.outputs.stage != 'none'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false  # no push token left in .git/config
+
+      - name: Build owner-only thread
+        if: steps.route.outputs.stage != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .pipeline-tmp
+          gh api "repos/$REPO/issues/$ISSUE_NUMBER" > .pipeline-tmp/issue.json
+          {
+            jq -r '"# Issue #\(.number): \(.title)\n\n\(.body // "")\n"' .pipeline-tmp/issue.json
+            # Comments: the owner, plus this workflow's own comments (identified by a marker).
+            # Anyone else is dropped here and never reaches the model.
+            gh api --paginate "repos/$REPO/issues/$ISSUE_NUMBER/comments" | jq -r --arg o "$OWNER" --arg m "$BOT_MARKER" '
+              .[]
+              | select(.user.login == $o or (.user.login == "github-actions[bot]" and (.body | contains($m))))
+              | (if .user.login == $o then "## Richard" else "## Interview Agent (you, earlier)" end)
+                + " (" + .created_at + ")\n\n" + (.body | gsub($m; "")) + "\n"'
+          } > .pipeline-tmp/thread.md
+          echo "Thread: $(wc -c < .pipeline-tmp/thread.md) bytes"
+
+      - name: Run Interview Agent
+        if: steps.route.outputs.stage != 'none'
+        uses: anthropics/claude-code-action@f431adaf77e0fecf918431e75a2b5b45b85af002  # v1 (commit the v1 tag pointed to on 2026-11-19)
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The stage name and tool list come from the routing step above (fixed values), never from event text.
+          prompt: |
+            You are the Interview Agent for probl.me. Read and follow the instructions in
+            .github/pipeline/interview-${{ steps.route.outputs.stage }}.md
+            The article thread is in .pipeline-tmp/thread.md. Read only that file for issue content.
+          claude_args: |
+            --max-turns 12
+            --allowedTools "${{ steps.route.outputs.tools }}"
+            --disallowedTools "Bash,WebFetch,WebSearch,Read(//proc/**),Read(//etc/**),Read(.git/**),Edit(.github/**),Write(.github/**),Write(.git/**)"
+
+      - name: Post reply (start and turn)
+        if: steps.route.outputs.stage == 'start' || steps.route.outputs.stage == 'turn'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -s .pipeline-tmp/reply.md || { echo "Claude wrote no reply"; exit 1; }
+          head -c 8000 .pipeline-tmp/reply.md > .pipeline-tmp/reply-trimmed.md
+          # Never post anything that looks like a credential.
+          if grep -qE 'gh[pousr]_[A-Za-z0-9]{20,}|github_pat_|sk-ant-|eyJ[A-Za-z0-9_-]{20,}|[A-Za-z0-9+/=]{80,}' .pipeline-tmp/reply-trimmed.md; then
+            echo "Reply looks like it contains a secret; not posting."; exit 1
+          fi
+          # Do not ping anyone: neutralise @mentions except @claude and mentions inside code spans.
+          perl -CS -pe 's/(?<!`)@(?!claude\b)(?=\w)/@\x{200B}/g' .pipeline-tmp/reply-trimmed.md > .pipeline-tmp/reply-safe.md
+          {
+            printf '%s\n\n' "$BOT_MARKER"
+            cat .pipeline-tmp/reply-safe.md
+            printf '\n\n---\n*Interview Agent (automated). Your answers here are public. Reply in any order, as many comments as you like. When finished, comment `@claude done` on its own line.*\n'
+          } > .pipeline-tmp/reply-final.md
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file .pipeline-tmp/reply-final.md
+          # Waiting on Richard: put it on his to-do list.
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-assignee "$OWNER" || true
+
+      - name: Commit interview notes (finalize)
+        if: steps.route.outputs.stage == 'finalize'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          # Exactly one new file, in the one allowed place. Anything else aborts.
+          changed="$(git status --porcelain --untracked-files=all)"
+          [ "$(printf '%s\n' "$changed" | wc -l)" -eq 1 ] || { echo "Expected exactly one changed file:"; echo "$changed"; exit 1; }
+          file="$(printf '%s' "$changed" | sed -E 's/^.{3}//')"
+          printf '%s' "$file" | grep -Eq '^src/content/posts/[a-z0-9]+(-[a-z0-9]+){2,5}/interview-notes\.md$' \
+            || { echo "Unexpected path: $file"; exit 1; }
+          [ "$(printf '%s' "$changed" | cut -c1-2)" = '??' ] || { echo "Notes file must be new"; exit 1; }
+          [ ! -L "$file" ] && [ -f "$file" ] || { echo "Notes file must be a regular file"; exit 1; }
+          [ "$(wc -c < "$file")" -lt 40000 ] || { echo "Notes file too large"; exit 1; }
+
+          # Commit from a pristine repository: discard the workspace .git entirely so
+          # nothing left in hooks or config by an earlier step can run or redirect the push.
+          cp -- "$file" "$RUNNER_TEMP/notes.md"
+          rm -rf .git
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://github.com/$REPO.git"
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          gh_git() { git -c core.hooksPath=/dev/null -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"; }
+          gh_git fetch -q --depth=1 origin "$DEFAULT_BRANCH"
+          branch="article/$ISSUE_NUMBER"
+          if gh_git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            branch="article/$ISSUE_NUMBER-$RUN_ID"   # re-run: never fail on an existing branch
+          fi
+          git switch -q -c "$branch" FETCH_HEAD
+          mkdir -p -- "$(dirname "$file")"
+          cp -- "$RUNNER_TEMP/notes.md" "$file"
+          git add -- "$file"
+          git -c core.hooksPath=/dev/null commit -q -m "content: add interview notes for issue #$ISSUE_NUMBER"
+          gh_git push origin "$branch"
+          echo "NOTES_FILE=$file" >> "$GITHUB_ENV"
+          echo "NOTES_BRANCH=$branch" >> "$GITHUB_ENV"
+
+      - name: Move issue to drafting (finalize)
+        if: steps.route.outputs.stage == 'finalize'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh label create "stage:drafting" --repo "$REPO" --color 1D76DB --description "Interview done; drafting" 2>/dev/null || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:interview" --add-label "stage:drafting" --remove-assignee "$OWNER"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Interview captured: [\`$NOTES_FILE\`](https://github.com/$REPO/blob/$NOTES_BRANCH/$NOTES_FILE) on branch \`$NOTES_BRANCH\`. Moved to \`stage:drafting\`. Research and drafting are not automated yet; that is the next build phase."
