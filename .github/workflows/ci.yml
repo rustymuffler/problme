@@ -39,6 +39,34 @@ jobs:
       - name: Build
         run: npm run build
 
+  content-lint:
+    name: Content lint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0  # the lint diffs against the base branch to find changed posts
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        env:
+          ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+        run: npm ci
+
+      # Lints only posts this PR adds or changes. Published older posts are
+      # not re-linted, so a legacy issue never blocks an unrelated PR.
+      - name: Lint changed posts
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/lint-content.mjs --changed "origin/${BASE_REF}"
+
   links:
     name: Link checker
     runs-on: ubuntu-latest
