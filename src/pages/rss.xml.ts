@@ -1,5 +1,5 @@
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../lib/posts';
 import type { APIContext } from 'astro';
 import { SITE_DESCRIPTION, SITE_NAME } from '../lib/schema';
 
@@ -8,8 +8,7 @@ import { SITE_DESCRIPTION, SITE_NAME } from '../lib/schema';
 // renderer + HTML sanitizer), and MDX components do not render through a
 // plain markdown pipeline, so full content is deliberately not included.
 export async function GET(context: APIContext) {
-  const posts = (await getCollection('posts'))
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const posts = await getPublishedPosts();
 
   return rss({
     title: SITE_NAME,

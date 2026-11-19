@@ -3,6 +3,14 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Scheduled publishing: posts dated in the future are left out of builds
+  # (src/lib/publish.ts). This rebuild releases any post whose date has arrived.
+  # Tuesdays and Thursdays 14:17 UTC (about 9am US Eastern; off-minute because
+  # GitHub delays cron jobs scheduled on the hour). GitHub pauses schedules on
+  # public repos after 60 days without repo activity; weekly merges prevent that,
+  # and workflow_dispatch below is the manual fallback.
+  schedule:
+    - cron: '17 14 * * 2,4'
   workflow_dispatch:
 
 # Allow only one concurrent deployment; cancel in-progress runs

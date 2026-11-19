@@ -1,4 +1,4 @@
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../lib/posts';
 import { SITE_URL } from '../lib/schema';
 
 /**
@@ -12,9 +12,7 @@ import { SITE_URL } from '../lib/schema';
 const mdText = (text: string) => text.replace(/[[\]]/g, '\\$&').replace(/\s+/g, ' ').trim();
 
 export async function GET() {
-  const posts = (await getCollection('posts')).sort(
-    (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-  );
+  const posts = await getPublishedPosts();
 
   const postLines = posts
     .map((post) => {

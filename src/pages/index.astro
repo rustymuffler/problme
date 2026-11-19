@@ -4,11 +4,9 @@ import BusinessCard from '../components/BusinessCard.astro';
 import IconStrip from '../components/IconStrip.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import Button from '../components/Button.astro';
-import { getCollection } from 'astro:content';
+import { getPublishedPosts } from '../lib/posts';
 
-const allPosts = (await getCollection('posts'))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 3);
+const allPosts = (await getPublishedPosts()).slice(0, 3);
 
 const fmt = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 ---
