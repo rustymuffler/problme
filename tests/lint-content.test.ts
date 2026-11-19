@@ -114,3 +114,39 @@ test('long sentences and paragraphs only warn', () => {
   assert.ok(rules(raw, 'warning').includes('paragraph-length'));
   assert.deepEqual(rules(raw), []);
 });
+
+test('em dash in a link URL or an import line is ignored', () => {
+  const base = goodPost().split('---\n')[2];
+  const body = base + '\nSee [a page](https://example.com/a—b) for more.\n';
+  assert.ok(!rules(goodPost({ body })).includes('em-dash'));
+});
+
+test('em dash in frontmatter is an error', () => {
+  assert.ok(rules(goodPost({ front: { title: '"Title — with a dash padded out to fifty-five chars"' } })).includes('em-dash'));
+});
+
+test('CRLF files lint the same as LF files', () => {
+  assert.deepEqual(rules(goodPost().replace(/\n/g, '\r\n')), []);
+});
+
+test('a file with no frontmatter reports errors instead of crashing', () => {
+  const found = rules('Just some text with no frontmatter.\n');
+  assert.ok(found.includes('frontmatter'));
+});
+
+test('oversized files are rejected quickly', () => {
+  const start = Date.now();
+  assert.ok(rules('x'.repeat(600_000)).includes('file-size'));
+  assert.ok(Date.now() - start < 1000);
+});
+
+test('unclosed code fence warns', () => {
+  const body = goodPost().split('---\n')[2] + '\n```\nnever closed\n';
+  assert.ok(rules(goodPost({ body }), 'warning').includes('code-fence'));
+});
+
+test('out-of-range TL;DR length only warns', () => {
+  const base = goodPost().split('---\n')[2].replace(/TL;DR: [^\n]*/, 'TL;DR: Too short.');
+  assert.ok(rules(goodPost({ body: base }), 'warning').includes('tldr'));
+  assert.ok(!rules(goodPost({ body: base })).includes('tldr'));
+});

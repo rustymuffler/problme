@@ -11,6 +11,12 @@
  *   node scripts/lint-content.mjs --changed <ref> lint posts changed vs <ref>
  *
  * Errors fail the run (exit 1). Warnings are reported but never fail it.
+ *
+ * Deliberately NOT covered (judgment calls for the Proofreader and SEO
+ * Reviewer agents): primary keyword placement, internal links, numbers under
+ * ten spelled out, repeated sentence openers, passive voice, tone, claim
+ * sourcing. heroImage is a warning, not an error, because the content schema
+ * marks it optional.
  * No new dependencies: frontmatter is parsed by @astrojs/markdown-remark,
  * which the site already depends on.
  */
@@ -88,6 +94,12 @@ function splitSentences(paragraph) {
 export function lintPost(raw, ctx) {
   const findings = [];
   const add = (level, rule, line, message) => findings.push({ level, rule, line, message });
+
+  // Guard against runaway input: the prose regexes below are not linear-time.
+  if (raw.length > 500_000) {
+    add('error', 'file-size', 1, `File is ${raw.length} characters; articles over 500,000 are not linted. Check the file.`);
+    return findings;
+  }
 
   let frontmatter;
   let body;
@@ -187,8 +199,9 @@ export function lintPost(raw, ctx) {
 
   // ---- Punctuation and banned phrases (whole file, frontmatter included) ---
   for (const line of scanLines(raw)) {
-    if (line.code) continue;
-    const text = normaliseQuotes(line.prose);
+    if (line.code || /^\s*import\s/.test(line.raw)) continue;
+    // Link URLs are not prose: drop them before looking for dashes and phrases.
+    const text = normaliseQuotes(line.prose.replace(/\]\([^)]*\)/g, ']'));
     if (text.includes('—')) {
       add('error', 'em-dash', line.n, 'Em dash found. Use a comma, colon, period or rewrite the sentence.');
     }
@@ -207,6 +220,12 @@ export function lintPost(raw, ctx) {
     for (const { re, say } of WARN_PHRASES) {
       if (re.test(text)) add('warning', 'banned-phrase', line.n, `Check phrase: ${say}.`);
     }
+  }
+
+  // An unclosed fence silently mutes every check after it.
+  const fenceCount = raw.split(/\r?\n/).filter((l) => /^\s*(```|~~~)/.test(l)).length;
+  if (fenceCount % 2 === 1) {
+    add('warning', 'code-fence', 1, 'Unclosed code fence; checks after it were skipped.');
   }
 
   // ---- Headings ------------------------------------------------------------
@@ -288,7 +307,7 @@ function postSlugs(args) {
     readdirSync(POSTS_DIR, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name);
   if (args[0] === '--changed') {
     const ref = args[1];
-    if (!ref || !/^[\w./-]+$/.test(ref)) throw new Error('--changed needs a git ref such as origin/main');
+    if (!ref || !/^(?!-)[\w./-]+$/.test(ref)) throw new Error('--changed needs a git ref such as origin/main');
     const out = execFileSync('git', ['diff', '--name-only', '--diff-filter=ACMR', `${ref}...HEAD`, '--', 'src/content/posts'], {
       cwd: ROOT,
       encoding: 'utf8',
