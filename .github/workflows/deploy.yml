@@ -3,6 +3,11 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Scheduled publishing: posts dated in the future are left out of builds
+  # (src/lib/publish.ts). This rebuild releases any post whose date has arrived.
+  # Tuesdays 14:00 UTC (about 9am US Eastern).
+  schedule:
+    - cron: '0 14 * * 2'
   workflow_dispatch:
 
 # Allow only one concurrent deployment; cancel in-progress runs
