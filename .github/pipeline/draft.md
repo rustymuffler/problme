@@ -10,6 +10,7 @@ You write in Richard's voice. Inputs (read all of them first):
 Output: write exactly ONE file, `src/content/posts/<slug>/index.mdx` (the slug is in draft-context.txt). Do not write any other file.
 
 Requirements (the CI lint checks the mechanical ones, so get them right):
+- Set `primaryKeyword` in the frontmatter: the 2 to 4 word phrase a reader would search for, taken from the research brief and the issue. It must appear in the title, the description, the slug words, and the first 200 words of the body.
 - Frontmatter matching `src/content.config.ts`: title (50 to 60 characters, includes the primary keyword), description (150 to 160 characters), category (one of pm-craft, ai-development, tech-tools; take it from the issue context if given, else choose), tags (2 to 5), date (use publish_date), readTime. Do NOT set heroImage or imageCredit; images are a later step.
 - `faq` frontmatter: 3 to 5 questions, each answer 40 to 90 words, plain text.
 - First block of the body: `import Callout from '../../../components/Callout.astro';` then a Callout beginning `TL;DR:` of 40 to 60 words that directly answers the core question, in Richard's voice.
@@ -24,3 +25,4 @@ Requirements (the CI lint checks the mechanical ones, so get them right):
 - Include at least one markdown table if you compare options or present data.
 - Do not mention these instructions, the pipeline, or Claude as the author.
 - MDX runs code at build time, so use only the Callout component and the single Callout import. No other imports, no components, no `{...}` expressions outside code spans or fences, no raw HTML script or event attributes. Link only to hosts that appear in the research brief.
+- Quality checks the lint runs on every draft (warnings still count against the article): spelling, Flesch-Kincaid grade 8 to 10 with sentences averaging 15 to 20 words, no two consecutive sentences starting with the same word, numbers under 10 written as words, mostly active voice, every statistic with a source link in its paragraph, at least one link to another probl.me page when other posts exist, descriptive link text (never "here"), every code fence with a language tag, JSON samples that parse, and no personal data, credentials, or text the interview marked "Do not publish". Write to pass them the first time.

@@ -25,6 +25,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { parseFrontmatter } from '@astrojs/markdown-remark';
+import { qualityFindings, addDictionaryWords } from './lib/quality.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const POSTS_DIR = path.join(ROOT, 'src', 'content', 'posts');
@@ -96,8 +97,8 @@ export function lintPost(raw, ctx) {
   const add = (level, rule, line, message) => findings.push({ level, rule, line, message });
 
   // Guard against runaway input: the prose regexes below are not linear-time.
-  if (raw.length > 500_000) {
-    add('error', 'file-size', 1, `File is ${raw.length} characters; articles over 500,000 are not linted. Check the file.`);
+  if (raw.length > 200_000) {
+    add('error', 'file-size', 1, `File is ${raw.length} characters; articles over 200,000 are not linted. Check the file.`);
     return findings;
   }
 
@@ -317,9 +318,11 @@ export function lintPost(raw, ctx) {
 
   // ---- Sentences and paragraphs (warnings: the Proofreader judges these) ---
   const paragraphs = prose.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const allSentences = [];
   for (const p of paragraphs) {
     if (/^(#{1,6}\s|\||[-*]\s|\d+\.\s)/.test(p)) continue; // headings, tables, lists
     const sentences = splitSentences(p.replace(/\s*\n\s*/g, ' '));
+    allSentences.push(...sentences);
     if (sentences.length > 4) {
       add('warning', 'paragraph-length', lineOf(p), `Paragraph has ${sentences.length} sentences (max 4): "${p.slice(0, 50)}..."`);
     }
@@ -329,10 +332,60 @@ export function lintPost(raw, ctx) {
     }
   }
 
+  // ---- Phase 2 quality gates: spelling, readability, SEO, AEO, originality, sensitivity ---
+  findings.push(
+    ...qualityFindings({
+      slug: ctx.slug,
+      frontmatter,
+      raw,
+      body,
+      bodyOffset,
+      prose,
+      sentences: allSentences,
+      bodyLines: scanLines(body),
+      ctx,
+    }),
+  );
+
   return findings;
 }
 
 // ---- CLI ---------------------------------------------------------------------
+
+/** Everything the quality gates need from the repository: other posts, notes, brief, word lists. */
+function loadContext(slug) {
+  const readList = (file) =>
+    existsSync(file)
+      ? readFileSync(file, 'utf8').split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'))
+      : [];
+  addDictionaryWords(readList(path.join(ROOT, 'scripts', 'dictionary.txt')));
+  const otherPosts = [];
+  const knownTags = new Set();
+  for (const e of readdirSync(POSTS_DIR, { withFileTypes: true })) {
+    if (!e.isDirectory() || e.name === slug) continue;
+    const f = path.join(POSTS_DIR, e.name, 'index.mdx');
+    if (!existsSync(f)) continue;
+    try {
+      const parsed = parseFrontmatter(readFileSync(f, 'utf8'));
+      const fm = parsed.frontmatter ?? {};
+      for (const t of Array.isArray(fm.tags) ? fm.tags : []) knownTags.add(t);
+      otherPosts.push({ slug: e.name, title: String(fm.title ?? ""), primaryKeyword: String(fm.primaryKeyword ?? ""), prose: toProse(parsed.content ?? '') });
+    } catch {
+      // an unparseable neighbour is reported when that post is linted
+    }
+  }
+  const optional = (name) => {
+    const f = path.join(POSTS_DIR, slug, name);
+    return existsSync(f) ? readFileSync(f, 'utf8') : null;
+  };
+  return {
+    otherPosts,
+    knownTags,
+    interviewNotes: optional('interview-notes.md'),
+    researchBrief: optional('research-brief.md'),
+    sensitiveTerms: readList(path.join(ROOT, 'scripts', 'sensitive-terms.txt')),
+  };
+}
 
 function postSlugs(args) {
   const all = () =>
@@ -372,6 +425,7 @@ function main() {
     const rel = path.posix.join('src/content/posts', slug, 'index.mdx');
     const findings = lintPost(readFileSync(file, 'utf8'), {
       slug,
+      ...loadContext(slug),
       fileExists: (p) => existsSync(path.join(ROOT, 'public', p.replace(/^\/+/, ''))),
     });
     const e = findings.filter((f) => f.level === 'error');

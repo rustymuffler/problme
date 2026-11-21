@@ -7,6 +7,7 @@ const posts = defineCollection({
     title: z.string(),
     description: z.string(),
     category: z.enum(['pm-craft', 'ai-development', 'tech-tools']),
+    primaryKeyword: z.string().optional(),
     tags: z.array(z.string()),
     date: z.coerce.date(),
     readTime: z.string(),
