@@ -53,6 +53,13 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
         run: node scripts/check-built-post.mjs --changed "origin/${BASE_REF}"
 
+      # Hero size and WebP variants, in-article images self-hosted and within the size budgets.
+      - name: Check article images
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node scripts/check-post-images.mjs --changed "origin/${BASE_REF}"
+
   content-lint:
     name: Content lint
     runs-on: ubuntu-latest
