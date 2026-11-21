@@ -7,12 +7,9 @@ name: Stalled interview timer
 on:
   schedule:
     - cron: '23 13 * * *'
+  # Checkov (CKV_GHA_7) requires workflow_dispatch to have no inputs, so a manual run is always a
+  # dry run: it prints what the timer would do and changes nothing. Only the schedule acts.
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Only print what would happen'
-        type: boolean
-        default: true
 
 permissions:
   contents: read
@@ -44,7 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           set -euo pipefail
           if [ "$DRY_RUN" = true ]; then
