@@ -129,7 +129,7 @@ jobs:
       contents: read   # read-only token; no write access in this job
       id-token: write  # required by the Claude action
     outputs:
-      blocked: ${{ steps.scan.outputs.blocked }}
+      blocked: ${{ (steps.prescan.outputs.blocked == 'true' && 'true') || steps.scan.outputs.blocked }}   # either scan blocking stops the pipeline
       risk: ${{ steps.scan.outputs.risk }}
       finding: ${{ steps.scan.outputs.finding }}
     steps:
