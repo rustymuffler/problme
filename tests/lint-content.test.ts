@@ -150,3 +150,10 @@ test('out-of-range TL;DR length only warns', () => {
   assert.ok(rules(goodPost({ body: base }), 'warning').includes('tldr'));
   assert.ok(!rules(goodPost({ body: base })).includes('tldr'));
 });
+
+test('unresolved pipeline placeholders are errors', () => {
+  for (const marker of ['[UNVERIFIED - needs source]', '[NOT ANSWERED - Richard to add]', '[IMAGE - a diagram]']) {
+    const body = goodPost().split('---\n')[2] + `\n${marker}\n`;
+    assert.ok(rules(goodPost({ body })).includes('unresolved-marker'), marker);
+  }
+});

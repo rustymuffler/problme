@@ -214,6 +214,10 @@ export function lintPost(raw, ctx) {
         break;
       }
     }
+    // Placeholders the pipeline leaves for Richard. A post cannot merge while any remain.
+    if (/\[(UNVERIFIED|NOT ANSWERED|IMAGE)\b/.test(line.prose)) {
+      add('error', 'unresolved-marker', line.n, 'Unresolved placeholder ([UNVERIFIED], [NOT ANSWERED], or [IMAGE]). Resolve it before merging.');
+    }
     for (const { re, say } of BANNED_PHRASES) {
       if (re.test(text)) add('error', 'banned-phrase', line.n, `Banned phrase: ${say}.`);
     }
