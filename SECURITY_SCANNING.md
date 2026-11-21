@@ -277,10 +277,10 @@ The content pipeline runs a model with a subscription token on a public reposito
 | Untrusted content | Research output is sanitised (HTML, images, hidden and control characters), credential-scanned and run through `scripts/scan-untrusted-content.mjs`; a detection or a scan failure stops the pipeline |
 | What reaches the build | Drafts must pass the lint: only the Callout component, no expressions, scripts or event handlers; links only to hosts in the research brief |
 | Commits and PRs | Plain steps validate the file list, then commit from a pristine repository with hooks disabled |
-| Merge | Richard only; `main` requires PRs and nine checks, no bypass |
+| Merge | Richard only; `main` requires PRs and eleven checks, no bypass |
 | Repository settings | See DECISIONS.md Decision 18 |
 
-Open items: `Content PR path guard` and `Workflow lint (actionlint)` become required checks once they have run green (roadmap P0-4, P0-5). The injection scanner's behaviour on the Actions runner is unproven until the full test run.
+Open items: the injection scanner's behaviour on the Actions runner is unproven until the full test run.
 
 ---
 

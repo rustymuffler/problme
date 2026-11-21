@@ -39,9 +39,9 @@ Rules that hold for the whole pipeline:
 
 - **Owner gate.** Only Richard's GitHub account (`rustymuffler`) can start or steer any stage. Each job re-checks the issue author and the event sender. Everyone else's comments are filtered out before a model sees them.
 - **No self-review.** The draft, the independent review and (when built) the Proofreader, SEO and fact-check reviews are separate runs.
-- **Human merge.** Only Richard merges. Nothing auto-merges, and `main` requires pull requests and nine passing checks with no bypass.
+- **Human merge.** Only Richard merges. Nothing auto-merges, and `main` requires pull requests and eleven passing checks with no bypass.
 - **Untrusted content stays contained.** Web pages are read only by the research job, which has no repository write access and no write token. Its output is sanitised and scanned before any other job reads it.
-- **Article PRs are narrow.** Pipeline PRs may change only one article folder and its images; anything else goes through the code workflow. (Enforced by the `Content PR path guard` CI check, which arrives with the CI changes in PR 168 and becomes a required check after it has run green.)
+- **Article PRs are narrow.** Pipeline PRs may change only one article folder and its images; anything else goes through the code workflow. (Enforced by the required `Content PR path guard` CI check.)
 
 ---
 

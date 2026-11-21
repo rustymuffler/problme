@@ -328,7 +328,7 @@
 2. The default workflow token is read-only; every workflow declares its own permissions.
 3. Allowed Actions are limited to GitHub-owned actions plus eight named third-party actions, and full-SHA pinning is required. Composite actions call other actions, so a new action must be checked for nested `uses:` entries before it is added to the allowlist (the Claude action needs `oven-sh/setup-bun`).
 4. Secret scanning and push protection are on.
-5. The `Main` ruleset requires pull requests and nine status checks (Build, Link checker, Gitleaks, Semgrep, Trivy, Checkov, Lighthouse CI, Accessibility, Content lint) with no bypass actors, and blocks deletion and force pushes.
+5. The `Main` ruleset requires pull requests and eleven status checks (Build, Link checker, Gitleaks, Semgrep, Trivy, Checkov, Lighthouse CI, Accessibility, Content lint, Content PR path guard, Workflow lint) with no bypass actors, and blocks deletion and force pushes.
 6. Not applied: interaction limits (they would also stop readers from commenting).
 
 ---
@@ -342,7 +342,7 @@
 
 **Decision:** The first end-to-end test runs once, after phases 0 to 3 plus publish tracking are built (the gate in `PIPELINE_ROADMAP.md`, issue #166), so it exercises the finished pipeline and produces a fully completed article. The interview start stage was verified live during the parked trial.
 
-**Addendum to Decision 16 (takes effect when PR 168 merges):** CI builds for pull requests include future-dated posts (`INCLUDE_FUTURE_POSTS=true`) and Lighthouse CI also audits every post a PR changes, so a scheduled article is checked before it goes live.
+**Addendum to Decision 16 (PR 168, merged 2026-11-21):** CI builds for pull requests include future-dated posts (`INCLUDE_FUTURE_POSTS=true`) and Lighthouse CI also audits every post a PR changes, so a scheduled article is checked before it goes live.
 
 ---
 
