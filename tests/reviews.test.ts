@@ -79,7 +79,7 @@ test('aggregation: all pass is ready; any revise, lint error or missing review n
   assert.deepEqual(missing.missing, ['proofreader']);
   assert.equal(missing.needsWork, true);
 
-  const later = aggregateReviews(all.slice(0, 4), { pass: 2, expectedRoles: ['proofreader', 'seo', 'aeo', 'voice'], lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).' + chr(10) });
+  const later = aggregateReviews(all.slice(0, 4), { pass: 2, expectedRoles: ['proofreader', 'seo', 'aeo', 'voice'], lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).' + String.fromCharCode(10) });
   assert.equal(later.ready, true);
 });
 
