@@ -62,6 +62,8 @@ The content pipeline for this blog, idea generation, interviews, research, draft
 
 See [`AGENTS.md`](AGENTS.md) for the full roster and workflow, and [`CONTENT_STANDARDS.md`](CONTENT_STANDARDS.md) for the editorial standards every article is held to.
 
+The pipeline now runs on GitHub itself: an article is a GitHub issue, the interview happens in issue comments, drafting runs in GitHub Actions, and the result arrives as a pull request. Only the repository owner can start or steer it, and a human merges every article. [`PIPELINE_ROADMAP.md`](PIPELINE_ROADMAP.md) tracks what is built and what is still to automate.
+
 ---
 
 ## Contributing, Testing, and Reporting Bugs

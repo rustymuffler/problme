@@ -204,6 +204,14 @@ jobs:
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:interview" --add-label "stage:drafting" --remove-assignee "$OWNER"
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "<!-- pipeline:branch $NOTES_BRANCH -->Interview captured: [\`$NOTES_FILE\`](https://github.com/$REPO/blob/$NOTES_BRANCH/$NOTES_FILE) on branch \`$NOTES_BRANCH\`. Moved to \`stage:drafting\`. Research and drafting are starting now; you will be notified here when the draft PR is ready."
 
+      - name: Report failure
+        if: failure() && steps.route.outputs.stage != 'none'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "The interview step failed. A common cause is that the Claude Pro usage limit was reached; nothing is lost. Comment again later to retry; if the interview was already finished, comment \`@claude draft\` on its own line. [Run details]($RUN_URL)"
+
   # Research, draft, lint, PR and review. Starts right after "@claude done" has captured the
   # interview. The reusable workflow re-checks the owner gate in every job.
   draft:

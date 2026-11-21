@@ -191,3 +191,13 @@ These invariants are tracked across all phases. The Code Reviewer Agent checks f
 *Update 2026-08-02 (Monday idea batch) — Content Strategist Agent. Ran the scheduled weekly idea batch, proposed 8 ideas across all three categories. Richard selected 4 for the queue: C9 (ai-development, direct follow-up to C8's Decisions 12-13), C10 (tech-tools, documents the Umami stack that went live 2026-07-15, closes out M3.24's writeup), C11 (pm-craft, chosen to help balance the category since C1 was the only pm-craft article queued), C12 (ai-development, opens the Phase 4 "Building probl.me in Public" series per M4.5). Queue restored to 7 Queued articles (C3, C5, C6, C9, C10, C11, C12), back above the ≥4 target flagged last session. Next step per the content workflow: Interview Agent step for whichever article Richard wants to enter the draft loop first.*
 
 *Update 2026-08-16 — PM Agent. C9 ran the full content pipeline end to end: interview, research brief (scanned via `scripts/scan-untrusted-content.mjs` before writing — one Tier-2-only advisory false positive on the brief's own benign word-count/citation text, consistent with the precedent in Decision 13, resolved by manual review), MDX draft, hand-built SVG image set (hero plus three in-article diagrams), SEO review (returned 3 items: title/description length, unlinked sources — all fixed), and proofreading review (returned line-level feedback: sentence/paragraph length, passive voice, a Tier 1/Tier 2 factual mixup, numbers formatting — all fixed). `scripts/render-article-images.mjs`, shared tooling this article's own PR touches outside `src/content/posts/[slug]/`, was scanned per the workflow-seam rule before the PR opened: Aikido (313 rules, 0 findings) and Semgrep (200 rules, 0 findings). Draft PR [#102](https://github.com/rustymuffler/problme/pull/102) opened, pending Richard's review and merge. Queue after C9 enters review: C3, C5, C6, C10, C11, C12 remain Queued.*
+
+---
+
+## Pipeline Automation (added 2026-11-21)
+
+The phone-first, GitHub-native content pipeline is tracked outside this file:
+
+- Requirements: `PIPELINE_AUTOMATION_SPEC.md`
+- Everything built and everything still to automate, in phases, with the quality bar and the full test gate: `PIPELINE_ROADMAP.md`, with one tracking issue per phase (#157 to #163) and the test gate (#166).
+- The first end-to-end test article runs only after phases 0 to 3 plus publish tracking are built. Content calendar updates and the retrospective stay manual until phases 4 and 5.
