@@ -209,7 +209,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "The interview step failed. A common cause is that the Claude Pro usage limit was reached; nothing is lost. Comment again later to retry; if the interview was already finished, comment `@claude draft` on its own line. [Run details]($RUN_URL)"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "The interview step failed. A common cause is that the Claude Pro usage limit was reached; nothing is lost. Comment again later to retry; if the interview was already finished, comment \`@claude draft\` on its own line. [Run details]($RUN_URL)"
 
   # Research, draft, lint, PR and review. Starts right after "@claude done" has captured the
   # interview. The reusable workflow re-checks the owner gate in every job.
