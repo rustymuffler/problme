@@ -140,3 +140,35 @@ test('bad manifest, missing file and invalid slug fail cleanly', () => {
     cleanup(b.root);
   }
 });
+
+test('alt text cannot carry MDX, markdown, entities or newlines', () => {
+  for (const bad of [
+    'A diagram {process.env.SECRET} describing the pipeline stages for readers.',
+    'A diagram with a break\nimport x from "y" describing the pipeline stages.',
+    'A diagram with an <script> tag describing the pipeline stages for readers.',
+    'A diagram with an entity &#123; describing the pipeline stages for readers.',
+    'A diagram with ${template} describing the pipeline stages for readers.',
+    'A diagram with `code` describing the pipeline stages for readers.',
+  ]) {
+    assert.ok(checkAlt(bad), JSON.stringify(bad));
+  }
+  assert.equal(checkAlt("It's a flow: interview, research, draft & review (4 steps) - 100% automatic."), checkAlt("It's a flow: interview, research, draft & review (4 steps) - 100% automatic."));
+});
+
+test('a diagram without a placeholder is dropped, and existing files are never overwritten', async () => {
+  const { root, slug, dir } = setup(
+    { hero: { file: 'hero.svg', alt: ALT }, images: [{ file: 'flow.svg', alt: ALT }, { file: 'orphan.svg', alt: ALT }] },
+    { 'hero.svg': heroSvg, 'flow.svg': diagramSvg, 'orphan.svg': diagramSvg },
+  );
+  try {
+    const first = run(root, slug, dir);
+    assert.equal(first.status, 0, first.stdout + first.stderr);
+    assert.equal(existsSync(path.join(root, 'public/assets/posts', slug, 'orphan.png')), false);
+    assert.equal(existsSync(path.join(root, 'src/content/posts', slug, 'images/orphan.svg')), false);
+    const second = run(root, slug, dir);
+    assert.equal(second.status, 1);
+    assert.match(second.stdout, /refusing to overwrite/);
+  } finally {
+    cleanup(root);
+  }
+});

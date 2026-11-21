@@ -6,7 +6,9 @@
  * references, embedded HTML or anything else active. Colors must come from the brand palette and fonts
  * from the brand font stack. A file that passes is safe to rasterise and to commit as a source file.
  *
- * Pure function of the text: no file system, no parsing library.
+ * Pure function of the text: no file system, no parsing library. Every regular expression here is
+ * linear: whitespace runs are capped first, tags are length-limited, and the tag pattern has no
+ * overlapping quantifiers.
  */
 
 /** Workshop palette from BRAND.md (the CSS tokens in src/styles/global.css). Hex values, upper case. */
@@ -29,29 +31,33 @@ export const BRAND_COLORS = new Set([
 
 const ALLOWED_FONTS = new Set(['hanken grotesk', 'inter', 'jetbrains mono', 'sans-serif', 'monospace']);
 
-const ELEMENTS = new Set([
+// XML is case-sensitive, so names must be written exactly as listed (the renderer would otherwise
+// ignore or reject them).
+const ELEMENT_LIST = [
   'svg', 'g', 'defs', 'title', 'desc', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'path',
-  'text', 'tspan', 'lineargradient', 'radialgradient', 'stop', 'clippath', 'marker',
-]);
-// Canonical spelling for elements whose names have capitals.
-const CANON = { lineargradient: 'linearGradient', radialgradient: 'radialGradient', clippath: 'clipPath' };
+  'text', 'tspan', 'linearGradient', 'radialGradient', 'stop', 'clipPath', 'marker',
+];
+const ELEMENTS = new Set(ELEMENT_LIST);
 
-const ATTRIBUTES = new Set([
-  'xmlns', 'version', 'viewbox', 'width', 'height', 'x', 'y', 'dx', 'dy', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2',
+const ATTRIBUTE_LIST = [
+  'xmlns', 'version', 'viewBox', 'width', 'height', 'x', 'y', 'dx', 'dy', 'cx', 'cy', 'r', 'rx', 'ry', 'x1', 'y1', 'x2', 'y2',
   'd', 'points', 'transform', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray',
   'stroke-dashoffset', 'stroke-miterlimit', 'opacity', 'fill-opacity', 'stroke-opacity', 'fill-rule', 'clip-rule',
   'font-family', 'font-size', 'font-weight', 'font-style', 'text-anchor', 'dominant-baseline', 'letter-spacing',
-  'id', 'offset', 'stop-color', 'stop-opacity', 'gradientunits', 'gradienttransform', 'clip-path', 'clippathunits',
-  'marker-start', 'marker-end', 'markerwidth', 'markerheight', 'refx', 'refy', 'orient', 'markerunits',
-  'preserveaspectratio', 'role', 'aria-label', 'aria-hidden', 'xml:space',
-]);
+  'id', 'offset', 'stop-color', 'stop-opacity', 'gradientUnits', 'gradientTransform', 'clip-path', 'clipPathUnits',
+  'marker-start', 'marker-end', 'markerWidth', 'markerHeight', 'refX', 'refY', 'orient', 'markerUnits',
+  'preserveAspectRatio', 'role', 'aria-label', 'aria-hidden', 'xml:space',
+];
+const ATTRIBUTES = new Set(ATTRIBUTE_LIST);
 
 const COLOR_ATTRS = new Set(['fill', 'stroke', 'stop-color']);
 const NUMBER_ATTRS = new Set(['opacity', 'fill-opacity', 'stroke-opacity', 'stop-opacity', 'stroke-width', 'font-size', 'offset']);
 
 const MAX_BYTES = 150_000;
+const MAX_TAG = 4000; // characters in one tag
 const MAX_ELEMENTS = 2500;
 const MAX_DEPTH = 14;
+const MAX_DIMENSION = 4000;
 
 /** Expand #abc to #AABBCC and upper-case. */
 function normaliseHex(value) {
@@ -60,6 +66,11 @@ function normaliseHex(value) {
   if (/^#[0-9a-fA-F]{6}$/.test(v)) return v.toUpperCase();
   return null;
 }
+
+// name, optional attributes (each: whitespace, name, =, quoted value), optional slash. No lazy
+// quantifier and no overlap between the whitespace and the attribute names, so matching is linear.
+const TAG = /^<(\/?)([A-Za-z][A-Za-z0-9:-]*)((?:\s+[A-Za-z_:][-A-Za-z0-9_:.]*\s*=\s*(?:"[^"]*"|'[^']*'))*)\s*(\/?)>$/;
+const ATTR = /\s+([A-Za-z_:][-A-Za-z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
 
 /**
  * @param {string} svg
@@ -76,10 +87,12 @@ export function validateSvg(svg, options = {}) {
 
   if (typeof svg !== 'string' || svg.length === 0) return { ok: false, problems: ['Empty SVG.'], width, height };
   if (Buffer.byteLength(svg) > MAX_BYTES) return { ok: false, problems: [`SVG is larger than ${MAX_BYTES} bytes.`], width, height };
+  // Long whitespace runs are never needed and are what makes sloppy tag patterns slow.
+  if (/\s{200,}/.test(svg)) return { ok: false, problems: ['SVG contains a run of 200 or more whitespace characters.'], width, height };
   if (/<!(?:DOCTYPE|ENTITY|\[CDATA\[)|<\?|<!--/i.test(svg)) fail('DOCTYPE, entity declarations, CDATA, processing instructions and comments are not allowed.');
   if (/&(?!(?:amp|lt|gt|quot|apos|#39|#x27);)[A-Za-z#][A-Za-z0-9#]*;/.test(svg)) fail('Only the basic XML entities (&amp; &lt; &gt; &quot; &apos;) are allowed.');
 
-  const tokens = svg.match(/<[^>]*>|[^<]+/g) ?? [];
+  const tokens = svg.match(/<[^<>]*>|<[^<>]*|[^<]+/g) ?? [];
   const stack = [];
   let elements = 0;
   let sawRoot = false;
@@ -91,17 +104,21 @@ export function validateSvg(svg, options = {}) {
       if (/[<>]/.test(token)) fail('Unexpected markup characters in text.');
       continue;
     }
-    const m = /^<(\/?)([A-Za-z][A-Za-z0-9:-]*)((?:\s+[^<>]*?)?)\s*(\/?)>$/.exec(token);
+    if (token.length > MAX_TAG) {
+      fail('A tag is longer than 4000 characters.');
+      continue;
+    }
+    const m = TAG.exec(token);
     if (!m) {
       fail(`Malformed tag: ${token.slice(0, 40)}`);
       continue;
     }
     const [, closing, rawName, attrText, selfClose] = m;
-    const name = rawName.toLowerCase();
-    if (!ELEMENTS.has(name)) {
-      fail(`Element <${rawName}> is not allowed.`);
+    if (!ELEMENTS.has(rawName)) {
+      fail(`Element <${rawName}> is not allowed (names are case-sensitive).`);
       continue;
     }
+    const name = rawName;
     if (closing) {
       const top = stack.pop();
       if (top !== name) fail(`Mismatched closing tag </${rawName}>.`);
@@ -122,20 +139,18 @@ export function validateSvg(svg, options = {}) {
     if (name === 'svg' && stack.length > 0) fail('Nested <svg> elements are not allowed.');
     if (name === 'tspan' && !inText) fail('<tspan> must be inside <text>.');
 
-    // Attributes: every name and value is checked; nothing may be left over.
+    // Attributes: every name and value is checked; the tag pattern already guarantees nothing else is present.
     const attrs = {};
-    let rest = attrText;
-    for (const a of attrText.matchAll(/\s+([A-Za-z_:][-A-Za-z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) {
-      const key = a[1].toLowerCase();
+    for (const a of attrText.matchAll(ATTR)) {
+      const key = a[1];
       const value = a[2] ?? a[3] ?? '';
       attrs[key] = value;
-      rest = rest.replace(a[0], '');
       if (!ATTRIBUTES.has(key)) {
-        fail(`Attribute "${a[1]}" is not allowed on <${rawName}>.`);
+        fail(`Attribute "${key}" is not allowed on <${rawName}> (names are case-sensitive).`);
         continue;
       }
-      if (/javascript:|data:|vbscript:|https?:|\/\/|@import|expression\s*\(|&#|<|>/i.test(value) && key !== 'xmlns') fail(`Attribute ${a[1]} has a forbidden value.`);
-      if (/url\(/i.test(value) && !/^url\(#[A-Za-z0-9_-]{1,60}\)$/.test(value.trim())) fail(`Attribute ${a[1]} may only reference a local #id.`);
+      if (/javascript:|data:|vbscript:|https?:|\/\/|@import|expression\s*\(|&#|<|>/i.test(value) && key !== 'xmlns') fail(`Attribute ${key} has a forbidden value.`);
+      if (/url\(/i.test(value) && !/^url\(#[A-Za-z0-9_-]{1,60}\)$/.test(value.trim())) fail(`Attribute ${key} may only reference a local #id.`);
       if (COLOR_ATTRS.has(key)) {
         const v = value.trim();
         if (v !== 'none' && !/^url\(#[A-Za-z0-9_-]{1,60}\)$/.test(v)) {
@@ -144,7 +159,11 @@ export function validateSvg(svg, options = {}) {
           else if (!BRAND_COLORS.has(hex)) fail(`Color ${hex} is not in the brand palette (BRAND.md Workshop palette).`);
         }
       }
-      if (NUMBER_ATTRS.has(key) && !/^-?\d+(\.\d+)?(px|%)?$/.test(value.trim())) fail(`Attribute ${a[1]} must be a number.`);
+      if (NUMBER_ATTRS.has(key) && !/^-?\d{1,6}(\.\d{1,6})?(px|%)?$/.test(value.trim())) fail(`Attribute ${key} must be a number.`);
+      if ((key === 'width' || key === 'height') && name === 'svg') {
+        const n = Number(value.replace(/px$/, ''));
+        if (!/^\d{1,5}(px)?$/.test(value.trim()) || n > MAX_DIMENSION) fail(`The root ${key} must be a plain number of at most ${MAX_DIMENSION}.`);
+      }
       if (key === 'font-family') {
         for (const part of value.split(',')) {
           if (!ALLOWED_FONTS.has(part.replace(/["']/g, '').trim().toLowerCase())) fail(`Font "${part.trim()}" is not allowed; use Hanken Grotesk, Inter, JetBrains Mono, sans-serif or monospace.`);
@@ -153,11 +172,10 @@ export function validateSvg(svg, options = {}) {
       if (key === 'xmlns' && value !== 'http://www.w3.org/2000/svg') fail('xmlns must be the SVG namespace.');
       if (key === 'd' && /[^MmLlHhVvCcSsQqTtAaZz0-9eE+\-., \t\r\n]/.test(value)) fail('Path data has unexpected characters.');
     }
-    if (rest.replace(/\s+/g, '') !== '') fail(`Unparseable attributes on <${rawName}>.`);
 
     if (name === 'svg' && stack.length === 0) {
       if (attrs.xmlns !== 'http://www.w3.org/2000/svg') fail('The root <svg> needs xmlns="http://www.w3.org/2000/svg".');
-      const vb = /^0 0 (\d{2,4}) (\d{2,4})$/.exec((attrs.viewbox ?? '').trim());
+      const vb = /^0 0 (\d{2,4}) (\d{2,4})$/.exec((attrs.viewBox ?? '').trim());
       if (!vb) fail('The root <svg> needs viewBox="0 0 <width> <height>".');
       else {
         width = Number(vb[1]);
@@ -177,6 +195,5 @@ export function validateSvg(svg, options = {}) {
   }
   if (stack.length) fail('Unclosed elements.');
   if (!sawRoot) fail('No <svg> element found.');
-  void CANON;
   return { ok: problems.length === 0, problems, width, height };
 }

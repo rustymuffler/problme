@@ -74,3 +74,21 @@ test('hostile input is rejected quickly', () => {
   validateSvg('<svg ' + NS + ' viewBox="0 0 1200 630">' + '<text>'.repeat(5000), { kind: 'hero' });
   assert.ok(Date.now() - start < 3000, `took ${Date.now() - start} ms`);
 });
+
+test('whitespace and unterminated-tag input cannot hang the validator (ReDoS regression)', () => {
+  const start = Date.now();
+  for (const n of [1000, 10000, 100000]) {
+    const svg = '<svg ' + NS + ' viewBox="0 0 1200 630"><g' + ' '.repeat(n) + '<></g></svg>';
+    assert.equal(validateSvg(svg, { kind: 'hero' }).ok, false);
+  }
+  assert.equal(validateSvg('<svg ' + NS + ' viewBox="0 0 1200 630"><rect' + ' x="1"'.repeat(5000) + '/></svg>', { kind: 'hero' }).ok, false);
+  assert.ok(Date.now() - start < 1500, `took ${Date.now() - start} ms`);
+});
+
+test('names are case-sensitive and the root size is bounded', () => {
+  assert.equal(validateSvg(`<SVG ${NS} viewBox="0 0 1200 630"></SVG>`, { kind: 'hero' }).ok, false);
+  assert.equal(validateSvg(`<svg ${NS} viewbox="0 0 1200 630"></svg>`, { kind: 'hero' }).ok, false);
+  assert.equal(validateSvg(`<svg ${NS} viewBox="0 0 1200 630"><G></G></svg>`, { kind: 'hero' }).ok, false);
+  assert.equal(validateSvg(`<svg ${NS} width="60000" height="60000" viewBox="0 0 1200 630"></svg>`, { kind: 'hero' }).ok, false);
+  assert.equal(validateSvg(`<svg ${NS} width="1200" height="630" viewBox="0 0 1200 630"></svg>`, { kind: 'hero' }).ok, true);
+});

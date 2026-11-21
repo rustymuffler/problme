@@ -18,7 +18,7 @@
  * manifest.json: { "hero": { "file": "hero.svg", "alt": "..." },
  *                  "images": [ { "file": "flow.svg", "alt": "..." } ] }
  */
-import { mkdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -30,12 +30,13 @@ const MAX_IMAGES = 8;
 const BUDGET = { hero: 450_000, diagram: 400_000, webp: 200_000 }; // bytes
 const CREDIT = 'AI-generated with Claude';
 
-/** Alt text must be plain descriptive text: no markup, links, or markdown. */
+/** Alt text is plain descriptive text on one line, from a small safe character set (it ends up in MDX). */
 export function checkAlt(alt) {
   if (typeof alt !== 'string') return 'alt text is missing';
   const t = alt.trim();
   if (t.length < 20 || t.length > 250) return `alt text is ${t.length} characters; use 20 to 250`;
-  if (/[<>\[\]()`*_#|\\]|https?:|www\.|\/\//.test(t)) return 'alt text must be plain text (no markup, brackets, links or markdown)';
+  if (!/^[A-Za-z0-9 ,.;:'"%&+\-?!/]+$/.test(t)) return 'alt text may use only letters, numbers, spaces and , . ; : \' " % & + - ? ! / on a single line (no brackets, braces, angle brackets, links or markdown)';
+  if (/&#|https?:|www\.|\/\//.test(t)) return 'alt text must not contain links or character references';
   if (/^(image|picture|photo|graphic|diagram|screenshot)\s+of\b/i.test(t)) return 'alt text should describe what the image shows, not start with "image of"';
   return null;
 }
@@ -69,6 +70,22 @@ export function checkManifest(manifest) {
   return [problems, entries];
 }
 
+/** Number of [IMAGE ...] placeholder lines outside code fences. */
+export function countPlaceholders(mdx) {
+  let inFence = false;
+  let n = 0;
+  for (const line of mdx.replace(/\r\n/g, '\n').split('\n')) {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
+    else if (!inFence && /^\[IMAGE\b[^\]]*\]\s*$/.test(line)) n += 1;
+  }
+  return n;
+}
+
+/** True if the hero WebP files already exist. */
+function e0(outputs, publicDir) {
+  return outputs.some(({ e }) => e.kind === 'hero') && ['hero.webp', 'hero-640.webp'].some((f) => existsSync(path.join(publicDir, f)));
+}
+
 /** Set heroImage and imageCredit in the frontmatter, and fill [IMAGE ...] placeholders in order. */
 export function updateArticle(mdx, slug, entries) {
   const text = mdx.replace(/\r\n/g, '\n');
@@ -92,7 +109,8 @@ export function updateArticle(mdx, slug, entries) {
       const d = diagrams[next];
       next += 1;
       replaced.push(d.file);
-      return `![${d.alt}](/assets/posts/${slug}/${d.name}.png)`;
+      const safeAlt = d.alt.replace(/[\r\n{}<>\[\]()`*_#|\\]/g, ' ').replace(/\s+/g, ' ').trim();
+      return `![${safeAlt}](/assets/posts/${slug}/${d.name}.png)`;
     }
     return line;
   });
@@ -132,6 +150,12 @@ async function main() {
   const [manifestProblems, entries] = checkManifest(manifest);
   if (manifestProblems.length) return fail(manifestProblems);
 
+  // Count the placeholders first: a diagram without a placeholder is dropped, never committed.
+  const placeholders = countPlaceholders(readFileSync(path.resolve('src/content/posts', slug, 'index.mdx'), 'utf8'));
+  const diagramsAll = entries.filter((e) => e.kind === 'diagram');
+  const dropped = diagramsAll.slice(placeholders).map((e) => e.file);
+  for (const e of entries.filter((x) => x.kind === 'diagram' && dropped.includes(x.file))) entries.splice(entries.indexOf(e), 1);
+  for (const f of dropped) console.log(`::warning::[images] ${f} has no [IMAGE] placeholder and was dropped`);
   const publicDir = path.resolve('public/assets/posts', slug);
   const sourceDir = path.resolve('src/content/posts', slug, 'images');
   const articleFile = path.resolve('src/content/posts', slug, 'index.mdx');
@@ -154,6 +178,15 @@ async function main() {
     }
     outputs.push({ e, svg, width: result.width, height: result.height });
   }
+  if (problems.length) return fail(problems);
+
+  // Never overwrite: a re-run or an existing article must not have its files replaced.
+  for (const { e } of outputs) {
+    for (const f of [path.join(publicDir, `${e.name}.png`), path.join(sourceDir, e.file)]) {
+      if (existsSync(f)) problems.push(`${path.relative(process.cwd(), f)} already exists; refusing to overwrite it`);
+    }
+  }
+  if (e0(outputs, publicDir)) problems.push('hero webp files already exist; refusing to overwrite them');
   if (problems.length) return fail(problems);
 
   mkdirSync(publicDir, { recursive: true });
@@ -192,7 +225,6 @@ async function main() {
   writeFileSync(articleFile, updated.mdx);
   console.log(JSON.stringify({ slug, written, placed: updated.placed, unplaced: updated.unplaced }, null, 2));
   for (const f of updated.unplaced) console.log(`::warning::[images] ${f} has no [IMAGE] placeholder to replace and was not added to the article`);
-  void statSync;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

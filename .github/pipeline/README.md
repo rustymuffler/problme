@@ -62,4 +62,4 @@ The SVG pipeline is geometric. When an article needs a photograph or a human mom
 1. In Vercel, Add New, Project, import `rustymuffler/problme`. Install the Vercel GitHub app on this repository only.
 2. Leave the framework preset on Astro; the build and install commands come from `vercel.json`. Do not add any secrets or environment variables to this project.
 3. Turn on "Vercel for GitHub" pull request comments. Each PR then gets a comment with a preview link you can open on your phone.
-4. Because the repository is public, previews are unlisted but not secret.
+4. Because the repository is public, previews are unlisted but not secret. In the Vercel project settings, keep Deployment Protection on if you want previews to need a Vercel login, and keep deployments for pull requests from forks requiring authorization.
