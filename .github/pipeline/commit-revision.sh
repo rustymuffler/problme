@@ -5,6 +5,7 @@
 # PASS_NUMBER, ISSUE_NUMBER.
 set -euo pipefail
 file="src/content/posts/$SLUG/index.mdx"
+base_sha="$(cat .pipeline-tmp/base-sha)"
 mkdir -p "$RUNNER_TEMP/rev"
 cp -- "$file" "$RUNNER_TEMP/rev/index.mdx"
 
@@ -20,6 +21,8 @@ gh_git() { # $1 = token, rest = git args
   git -c core.hooksPath=/dev/null -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" "$@"
 }
 git fetch -q --depth=1 origin "$BRANCH"
+# If the branch moved while this run worked (for example Richard edited the article), do not overwrite it.
+[ "$(git rev-parse FETCH_HEAD)" = "$base_sha" ] || { echo "The article branch changed during the review; not committing this revision."; exit 1; }
 git checkout -q -f -B "$BRANCH" FETCH_HEAD
 cp -- "$RUNNER_TEMP/rev/index.mdx" "$file"
 git add -- "$file"

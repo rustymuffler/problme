@@ -55,7 +55,7 @@ env:
   BRANCH: ${{ inputs.branch }}
   SLUG: ${{ inputs.slug }}
   PASS: ${{ inputs.pass }}
-  AID: ${{ inputs.pass }}-${{ github.run_attempt }}
+  AID: ${{ inputs.pass }}
 
 jobs:
   prep:
@@ -77,7 +77,7 @@ jobs:
       - name: Download draft metadata
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: draft-meta-${{ github.run_attempt }}
+          name: draft-meta
           path: .pipeline-tmp/meta
 
       - name: Overlay the article from its branch
@@ -107,7 +107,13 @@ jobs:
       - name: Run the content lint
         env:
           LINT_REQUIRE_IMAGES: 'true'
-        run: node scripts/lint-content.mjs "$SLUG" > .pipeline-tmp/review-inputs/lint-output.txt 2>&1 || true
+        run: |
+          set +e
+          node scripts/lint-content.mjs "$SLUG" > .pipeline-tmp/review-inputs/lint-output.txt 2>&1
+          code=$?
+          # The lint exits 1 when it finds errors; any other code is a crash and must never read as clean.
+          if [ "$code" -gt 1 ]; then echo "LINT_CRASHED exit $code" >> .pipeline-tmp/review-inputs/lint-output.txt; fi
+          exit 0
 
       - name: Upload review inputs
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
@@ -115,6 +121,7 @@ jobs:
           name: review-inputs-${{ env.AID }}
           path: .pipeline-tmp/review-inputs
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   reviewers:
     name: Review (${{ matrix.role }})
@@ -180,15 +187,15 @@ jobs:
           name: verdict-${{ matrix.role }}-p${{ env.AID }}
           path: .pipeline-tmp/verdicts/${{ matrix.role }}.json
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   factcheck:
     name: Fact check (web)
     needs: prep
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # Pass 1 only: it is the expensive run and the only reviewer with web access.
+    # Every pass: facts a revision adds must be checked, and an earlier "must" finding must be seen fixed.
     if: >-
-      inputs.pass == '1' &&
       github.event.sender.login == 'rustymuffler' &&
       github.event.issue.user.login == 'rustymuffler'
     permissions:
@@ -237,6 +244,7 @@ jobs:
           name: verdict-factcheck-p${{ env.AID }}
           path: .pipeline-tmp/verdicts/factcheck.json
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   gate:
     name: Gate
@@ -267,9 +275,7 @@ jobs:
         run: |
           set -euo pipefail
           [ "$REVIEWERS_RESULT" = success ] || { echo "::error::A reviewer did not complete ($REVIEWERS_RESULT). Not treating the article as reviewed."; exit 1; }
-          if [ "$PASS" = 1 ]; then
-            [ "$FACTCHECK_RESULT" = success ] || { echo "::error::The fact check did not complete ($FACTCHECK_RESULT)."; exit 1; }
-          fi
+          [ "$FACTCHECK_RESULT" = success ] || { echo "::error::The fact check did not complete ($FACTCHECK_RESULT)."; exit 1; }
 
       - name: Download review inputs
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
@@ -288,8 +294,7 @@ jobs:
         id: agg
         run: |
           set -euo pipefail
-          roles="proofreader,seo,aeo,voice"
-          [ "$PASS" = 1 ] && roles="$roles,factcheck"
+          roles="proofreader,seo,aeo,voice,factcheck"
           node scripts/review-aggregate.mjs --dir .pipeline-tmp/verdicts \
             --lint .pipeline-tmp/review-inputs/lint-output.txt \
             --scan .pipeline-tmp/review-inputs/scan-summary.txt \
@@ -304,6 +309,7 @@ jobs:
           name: agg-${{ env.AID }}
           path: .pipeline-tmp/agg
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   revise:
     name: Revise
@@ -342,7 +348,8 @@ jobs:
           git checkout FETCH_HEAD -- "src/content/posts/$SLUG"
           git checkout FETCH_HEAD -- "public/assets/posts/$SLUG" 2>/dev/null || true
           cp -- ".pipeline-tmp/dl/agg-$AID/feedback.md" .pipeline-tmp/feedback.md
-          cp -- ".pipeline-tmp/dl/agg-$AID/extra-hosts.txt" .pipeline-tmp/extra-hosts.txt 2>/dev/null || : > .pipeline-tmp/extra-hosts.txt
+          # The branch tip this revision starts from; the commit step refuses to run if it has moved.
+          git rev-parse FETCH_HEAD > .pipeline-tmp/base-sha
           cp -- "src/content/posts/$SLUG/interview-notes.md" .pipeline-tmp/interview-notes.md
           cp -- "src/content/posts/$SLUG/research-brief.md" .pipeline-tmp/research-brief.md
           printf 'slug: %s\npublish_date: %s\n' "$SLUG" "$PUBLISH_DATE" > .pipeline-tmp/draft-context.txt

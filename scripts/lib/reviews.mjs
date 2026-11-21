@@ -43,7 +43,7 @@ const PASS_SCORE = 3; // every criterion must score at least this
 export function cleanText(value, max) {
   return String(value ?? '')
     .replace(/https?:\/\/\S+/gi, ' ')
-    .replace(/[\u0000-\u001F\u007F-\u009F​-‏‪-‮⁠-⁤﻿]/g, ' ')
+    .replace(/[\p{Cc}\p{Cf}\u034F\u180E\uFE00-\uFE0F\u{E0000}-\u{E007F}]/gu, ' ')
     .replace(/[<>{}\[\]`$\\|]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -111,7 +111,13 @@ export function validateVerdict(input, role) {
 
 /** Count error and warning lines in the content lint output. */
 export function lintCounts(lintText) {
-  const lines = String(lintText ?? '').split(/\r?\n/);
+  const text = String(lintText ?? '');
+  const lines = text.split(/\r?\n/);
+  // The lint always ends with a "Content lint:" summary line. Without it (crash, timeout, empty file,
+  // or the sentinel the workflow writes) the result is unknown, which counts as an error.
+  if (!/^Content lint: \d+ error/m.test(text) || /LINT_CRASHED/.test(text)) {
+    return { errors: 1, warnings: 0, errorLines: ['The content lint did not complete, so the article is not treated as clean.'], crashed: true };
+  }
   return {
     errors: lines.filter((l) => /^\s{2}error\s/.test(l)).length,
     warnings: lines.filter((l) => /^\s{2}warning\s/.test(l)).length,
@@ -176,6 +182,8 @@ export function aggregateReviews(verdicts, meta = {}) {
     `Content lint (includes spelling, readability, SEO and AEO mechanics, images, sensitivity): ${lint.errors} error(s), ${lint.warnings} warning(s).`,
   ];
   if (meta.scanSummary) sc.push(`Research safety scan: ${cleanText(meta.scanSummary, 120)}`);
+  const hosts = [...new Set((byRole.factcheck?.sources ?? []).map((u) => new URL(u).hostname.replace(/^www\./, '').toLowerCase()))];
+  if (hosts.length) sc.push(`Sources the fact check relied on: ${hosts.join(', ')}.`);
   if (!ready && pass >= maxPasses) sc.push('', `The ${maxPasses} review passes are used up. The items above are unresolved and need Richard.`);
   sc.push('');
 

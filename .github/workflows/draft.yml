@@ -217,11 +217,12 @@ jobs:
         if: steps.scan.outputs.blocked == 'false'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: research-${{ github.run_attempt }}
+          name: research
           path: |
             .pipeline-tmp/research-brief.md
             .pipeline-tmp/scan-summary.txt
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   draft:
     name: Draft and open PR
@@ -254,7 +255,7 @@ jobs:
       - name: Download research
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: research-${{ github.run_attempt }}
+          name: research
           path: .pipeline-tmp
 
       - name: Stage inputs
@@ -410,12 +411,13 @@ jobs:
       - name: Upload lint and scan summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: draft-meta-${{ github.run_attempt }}
+          name: draft-meta
           path: |
             .pipeline-tmp/lint-output.txt
             .pipeline-tmp/scan-summary.txt
             .pipeline-tmp/research-brief.md
           retention-days: 7
+          overwrite: true   # a re-run of failed jobs replaces the earlier attempt's file
 
   # ---- Editorial reviews (roadmap phase 3). Up to three passes; a pass reviews, and unless it is the
   # last, revises. Each reviewer is a separate run and none is the run that wrote the draft.
@@ -519,14 +521,13 @@ jobs:
       - name: Download the scorecard
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
-          name: agg-${{ steps.last.outputs.pass }}-${{ github.run_attempt }}
-          path: .pipeline-tmp/dl/agg-${{ steps.last.outputs.pass }}-${{ github.run_attempt }}
+          name: agg-${{ steps.last.outputs.pass }}
+          path: .pipeline-tmp/dl/agg-${{ steps.last.outputs.pass }}
 
       - name: Post the scorecard and hand over to Richard
         env:
           GH_TOKEN: ${{ github.token }}
           LAST_PASS: ${{ steps.last.outputs.pass }}
-          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: bash .github/pipeline/finalize-pr.sh
 
   notify:

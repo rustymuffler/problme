@@ -63,7 +63,7 @@ test('fact check sources must be https URLs, at most ten', () => {
 
 test('aggregation: all pass is ready; any revise, lint error or missing review needs work', () => {
   const all = ['proofreader', 'seo', 'aeo', 'voice', 'factcheck'].map((r) => norm(r)!);
-  const ready = aggregateReviews(all, { lintText: '  warning x.mdx:1  [spelling] hi\n', pass: 1 });
+  const ready = aggregateReviews(all, { lintText: '  warning x.mdx:1  [spelling] hi\nContent lint: 0 error(s), 1 warning(s) in 1 post(s).\n', pass: 1 });
   assert.equal(ready.ready, true);
   assert.match(ready.scorecard, /READY FOR RICHARD/);
 
@@ -71,7 +71,7 @@ test('aggregation: all pass is ready; any revise, lint error or missing review n
   assert.equal(withRevise.needsWork, true);
   assert.match(withRevise.feedback, /\[must\] At "intro": Reads like a bot\. Suggested fix: Use his words\./);
 
-  const lintErr = aggregateReviews(all, { lintText: '  error   src/content/posts/x/index.mdx:3  [em-dash] Em dash found.\n', pass: 1 });
+  const lintErr = aggregateReviews(all, { lintText: '  error   src/content/posts/x/index.mdx:3  [em-dash] Em dash found.\nContent lint: 1 error(s), 0 warning(s) in 1 post(s).\n', pass: 1 });
   assert.equal(lintErr.needsWork, true);
   assert.match(lintErr.feedback, /Content lint errors/);
 
@@ -79,7 +79,7 @@ test('aggregation: all pass is ready; any revise, lint error or missing review n
   assert.deepEqual(missing.missing, ['proofreader']);
   assert.equal(missing.needsWork, true);
 
-  const later = aggregateReviews(all.slice(0, 4), { pass: 2, expectedRoles: ['proofreader', 'seo', 'aeo', 'voice'] });
+  const later = aggregateReviews(all.slice(0, 4), { pass: 2, expectedRoles: ['proofreader', 'seo', 'aeo', 'voice'], lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).' + chr(10) });
   assert.equal(later.ready, true);
 });
 
@@ -134,7 +134,7 @@ test('review-aggregate CLI writes feedback, scorecard and state', () => {
   const script = path.resolve('scripts/review-aggregate.mjs');
   try {
     for (const r of ['proofreader', 'seo']) writeFileSync(path.join(dir, `${r}.json`), JSON.stringify(norm(r)));
-    writeFileSync(path.join(dir, 'lint.txt'), '  error   x.mdx:1  [em-dash] Em dash found.\n');
+    writeFileSync(path.join(dir, 'lint.txt'), '  error   x.mdx:1  [em-dash] Em dash found.\nContent lint: 1 error(s), 0 warning(s) in 1 post(s).\n');
     const result = spawnSync('node', [script, '--dir', dir, '--lint', path.join(dir, 'lint.txt'), '--pass', '2', '--roles', 'proofreader,seo', '--out-dir', path.join(dir, 'out')], { encoding: 'utf8' });
     assert.equal(result.status, 0, result.stdout + result.stderr);
     assert.match(result.stdout, /needs_work=true/);
@@ -147,4 +147,37 @@ test('review-aggregate CLI writes feedback, scorecard and state', () => {
       // best effort
     }
   }
+});
+
+test('a missing, empty, or crashed lint is never clean', () => {
+  for (const text of ['', 'LINT_CRASHED exit 2', 'stack trace only\n', undefined]) {
+    const c = lintCounts(text as string);
+    assert.equal(c.errors, 1, JSON.stringify(text));
+    assert.equal(c.crashed, true);
+  }
+  assert.equal(lintCounts('x\nContent lint: 0 error(s), 3 warning(s) in 1 post(s).\n').errors, 0);
+  const all = ['proofreader', 'seo', 'aeo', 'voice', 'factcheck'].map((r) => norm(r)!);
+  assert.equal(aggregateReviews(all, { lintText: '', pass: 1 }).ready, false);
+  assert.equal(aggregateReviews(all, { lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).\n', pass: 1 }).ready, true);
+});
+
+test('cleanText removes invisible and format characters, including tag characters and bidi isolates', () => {
+  const dirty = 'a\u00ADb\u2066c\u2069d\u{E0041}e\u180Ef\u034Fg\uFE0Fh\u200Bi';
+  const clean = cleanText(dirty, 100);
+  assert.doesNotMatch(clean, /[\u00AD\u2066\u2069\u180E\u034F\uFE0F\u200B]|[\u{E0000}-\u{E007F}]/u);
+  assert.match(clean, /a b c d e f g h i/);
+});
+
+test('the fact check is a required review on every pass', () => {
+  const four = ['proofreader', 'seo', 'aeo', 'voice'].map((r) => norm(r)!);
+  const r = aggregateReviews(four, { lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).\n', pass: 2 });
+  assert.deepEqual(r.missing, ['factcheck']);
+  assert.equal(r.ready, false);
+});
+
+test('the scorecard lists the hosts the fact check relied on, as text only', () => {
+  const fc = norm('factcheck', { sources: ['https://docs.github.com/en/actions', 'https://www.Example.org/a'] })!;
+  const r = aggregateReviews([fc], { pass: 1, expectedRoles: ['factcheck'], lintText: 'Content lint: 0 error(s), 0 warning(s) in 1 post(s).\n' });
+  assert.match(r.scorecard, /Sources the fact check relied on: docs\.github\.com, example\.org\./);
+  assert.doesNotMatch(r.scorecard, /https?:\/\//);
 });

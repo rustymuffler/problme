@@ -5,8 +5,8 @@
  *   node scripts/review-aggregate.mjs --dir <folder of normalised *.json verdicts> --lint <lint-output.txt>
  *       --pass <n> --out-dir <folder> [--roles a,b,c] [--scan <scan-summary.txt>]
  *
- * Writes feedback.md (what the Writer revises from), scorecard.md (shown in the PR), extra-hosts.txt
- * (link hosts the fact checker opened) and state.json, and prints needs_work, ready and exhausted lines
+ * Writes feedback.md (what the Writer revises from), scorecard.md (shown in the PR)
+ * and state.json, and prints needs_work, ready and exhausted lines
  * for $GITHUB_OUTPUT.
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -47,7 +47,6 @@ function main() {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(path.join(outDir, 'feedback.md'), result.feedback);
   writeFileSync(path.join(outDir, 'scorecard.md'), result.scorecard);
-  writeFileSync(path.join(outDir, 'extra-hosts.txt'), result.extraHosts.join('\n') + (result.extraHosts.length ? '\n' : ''));
   writeFileSync(path.join(outDir, 'state.json'), JSON.stringify({ needsWork: result.needsWork, ready: result.ready, exhausted: result.exhausted, missing: result.missing, lint: result.lint }, null, 2));
   console.log(`needs_work=${result.needsWork}`);
   console.log(`ready=${result.ready}`);

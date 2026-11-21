@@ -32,18 +32,27 @@ if [ "$(wc -c < "$file")" -lt $(( $(printf '%s' "$before" | wc -c) / 2 )) ]; the
   echo "The revision removed more than half of the article."; exit 1
 fi
 
-# Lint (recorded, not fatal: the next review pass reads the result).
+# Lint. Most findings are read by the next review pass, but a crash and the hard-safety rules (executable
+# MDX, secrets, personal data, do-not-publish text) must never be committed.
 LINT_REQUIRE_IMAGES=true node scripts/lint-content.mjs "$SLUG" > .pipeline-tmp/lint-revision.txt 2>&1 || true
 cat .pipeline-tmp/lint-revision.txt
+if ! grep -q '^Content lint: ' .pipeline-tmp/lint-revision.txt; then
+  echo "The content lint did not complete."; exit 1
+fi
+if grep -qE '^  error .*\[(mdx-[a-z]+|secret-pattern|sensitive-[a-z]+|do-not-publish)\]' .pipeline-tmp/lint-revision.txt; then
+  echo "The revision breaks a hard safety rule (see the lint output above)."; exit 1
+fi
 
-# Link gate: every external link host must be in the research brief or the fact check's sources.
-allowed="$( { grep -oE 'https?://[^/) >]+' .pipeline-tmp/research-brief.md | sed -E 's#https?://##; s#^www\.##'; cat .pipeline-tmp/extra-hosts.txt 2>/dev/null; } | tr 'A-Z' 'a-z' | sort -u)"
+# Link gate: every external host must be in the research brief (or probl.me or github.com). The fact
+# check's sources are shown on the scorecard for Richard but never widen this gate.
+allowed="$(node scripts/link-hosts.mjs .pipeline-tmp/research-brief.md --all)"
 bad=0
-for host in $(grep -oE '\]\(https?://[^/) ]+' "$file" | sed -E 's#\]\(https?://##; s#^www\.##' | tr 'A-Z' 'a-z' | sort -u); do
+while IFS= read -r host; do
+  [ -z "$host" ] && continue
   case "$host" in probl.me|github.com) continue ;; esac
-  if ! printf '%s\n' "$allowed" | grep -qxF "$host"; then
-    echo "Link host not in the research brief or the fact check sources: $host"; bad=1
+  if ! printf '%s\n' "$allowed" | grep -qxF -- "$host"; then
+    echo "Link host not in the research brief: $host"; bad=1
   fi
-done
+done < <(node scripts/link-hosts.mjs "$file")
 [ "$bad" -eq 0 ] || exit 1
 echo "Revision OK."
