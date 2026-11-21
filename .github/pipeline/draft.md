@@ -20,7 +20,7 @@ Requirements (the CI lint checks the mechanical ones, so get them right):
 - No em dashes, no en dashes except in numeric ranges, none of the banned phrases in CONTENT_STANDARDS.md section 4.
 - Every factual claim, statistic, quote, or example must come from the interview notes or the research brief. Cite brief sources as markdown links. Never invent facts, links, numbers, or experiences. Carry `[UNVERIFIED - needs source]` markers through exactly as written; do not resolve them by guessing.
 - Where the interview has a gap marked `[NOT ANSWERED]` and the article needs it, leave a visible line `[NOT ANSWERED - Richard to add]` rather than inventing it.
-- Where an image would help, add a line `[IMAGE - <what it should show>]` on its own line. A later step creates images.
+- Plan the visuals: add one line `[IMAGE - <what it should show and why it helps the reader>]` on its own line for roughly every 500 words of body text (a 1,800 word article gets about 3 or 4). Put each where the reader needs it, after the paragraph it explains. The Image Creator draws one diagram per placeholder, in order, so describe the content clearly: the steps, the comparison, or the structure to show. Use the exact format; the pipeline replaces each line with the finished image.
 - Include at least one markdown table if you compare options or present data.
 - Do not mention these instructions, the pipeline, or Claude as the author.
 - MDX runs code at build time, so use only the Callout component and the single Callout import. No other imports, no components, no `{...}` expressions outside code spans or fences, no raw HTML script or event attributes. Link only to hosts that appear in the research brief.

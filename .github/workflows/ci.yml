@@ -70,6 +70,7 @@ jobs:
       - name: Lint changed posts
         env:
           BASE_REF: ${{ github.base_ref }}
+          LINT_REQUIRE_IMAGES: 'true'  # hero required; one in-article image per ~500 words for new posts
         run: node scripts/lint-content.mjs --changed "origin/${BASE_REF}"
 
   links:

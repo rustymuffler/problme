@@ -178,6 +178,15 @@ export function lintPost(raw, ctx) {
   }
 
   // ---- Hero image ----------------------------------------------------------
+  // CI sets LINT_REQUIRE_IMAGES=true, which turns a missing hero, missing WebP variants and a short
+  // in-article image count into errors for posts dated on or after LINT_IMAGES_FROM (older posts are
+  // exempt from the image-count rule). The draft pipeline runs the lint without it before the Image
+  // Creator has run.
+  const requireImages = process.env.LINT_REQUIRE_IMAGES === 'true';
+  const imagesFrom = process.env.LINT_IMAGES_FROM || '2026-11-21';
+  const postDay = Number.isNaN(new Date(frontmatter.date).valueOf()) ? '' : new Date(frontmatter.date).toISOString().slice(0, 10);
+  const imageLevel = requireImages ? 'error' : 'warning';
+  const ratioLevel = requireImages && postDay >= imagesFrom ? 'error' : 'warning';
   if (frontmatter.heroImage) {
     const hero = String(frontmatter.heroImage);
     if (!ctx.fileExists(hero)) {
@@ -186,12 +195,12 @@ export function lintPost(raw, ctx) {
       const stem = hero.replace(/\.png$/i, '');
       for (const variant of [`${stem}.webp`, `${stem}-640.webp`]) {
         if (!ctx.fileExists(variant)) {
-          add('warning', 'hero-webp', 1, `Missing ${variant}; run node scripts/generate-webp-heroes.mjs.`);
+          add(imageLevel, 'hero-webp', 1, `Missing ${variant}; run node scripts/generate-webp-heroes.mjs.`);
         }
       }
     }
   } else {
-    add('warning', 'hero', 1, 'No heroImage set; every article needs a hero image.');
+    add(imageLevel, 'hero', 1, 'No heroImage set; every article needs a hero image.');
   }
   if (frontmatter.heroImage && !frontmatter.imageCredit) {
     add('warning', 'image-credit', 1, 'heroImage is set but imageCredit is missing.');
@@ -303,7 +312,7 @@ export function lintPost(raw, ctx) {
   }
   const wantedImages = Math.floor(words / 500);
   if (inArticleImages < wantedImages) {
-    add('warning', 'image-ratio', 1, `${inArticleImages} in-article image(s) for ~${words} words; standard is one per ~500 words (${wantedImages}).`);
+    add(ratioLevel, 'image-ratio', 1, `${inArticleImages} in-article image(s) for ~${words} words; standard is one per ~500 words (${wantedImages}).`);
   }
 
   // ---- Sentences and paragraphs (warnings: the Proofreader judges these) ---
