@@ -54,7 +54,7 @@ test('merged: schedules the issue, removes stale stage labels, records slug and 
   const mdx = Buffer.from('---\ntitle: "x"\ndate: 2026-12-08\n---\nbody\n').toString('base64');
   const f = fakes(
     { 'pulls/9/files': [{ filename: 'src/content/posts/my-new-article/index.mdx' }, { filename: 'public/assets/posts/my-new-article/hero.png' }], 'issues/12/labels': [{ name: 'stage:review' }, { name: 'cat:tech-tools' }] },
-    { 'contents/src/content/posts/my-new-article/index.mdx': JSON.stringify({ content: mdx }) },
+    { 'contents/src/content/posts/my-new-article/index.mdx': JSON.stringify({ content: mdx }), 'repos/o/r/issues/12': JSON.stringify({ user: { login: OWNER } }) },
   );
   const r = await runMerged({ repo: 'o/r', headRef: 'article/12', prNumber: '9', mergeSha: 'a'.repeat(40), gh: f.gh, ghJson: f.ghJson, log: quiet });
   assert.deepEqual(r, { issue: 12, slug: 'my-new-article', date: '2026-12-08' });
@@ -68,7 +68,7 @@ test('merged: ignores non-article branches, mixed PRs, and bad inputs', async ()
   const f = fakes({});
   assert.equal(await runMerged({ repo: 'o/r', headRef: 'feat/x', prNumber: '9', mergeSha: 'a'.repeat(40), gh: f.gh, ghJson: f.ghJson, log: quiet }), undefined);
   assert.equal(f.writes().length, 0);
-  const mixed = fakes({ 'pulls/9/files': [{ filename: 'src/content/posts/a-b-c/index.mdx' }, { filename: 'src/components/X.astro' }, { filename: 'src/content/posts/x-y-z/index.mdx' }] });
+  const mixed = fakes({ 'pulls/9/files': [{ filename: 'src/content/posts/a-b-c/index.mdx' }, { filename: 'src/components/X.astro' }, { filename: 'src/content/posts/x-y-z/index.mdx' }] }, { 'repos/o/r/issues/3': JSON.stringify({ user: { login: OWNER } }) });
   assert.equal(await runMerged({ repo: 'o/r', headRef: 'article/3', prNumber: '9', mergeSha: 'a'.repeat(40), gh: mixed.gh, ghJson: mixed.ghJson, log: quiet }), undefined);
   assert.equal(mixed.writes().length, 0);
   await assert.rejects(runMerged({ repo: 'o/r', headRef: 'article/3', prNumber: '9', mergeSha: 'not-a-sha', log: quiet }), /MERGE_SHA/);
@@ -116,4 +116,66 @@ test('verify: other people issues and issues without a marker are skipped', asyn
   const f = fakes({ 'issues?labels=stage:scheduled': [stranger, noMarker], 'issues/41/comments': [{ user: { login: BOT }, body: 'hello', created_at: ago(1) }] });
   assert.deepEqual(await runVerify({ repo: 'o/r', now, gh: f.gh, ghJson: f.ghJson, liveCheck: async () => [], wait: async () => {}, log: quiet }), []);
   assert.equal(f.writes().length, 0);
+});
+
+test('merged: an issue the owner did not open, or an article without a date, is not tracked', async () => {
+  const stranger = fakes({ 'pulls/9/files': [{ filename: 'src/content/posts/my-new-article/index.mdx' }] }, { 'repos/o/r/issues/7': JSON.stringify({ user: { login: 'stranger' } }) });
+  assert.equal(await runMerged({ repo: 'o/r', headRef: 'article/7', prNumber: '9', mergeSha: 'a'.repeat(40), gh: stranger.gh, ghJson: stranger.ghJson, log: quiet }), undefined);
+  assert.equal(stranger.writes().length, 0);
+  const noDate = fakes(
+    { 'pulls/9/files': [{ filename: 'src/content/posts/my-new-article/index.mdx' }] },
+    { 'contents/src/content/posts/my-new-article/index.mdx': JSON.stringify({ content: Buffer.from('---\ntitle: x\n---\n').toString('base64') }), 'repos/o/r/issues/8': JSON.stringify({ user: { login: OWNER } }) },
+  );
+  await assert.rejects(runMerged({ repo: 'o/r', headRef: 'article/8', prNumber: '9', mergeSha: 'a'.repeat(40), gh: noDate.gh, ghJson: noDate.ghJson, log: quiet }), /No valid date/);
+  assert.equal(noDate.writes().length, 0);
+});
+
+test('verify: schedule markers and warning markers from anyone but github-actions[bot] are ignored', async () => {
+  const marker = slugMarker('spoofed-article-five', '2026-11-20');
+  const spoof = (login: string) => ({ user: { login }, body: marker, created_at: ago(1) });
+  for (const login of ['stranger', OWNER, 'github-actions']) {
+    const f = fakes({ 'issues?labels=stage:scheduled': [{ number: 50, user: { login: OWNER } }], 'issues/50/comments': [spoof(login)] });
+    const published = await runVerify({ repo: 'o/r', now, gh: f.gh, ghJson: f.ghJson, liveCheck: async () => [], wait: async () => {}, log: quiet });
+    assert.deepEqual(published, [], login);
+    assert.equal(f.writes().length, 0, login);
+  }
+  const a = scheduled(51, 'overdue-article-six', '2026-11-25');
+  a.comments.push({ user: { login: 'stranger' }, body: '<!-- pipeline:publish-warning -->', created_at: ago(1) });
+  const f = fakes({ 'issues?labels=stage:scheduled': [a.issue], 'issues/51/comments': a.comments });
+  await runVerify({ repo: 'o/r', now, gh: f.gh, ghJson: f.ghJson, liveCheck: async () => ['not in the sitemap'], wait: async () => {}, log: quiet });
+  assert.match(f.writes().join('\n'), /pipeline:publish-warning/); // a stranger's copy of the marker does not suppress the warning
+});
+
+test('verify: no retries by default, and a run deadline stops the retries', async () => {
+  const a = scheduled(60, 'slow-article-seven', '2026-11-30');
+  let checks = 0;
+  const f = fakes({ 'issues?labels=stage:scheduled': [a.issue], 'issues/60/comments': a.comments });
+  await runVerify({ repo: 'o/r', now, gh: f.gh, ghJson: f.ghJson, liveCheck: async () => { checks += 1; return ['the page returned 404']; }, wait: async () => {}, log: quiet });
+  assert.equal(checks, 1);
+
+  let t = 0;
+  const clock = () => { t += 100000; return t; }; // each reading advances 100 s against an 8 minute budget
+  checks = 0;
+  await runVerify({ repo: 'o/r', now, gh: f.gh, ghJson: f.ghJson, liveCheck: async () => { checks += 1; return ['the page returned 404']; }, wait: async () => {}, retries: 50, clock, log: quiet });
+  assert.ok(checks > 1 && checks < 10, `checks ${checks}`);
+});
+
+test('one failing issue does not stop the others, but the run reports the failure', async () => {
+  const a = scheduled(70, 'broken-article-eight', '2026-11-30');
+  const b = scheduled(71, 'fine-article-nine', '2026-11-30');
+  const f = fakes({ 'issues?labels=stage:scheduled': [a.issue, b.issue], 'issues/70/comments': a.comments, 'issues/71/comments': b.comments, 'issues/71/labels': [{ name: 'stage:scheduled' }] });
+  const gh = (args: string[]) => {
+    if (args.join(' ').includes('issue comment 70')) throw new Error('rate limited');
+    return f.gh(args);
+  };
+  await assert.rejects(runVerify({ repo: 'o/r', now, gh, ghJson: f.ghJson, liveCheck: async () => [], wait: async () => {}, log: quiet }), /Could not process issue\(s\): 70/);
+  assert.match(f.writes().join('\n'), /issue close 71/);
+
+  const t = fakes({ 'issues?labels=stage:interview': [interviewIssue(80), interviewIssue(81)], 'issues/80/comments': [botQ(4)], 'issues/81/comments': [botQ(4)] });
+  const tgh = (args: string[]) => {
+    if (args.join(' ').includes('issue comment 80')) throw new Error('boom');
+    return t.gh(args);
+  };
+  assert.throws(() => runTimer({ repo: 'o/r', now, gh: tgh, ghJson: t.ghJson, log: quiet }), /Could not process issue\(s\): 80/);
+  assert.match(t.writes().join('\n'), /issue comment 81/);
 });

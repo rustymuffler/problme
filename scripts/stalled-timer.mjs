@@ -22,7 +22,9 @@ export function runTimer({ repo, dry = false, now = new Date(), gh = realGh, ghJ
   const issues = ghJson(['api', `repos/${repo}/issues?labels=stage:interview&state=open&per_page=100`]).filter((i) => !i.pull_request);
   log(`${issues.length} open issue(s) labelled stage:interview.`);
   const acted = [];
+  const failed = [];
   for (const issue of issues) {
+   try {
     const comments = ghJson(['api', `repos/${repo}/issues/${issue.number}/comments?per_page=100`]);
     const d = decideStall(issue, comments, now);
     log(`#${issue.number}: ${d.action} (${d.reason})`);
@@ -42,7 +44,13 @@ export function runTimer({ repo, dry = false, now = new Date(), gh = realGh, ghJ
         `${STALLED_MARKER}\nParked as stalled: no answer for ${Math.floor(d.waitingDays)} days. Nothing is lost and no other article is blocked. To restart, add the label \`stage:interview\` again; the Interview Agent will continue from the answers already in this thread.`]);
     }
     acted.push({ number: issue.number, action: d.action });
+   } catch (err) {
+    // One bad issue (deleted, rate limited) must not stop the others.
+    failed.push(issue.number);
+    log(`::warning::#${issue.number}: ${String(err.message).split('\n')[0].slice(0, 200)}`);
+   }
   }
+  if (failed.length) throw new Error(`Could not process issue(s): ${failed.join(', ')}`);
   return acted;
 }
 

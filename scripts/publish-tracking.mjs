@@ -52,6 +52,10 @@ export async function runMerged({ repo, headRef, prNumber, mergeSha, gh = realGh
   if (!/^[0-9a-f]{40}$/.test(String(mergeSha))) throw new Error('MERGE_SHA must be a full commit SHA');
   const { ensureLabel, swapLabels } = makeHelpers(repo, gh, ghJson);
 
+  // Only issues the owner opened are tracked, whatever number the branch name carries.
+  const opener = JSON.parse(gh(['api', `repos/${repo}/issues/${issue}`])).user?.login;
+  if (opener !== OWNER) return log(`Issue #${issue} was not opened by the owner; nothing to track.`);
+
   const files = ghJson(['api', `repos/${repo}/pulls/${prNumber}/files?per_page=100`]).map((f) => f.filename);
   const slug = slugFromFiles(files);
   if (!slug) return log('The PR does not belong to exactly one article folder; nothing to track.');
@@ -85,13 +89,16 @@ export async function fetchLiveProblems(slug, fetchImpl = fetch) {
 }
 
 /** Confirm scheduled articles that are due; mark them published and close the issue. */
-export async function runVerify({ repo, now = new Date(), gh = realGh, ghJson = realGhJson, liveCheck = fetchLiveProblems, wait = sleep, retries = 5, log = console.log }) {
+export async function runVerify({ repo, now = new Date(), gh = realGh, ghJson = realGhJson, liveCheck = fetchLiveProblems, wait = sleep, retries = 0, deadlineMs = 8 * 60 * 1000, clock = Date.now, log = console.log }) {
   checkRepo(repo);
   const { ensureLabel, swapLabels } = makeHelpers(repo, gh, ghJson);
   const issues = ghJson(['api', `repos/${repo}/issues?labels=stage:scheduled&state=open&per_page=100`]).filter((i) => !i.pull_request && i.user?.login === OWNER);
   log(`${issues.length} scheduled article(s).`);
   const published = [];
+  const failed = [];
+  const deadline = clock() + deadlineMs; // one budget for all retries in this run
   for (const issue of issues) {
+   try {
     const comments = ghJson(['api', `repos/${repo}/issues/${issue.number}/comments?per_page=100`]);
     const marker = comments.map((c) => (c.user?.login === 'github-actions[bot]' ? parseSlugMarker(c.body) : null)).filter(Boolean).pop();
     if (!marker) {
@@ -103,7 +110,7 @@ export async function runVerify({ repo, now = new Date(), gh = realGh, ghJson = 
       continue;
     }
     let problems = await liveCheck(marker.slug);
-    for (let attempt = 1; problems.length && attempt <= retries; attempt += 1) {
+    for (let attempt = 1; problems.length && attempt <= retries && clock() < deadline; attempt += 1) {
       await wait(30000); // Pages and the CDN can lag a minute behind the deploy
       problems = await liveCheck(marker.slug);
     }
@@ -118,12 +125,18 @@ export async function runVerify({ repo, now = new Date(), gh = realGh, ghJson = 
     }
     log(`#${issue.number}: not live yet (${problems.join('; ')}).`);
     const overdueDays = (now.valueOf() - new Date(`${marker.date}T00:00:00Z`).valueOf()) / 86400000;
-    const warned = comments.some((c) => String(c.body ?? '').includes(WARNING_MARKER));
+    const warned = comments.some((c) => c.user?.login === 'github-actions[bot]' && String(c.body ?? '').includes(WARNING_MARKER));
     if (overdueDays >= 2 && !warned) {
       gh(['issue', 'edit', String(issue.number), '--repo', repo, '--add-assignee', OWNER]);
       gh(['issue', 'comment', String(issue.number), '--repo', repo, '--body', `${WARNING_MARKER}\nThis article was due on ${marker.date} but is not live: ${problems.join('; ')}. Check the Deploy to GitHub Pages workflow run and the post's date.`]);
     }
+   } catch (err) {
+    // One bad issue (deleted, rate limited) must not stop the others.
+    failed.push(issue.number);
+    log(`::warning::#${issue.number}: ${String(err.message).split('\n')[0].slice(0, 200)}`);
+   }
   }
+  if (failed.length) throw new Error(`Could not process issue(s): ${failed.join(', ')}`);
   return published;
 }
 
@@ -133,7 +146,8 @@ async function main() {
   if (command === 'merged') {
     await runMerged({ repo, headRef: process.env.HEAD_REF ?? '', prNumber: process.env.PR_NUMBER ?? '', mergeSha: process.env.MERGE_SHA ?? '' });
   } else if (command === 'verify') {
-    await runVerify({ repo });
+    const retries = Math.min(5, Math.max(0, Number(process.env.VERIFY_RETRIES ?? '0') || 0));
+    await runVerify({ repo, retries });
   } else {
     throw new Error('Usage: publish-tracking.mjs merged|verify');
   }
