@@ -1,0 +1,49 @@
+name: Stalled interview timer
+
+# Roadmap item P4-7. Once a day, look at article issues waiting on Richard's interview answers:
+# one nudge comment after 3 days, stage:stalled after 7, so a missed answer never blocks anything.
+# Decisions: scripts/lib/tracking.mjs. Only issues the owner opened are touched. No model is involved.
+
+on:
+  schedule:
+    - cron: '23 13 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only print what would happen'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  timer:
+    name: Nudge or park stalled interviews
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write   # comment, label, assign
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Run the timer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          if [ "$DRY_RUN" = true ]; then
+            node scripts/stalled-timer.mjs --dry-run
+          else
+            node scripts/stalled-timer.mjs
+          fi
