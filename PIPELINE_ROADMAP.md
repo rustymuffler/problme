@@ -67,15 +67,15 @@ The built stages run live, are locked down, and the docs match reality, before m
 | ID | Item | Status |
 |---|---|---|
 | P0-1 | FINAL STEP, run only when the full test gate is met (see "Full test gate" in PIPELINE_ROADMAP.md): one article through the complete pipeline, idea issue to published, with nothing skipped. Record Pro quota used, wall time per stage, your minutes, and fix first-run problems (Claude App token validity, tool-permission rule syntax, injection scanner on the runner, github_token behaviour). Already verified live on 2026-11-21: the interview start stage (the allowlist needed the nested setup-bun action). | ⬜ |
-| P0-2 | Open pipeline PRs as draft PRs until the Proofreader and SEO gates exist (MILESTONES invariants 4 and 8 say both must pass before a content PR opens). The PR body must say which reviews have not run. | 🔄 |
-| P0-3 | CI builds with INCLUDE_FUTURE_POSTS=true on pull requests so Lighthouse, accessibility and link checks cover a scheduled article now, not after it goes live. Production deploy stays unchanged. | ⬜ |
-| P0-4 | Content-PR path guard: a required check that article PRs touch only src/content/posts/<slug>/ and public/assets/posts/<slug>/. Anything else must go through the code workflow (Security Auditor and Code Reviewer). | ⬜ |
-| P0-5 | Add actionlint (or equivalent) for workflow files to CI, and confirm Semgrep and Checkov cover .github/workflows and .github/pipeline scripts. | ⬜ |
-| P0-6 | Repository lockdown to your account only. Done 2026-11-21: fork PR approval set to all external contributors. Needs your yes each: default workflow token to read-only, restrict allowed Actions to a pinned list, require SHA pinning, enable secret scanning and push protection, consider interaction limits, review the "Actions can create and approve PRs" setting. | 🔄 |
-| P0-7 | Fix lint errors in published posts (context-limits-design-constraint: banned word and missing TL;DR) and review the lint warnings on older posts. | ⬜ |
-| P0-8 | Docs alignment: rewrite AGENTS.md (roster, content workflow, Scheduling and Loops), CONTENT_STANDARDS.md section 7, MILESTONES.md (calendar, phase 3 and 4 items), DECISIONS.md (new decisions: GitHub-native pipeline, owner gate, isolation model), SECURITY_SCANNING.md (pipeline workflows), README pipeline diagram. | ⬜ |
+| P0-2 | Open pipeline PRs as draft PRs until the Proofreader and SEO gates exist (MILESTONES invariants 4 and 8 say both must pass before a content PR opens). The PR body must say which reviews have not run. | ✅ |
+| P0-3 | CI builds with INCLUDE_FUTURE_POSTS=true on pull requests so Lighthouse, accessibility and link checks cover a scheduled article now, not after it goes live. Production deploy stays unchanged. | ✅ |
+| P0-4 | Content-PR path guard: a required check that article PRs touch only src/content/posts/<slug>/ and public/assets/posts/<slug>/. Anything else must go through the code workflow (Security Auditor and Code Reviewer). | ✅ |
+| P0-5 | Add actionlint (or equivalent) for workflow files to CI, and confirm Semgrep and Checkov cover .github/workflows and .github/pipeline scripts. | ✅ |
+| P0-6 | Repository lockdown to your account only. Done 2026-11-21: fork PR approval set to all external contributors. Needs your yes each: default workflow token to read-only, restrict allowed Actions to a pinned list, require SHA pinning, enable secret scanning and push protection, consider interaction limits, review the "Actions can create and approve PRs" setting. | ✅ |
+| P0-7 | Fix lint errors in published posts (context-limits-design-constraint: banned word and missing TL;DR) and review the lint warnings on older posts. | ✅ |
+| P0-8 | Docs alignment: rewrite AGENTS.md (roster, content workflow, Scheduling and Loops), CONTENT_STANDARDS.md section 7, MILESTONES.md (calendar, phase 3 and 4 items), DECISIONS.md (new decisions: GitHub-native pipeline, owner gate, isolation model), SECURITY_SCANNING.md (pipeline workflows), README pipeline diagram. | ✅ |
 | P0-9 | Retire or delete the four paused Cowork scheduled tasks once their replacements exist; keep their prompts in the repo history. | ⬜ |
-| P0-10 | Subscription token lifecycle: calendar reminder before CLAUDE_CODE_OAUTH_TOKEN expires (about one year from 2026-11-19) and a documented behaviour when the Pro quota is exhausted (retry later, never silent). | ⬜ |
+| P0-10 | Subscription token lifecycle: calendar reminder before CLAUDE_CODE_OAUTH_TOKEN expires (about one year from 2026-11-19) and a documented behaviour when the Pro quota is exhausted (retry later, never silent). | ✅ |
 
 ## Phase 1: Images and previews
 
@@ -83,14 +83,14 @@ Every draft arrives with a hero image, in-article visuals, and a link you can re
 
 | ID | Item | Status |
 |---|---|---|
-| P1-1 | Image Creator stage: a run with no shell and no web writes SVG files from the article and BRAND.md (hero 1200x630 plus in-article diagrams and charts). | ⬜ |
-| P1-2 | SVG sanitiser (no scripts, external references, foreignObject, embedded HTML; palette limited to BRAND.md) and a deterministic rasteriser (sharp) producing PNG, then hero.webp and hero-640.webp via scripts/generate-webp-heroes.mjs, with file-size budgets. | ⬜ |
-| P1-3 | In-article visuals at one per about 500 words: replace each [IMAGE - ...] placeholder with a markdown image and descriptive alt text. Optional animated GIF (SVG frames to ffmpeg) only where motion clarifies. | ⬜ |
-| P1-4 | Fill heroImage and imageCredit deterministically; check alt-text quality (descriptive, not "image of"), hero dimensions, and credit value. | ⬜ |
-| P1-5 | Photo and emotion path stays manual (licence check required: royalty-free, commercial use, source URL recorded). Document the hand-off in the PR. | ⬜ |
-| P1-6 | After P1-1 works: make heroImage required and the image ratio an error in the lint. | ⬜ |
-| P1-7 | Vercel per-PR preview with INCLUDE_FUTURE_POSTS=true, noindex, link posted in the PR body and review comment. | ⬜ |
-| P1-8 | Image CI checks: OG size, image weight, WebP present, no broken image paths. | ⬜ |
+| P1-1 | Image Creator stage: a run with no shell and no web writes SVG files from the article and BRAND.md (hero 1200x630 plus in-article diagrams and charts). | ✅ |
+| P1-2 | SVG sanitiser (no scripts, external references, foreignObject, embedded HTML; palette limited to BRAND.md) and a deterministic rasteriser (sharp) producing PNG, then hero.webp and hero-640.webp via scripts/generate-webp-heroes.mjs, with file-size budgets. | ✅ |
+| P1-3 | In-article visuals at one per about 500 words: replace each [IMAGE - ...] placeholder with a markdown image and descriptive alt text. Optional animated GIF (SVG frames to ffmpeg) only where motion clarifies. | ✅ |
+| P1-4 | Fill heroImage and imageCredit deterministically; check alt-text quality (descriptive, not "image of"), hero dimensions, and credit value. | ✅ |
+| P1-5 | Photo and emotion path stays manual (licence check required: royalty-free, commercial use, source URL recorded). Document the hand-off in the PR. | ✅ |
+| P1-6 | After P1-1 works: make heroImage required and the image ratio an error in the lint. | ✅ |
+| P1-7 | Vercel per-PR preview with INCLUDE_FUTURE_POSTS=true, noindex, link posted in the PR body and review comment. | 🔄 |
+| P1-8 | Image CI checks: OG size, image weight, WebP present, no broken image paths. | ✅ |
 
 ## Phase 2: Deterministic quality gates
 
@@ -98,17 +98,17 @@ Everything a tool can check is checked by a tool, so agents only judge what need
 
 | ID | Item | Status |
 |---|---|---|
-| P2-1 | Grammar and spelling check (choose tooling, for example cspell plus retext plugins or a self-hosted LanguageTool). Run the supply-chain scan on any new dependency first. | ⬜ |
-| P2-2 | Readability metrics: Flesch-Kincaid grade 8 to 10, average sentence length 15 to 20, paragraph length. Warn, then promote to errors once tuned. | ⬜ |
-| P2-3 | Remaining Proofreader checklist items that tools can do: consecutive sentences starting with the same word, numbers under ten spelled out, passive-voice flags, repeated words. | ⬜ |
-| P2-4 | SEO mechanics: a primaryKeyword field; keyword in title, description, slug and first 200 words; description differs from the title; H2s phrased as questions where natural; at least one internal link; sensible link counts. | ⬜ |
-| P2-5 | AEO and GEO mechanics: TL;DR 40 to 60 words, core answer in the first 200 words, FAQ answers not duplicating the body (similarity check), data in tables, sections that stand alone (H2 section size bounds), a source link beside every statistic. | ⬜ |
-| P2-6 | Structured data and feeds on the built page: BlogPosting, BreadcrumbList and FAQPage JSON-LD parse and match frontmatter; canonical, sitemap, RSS and llms.txt entries exist. | ⬜ |
-| P2-7 | Originality and cannibalisation: n-gram overlap against the research sources and existing posts; duplicate title, slug or keyword detection. | ⬜ |
-| P2-8 | Sensitivity scan: employer and customer names, emails, keys, private URLs, anything flagged "Do not publish" in the interview, against a blocklist you maintain. | ⬜ |
-| P2-9 | Link quality: no "click here" text, external link liveness at draft time, sources older than 2 years flagged, primary sources preferred. | ⬜ |
-| P2-10 | Code and config sample checks: YAML and JSON parse, shell syntax, language tag on every fence, no secrets in samples. | ⬜ |
-| P2-11 | Tag taxonomy: prefer existing tags, flag new tags, category matches the issue label. | ⬜ |
+| P2-1 | Grammar and spelling check (choose tooling, for example cspell plus retext plugins or a self-hosted LanguageTool). Run the supply-chain scan on any new dependency first. | ✅ |
+| P2-2 | Readability metrics: Flesch-Kincaid grade 8 to 10, average sentence length 15 to 20, paragraph length. Warn, then promote to errors once tuned. | ✅ |
+| P2-3 | Remaining Proofreader checklist items that tools can do: consecutive sentences starting with the same word, numbers under ten spelled out, passive-voice flags, repeated words. | ✅ |
+| P2-4 | SEO mechanics: a primaryKeyword field; keyword in title, description, slug and first 200 words; description differs from the title; H2s phrased as questions where natural; at least one internal link; sensible link counts. | ✅ |
+| P2-5 | AEO and GEO mechanics: TL;DR 40 to 60 words, core answer in the first 200 words, FAQ answers not duplicating the body (similarity check), data in tables, sections that stand alone (H2 section size bounds), a source link beside every statistic. | ✅ |
+| P2-6 | Structured data and feeds on the built page: BlogPosting, BreadcrumbList and FAQPage JSON-LD parse and match frontmatter; canonical, sitemap, RSS and llms.txt entries exist. | ✅ |
+| P2-7 | Originality and cannibalisation: n-gram overlap against the research sources and existing posts; duplicate title, slug or keyword detection. | ✅ |
+| P2-8 | Sensitivity scan: employer and customer names, emails, keys, private URLs, anything flagged "Do not publish" in the interview, against a blocklist you maintain. | ✅ |
+| P2-9 | Link quality: no "click here" text, external link liveness at draft time, sources older than 2 years flagged, primary sources preferred. | ✅ |
+| P2-10 | Code and config sample checks: YAML and JSON parse, shell syntax, language tag on every fence, no secrets in samples. | ✅ |
+| P2-11 | Tag taxonomy: prefer existing tags, flag new tags, category matches the issue label. | ✅ |
 
 ## Phase 3: AI review agents and the revision loop
 
@@ -116,15 +116,15 @@ Independent reviewers check what tools cannot, and the draft is revised until it
 
 | ID | Item | Status |
 |---|---|---|
-| P3-1 | Proofreader Agent as its own run using the AGENTS.md checklist, with line-level feedback, Writer revision, and a maximum of 3 passes before escalation (invariant 4). | ⬜ |
-| P3-2 | SEO Reviewer Agent: search intent, title click-worthiness, headings, internal link suggestions, description quality; approve or return feedback (invariant 8). | ⬜ |
-| P3-3 | AEO and GEO Reviewer: answer-first quality, standalone sections, FAQ questions that match real queries, citation-worthiness, per GEO_MEASUREMENT.md. | ⬜ |
-| P3-4 | Fact-checker: reads each cited source and verifies every statistic and claim, flags unsupported ones, and tries to resolve [UNVERIFIED] items before they reach you. Runs isolated like research. | ⬜ |
-| P3-5 | Voice and value reviewer: Richard's insight is present and quoted, a clear takeaway, better than the competing articles from the research scan, concrete examples, reads like a person. | ⬜ |
-| P3-6 | Quality scorecard in every PR: originality and insight, accuracy, voice, structure, SEO, AEO, images, readability, with pass thresholds, revision count and open items. "Ready" only when every line passes. | ⬜ |
-| P3-7 | Revision loop orchestration across all reviewers, maximum 3 passes, then stage:stalled with a summary of what is unresolved. | ⬜ |
+| P3-1 | Proofreader Agent as its own run using the AGENTS.md checklist, with line-level feedback, Writer revision, and a maximum of 3 passes before escalation (invariant 4). | ✅ |
+| P3-2 | SEO Reviewer Agent: search intent, title click-worthiness, headings, internal link suggestions, description quality; approve or return feedback (invariant 8). | ✅ |
+| P3-3 | AEO and GEO Reviewer: answer-first quality, standalone sections, FAQ questions that match real queries, citation-worthiness, per GEO_MEASUREMENT.md. | ✅ |
+| P3-4 | Fact-checker: reads each cited source and verifies every statistic and claim, flags unsupported ones, and tries to resolve [UNVERIFIED] items before they reach you. Runs isolated like research. | ✅ |
+| P3-5 | Voice and value reviewer: Richard's insight is present and quoted, a clear takeaway, better than the competing articles from the research scan, concrete examples, reads like a person. | ✅ |
+| P3-6 | Quality scorecard in every PR: originality and insight, accuracy, voice, structure, SEO, AEO, images, readability, with pass thresholds, revision count and open items. "Ready" only when every line passes. | ✅ |
+| P3-7 | Revision loop orchestration across all reviewers, maximum 3 passes, then stage:stalled with a summary of what is unresolved. | ✅ |
 | P3-8 | Second research pass on request: fill gaps, thin counterarguments and unverified items (the C2 article needed this manually). | ✅ |
-| P3-9 | Reviewer independence: separate runs and prompts from the Writer; never the drafting run reviewing itself. | ⬜ |
+| P3-9 | Reviewer independence: separate runs and prompts from the Writer; never the drafting run reviewing itself. | ✅ |
 
 ## Phase 4: Ideas and planning
 
@@ -138,7 +138,7 @@ Good ideas arrive on their own and you only pick, with the cadence managed for y
 | P4-4 | Selection flow: thumbs-up or a label promotes an idea toward stage:interview, with a cap on interviews in flight. | ⬜ |
 | P4-5 | Cadence planner: choose publish dates that avoid collisions, hold the weekly target, and alert when fewer than 4 ideas or drafts are queued. | ⬜ |
 | P4-6 | Project board with Publish date, Category and Slug fields; weekly status issue; MILESTONES.md calendar kept in sync automatically. | ⬜ |
-| P4-7 | Stalled timer (F10): nudge after 3 days without an answer, stage:stalled after 7, resume commands documented. | ⬜ |
+| P4-7 | Stalled timer (F10): nudge after 3 days without an answer, stage:stalled after 7, resume commands documented. | ✅ |
 | P4-8 | Batch interviews: several topics in one sitting, with notes split per article. | ⬜ |
 | P4-9 | Interview upgrades: ask for screenshots or artefacts to use as images, and for the primary keyword in the reader's own words. | ⬜ |
 
@@ -148,8 +148,8 @@ After you merge, state updates and distribution drafts happen on their own, and 
 
 | ID | Item | Status |
 |---|---|---|
-| P5-1 | On PR merge: set stage:scheduled, comment the publish date, update the calendar. | ⬜ |
-| P5-2 | On publish day, after deploy: set stage:published, close the issue, comment the live URL; verify the page returns 200 and appears in the sitemap, RSS and llms.txt. | ⬜ |
+| P5-1 | On PR merge: set stage:scheduled, comment the publish date, update the calendar. | ✅ |
+| P5-2 | On publish day, after deploy: set stage:published, close the issue, comment the live URL; verify the page returns 200 and appears in the sitemap, RSS and llms.txt. | ✅ |
 | P5-3 | Indexing hygiene: sitemap already submitted; optional IndexNow or Bing ping; Search Console coverage check for the new URL. | ⬜ |
 | P5-4 | Distribution Agent (MILESTONES 4.9): draft a LinkedIn post and an X post per article in your voice for you to post manually. Never auto-post. | ⬜ |
 | P5-5 | Post-publish performance: Umami and Search Console figures plus the AI-citation prompt checks from GEO_MEASUREMENT.md, summarised per article. | ⬜ |

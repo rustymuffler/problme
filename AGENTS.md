@@ -27,9 +27,9 @@ The content track no longer depends on Claude Desktop or Cowork sessions. It run
 | Interview Agent | `pipeline.yml`, in issue comments (label `stage:interview`, finish with `@claude done`) | Built |
 | Research Agent | `draft.yml` research job: web tools, read-only token, sanitised and injection-scanned output | Built |
 | Writer Agent | `draft.yml` draft job: no web tools, one writable file, lint loop | Built |
-| Image Creator Agent | Not automated (roadmap phase 1) | Manual |
-| SEO Reviewer Agent | Mechanical rules only, in the content lint (agent review is roadmap phase 3) | Partial |
-| Proofreader Agent | Banned phrases, dashes and length rules only, in the content lint (agent review is roadmap phase 3) | Partial |
+| Image Creator Agent | `draft.yml` image steps: SVG diagrams validated by an allowlist and rendered with sharp, WebP variants, image checks; photos stay a manual step | Built |
+| SEO Reviewer Agent | `review-pass.yml` SEO and AEO reviewers plus the content lint SEO rules; the fact-checker also runs each pass | Built |
+| Proofreader Agent | `review-pass.yml` proofreader and voice reviewers plus the content lint (spelling, readability, banned phrases); up to 3 revision passes | Built |
 | Publisher Agent | `draft.yml` publish steps commit from a pristine repository and open the PR (as a draft until the Proofreader and SEO gates exist) | Built |
 | Independent reviewer | `draft.yml` review job: read-only, posts one PR comment | Built |
 | PM Agent | Issue labels, assignee and the roadmap issues; Cowork scheduled tasks paused | Partial |
