@@ -87,7 +87,9 @@ const REPEAT_OK = new Set(['that', 'had', 'no', 'very', 'bye', 'so', 'ha', 'yeah
 
 /** Every markdown link in the body, found with bounded regex work. */
 function extractLinks(body) {
-  return [...body.matchAll(/(?<!!)\[([^\]\n]{0,200})\]\(([^)\s]{0,500})[^)\n]{0,200}\)/g)];
+  // The optional title must start with whitespace, so the URL and title parts cannot overlap and
+  // a failed match costs at most about 500 steps per "[" (a plain second class made this quadratic).
+  return [...body.matchAll(/(?<!!)\[([^\]\n]{0,200})\]\(([^)\s]{0,500})(?:\s[^)\n]{0,200})?\)/g)];
 }
 
 /** The "Do not publish" items from the interview notes, one per line, bullets removed. */
