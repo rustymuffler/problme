@@ -19,6 +19,12 @@ faq:
     answer: "No. Factory.ai, which builds AI coding tools for production teams, makes the point that even windows measuring millions of tokens are not large enough to hold real enterprise codebases. Bigger windows delay the problem instead of eliminating it. Managing context actively, and designing the handoff between sessions, is a discipline that is here to stay."
 ---
 
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: Long AI sessions quietly lose quality well before they run out of room. I stopped fighting that and started designing around it. When a session nears 90 percent of its context, it writes a handoff document and closes, and the next session picks up cleanly with no re-explaining.
+</Callout>
+
 There is a specific feeling you get when an AI session starts going wrong. It is not a crash or an error message. It is more like quicksand. The responses get slower to understand. The AI starts suggesting things you already did two hours ago. You catch yourself typing out things you know you already explained, just to get the session back on track.
 
 I was working on Celly, my B2C SaaS app, when I first felt it. I was bogged down in mud. The AI had stopped being a collaborator and started being a liability. I was having to remind it of things we had accomplished. I was re-explaining decisions we had already made. Progress ground down to nothing useful.
@@ -79,7 +85,7 @@ The session produced what it was supposed to: a responsive site, a Credits and T
 
 That document contained a complete file manifest, a breakdown of what was fully complete, and what was in progress. It listed the exact next steps with numbered sub-tasks, the critical invariants the session must never break, the key decisions from the session with their rationale, and the commands needed to resume.
 
-The next session opened that file and picked up without any friction. No re-explaining. No reconstructing decisions from memory. No lost work. The handoff was seamless. I did not hit a single snag at the transition.
+The next session opened that file and picked up without any friction. No re-explaining. No reconstructing decisions from memory. No lost work. The handoff worked. I did not hit a single snag at the transition.
 
 That is what designing around a constraint looks like versus fighting it.
 
