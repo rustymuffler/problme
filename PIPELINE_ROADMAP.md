@@ -66,7 +66,7 @@ The built stages run live, are locked down, and the docs match reality, before m
 
 | ID | Item | Status |
 |---|---|---|
-| P0-1 | Merge the research and draft PR, then run one pilot article end to end (idea issue, interview, draft PR). Record Pro quota used, wall time, and your minutes. Fix first-run problems (Claude App token validity, tool-permission rule syntax, injection scanner on the runner, github_token behaviour). | ⬜ |
+| P0-1 | FINAL STEP, run only when the full test gate is met (see "Full test gate" in PIPELINE_ROADMAP.md): one article through the complete pipeline, idea issue to published, with nothing skipped. Record Pro quota used, wall time per stage, your minutes, and fix first-run problems (Claude App token validity, tool-permission rule syntax, injection scanner on the runner, github_token behaviour). Already verified live on 2026-11-21: the interview start stage (the allowlist needed the nested setup-bun action). | ⬜ |
 | P0-2 | Open pipeline PRs as draft PRs until the Proofreader and SEO gates exist (MILESTONES invariants 4 and 8 say both must pass before a content PR opens). The PR body must say which reviews have not run. | 🔄 |
 | P0-3 | CI builds with INCLUDE_FUTURE_POSTS=true on pull requests so Lighthouse, accessibility and link checks cover a scheduled article now, not after it goes live. Production deploy stays unchanged. | ⬜ |
 | P0-4 | Content-PR path guard: a required check that article PRs touch only src/content/posts/<slug>/ and public/assets/posts/<slug>/. Anything else must go through the code workflow (Security Auditor and Code Reviewer). | ⬜ |
@@ -171,6 +171,40 @@ The pipeline stays healthy and measurably gets better.  Tracking issue: [#163](h
 | P6-7 | Document how pipeline code changes use the code workflow (Test Writer, Security Auditor, Code Reviewer) versus article PRs. | ⬜ |
 | P6-8 | Incident runbook: injection detection, leaked secret, wrong publish (revert or unpublish), failed deploy. | ⬜ |
 
+## Full test gate
+
+No article is run through the pipeline as a pilot until the gate below is met. The first end-to-end test (item P0-1) runs once, when everything required is built, so it tests the finished pipeline and produces a fully completed article. Scope decided by Richard 2026-11-21: Phases 0 to 3 plus publish tracking (decided by Richard 2026-11-21). Tracking issue: [#166](https://github.com/rustymuffler/problme/issues/166).
+
+An earlier interview-only trial on issue #165 was started by mistake and parked. It verified that the interview start stage works live (and exposed a missing allowlist entry for the nested setup-bun action), and it is otherwise idle.
+
+### Required before the test run
+
+- Phase 0: P0-2, P0-3, P0-4, P0-5, P0-6, P0-7, P0-8, P0-10 (P0-1 is the test itself; P0-2 ends with the draft-PR rule removed once phase 3 passes)
+- Phase 1: all of P1-1 to P1-8 (images, SVG safety, previews, image checks)
+- Phase 2: all of P2-1 to P2-11 (every deterministic quality gate)
+- Phase 3: all of P3-1 to P3-9 (Proofreader, SEO, AEO, fact-checker, voice and value review, scorecard, revision loop, second research pass)
+- Phase 4: P4-7 only (stalled timer, so a missed answer never blocks the pipeline)
+- Phase 5: P5-1 and P5-2 only (stage tracking after merge and on publish day)
+
+### Deferred until after the first test
+
+- Phase 0: P0-9 (retire the paused scheduled tasks)
+- Phase 4: P4-1 to P4-6, P4-8, P4-9 (idea batch, keyword research, selection, cadence planner, project board, batch interviews). The test article starts from a manually created idea issue.
+- Phase 5: P5-3 to P5-7 (indexing, distribution drafts, performance, retrospective, feedback loop)
+- Phase 6: all (updates, freshness, evaluations, dry-run harness, quota monitoring, runbook)
+
+### Acceptance criteria for the test run
+
+1. An idea issue goes through stage:interview with real answers from Richard, ending with `@claude done`, using about 20 minutes of his time or less across the whole run.
+2. The research brief cites only opened sources, the injection scan is clean, and every statistic is verified by the fact-checker or flagged to Richard.
+3. The draft has zero lint errors, no open placeholders, passes the grammar, readability, SEO, AEO, originality and sensitivity gates, and uses Richard's interview content.
+4. A hero image and in-article visuals exist (about one per 500 words) with descriptive alt text, WebP variants and the correct credit.
+5. The Proofreader, SEO, AEO, fact-check and voice reviews all pass within 3 revision passes, and the quality scorecard shows every line passing.
+6. The PR opens ready for review (not draft), the phone preview link works, and all required checks pass including accessibility, Lighthouse and the link checker on the new article.
+7. Merge on a phone sets stage:scheduled; on the publish day the page is live, in the sitemap, RSS and llms.txt, and the issue shows stage:published and is closed.
+8. Failure drills pass: a missed interview answer triggers the stalled timer; a deliberately poisoned research brief is stopped by the scan; `@claude draft` resumes after a forced failure.
+9. Metrics recorded in the roadmap: Pro quota used, wall time per stage, revision loops, and Richard's minutes. Decide the 1 or 2 per week cadence from them.
+
 ## Decisions needed from Richard
 
 | Decision | Needed by | Recommendation |
@@ -184,7 +218,7 @@ The pipeline stays healthy and measurably gets better.  Tracking issue: [#163](h
 
 ## Recommended order
 
-1. **Phase 0** first. Nothing else is worth building on an unproven base, and the draft-PR rule keeps the invariants honest.
+1. **Phase 0** first. The hardening, alignment and draft-PR items come first; P0-1 (the live test) is the last step of the whole roadmap, not the first.
 2. **Phase 1** next, because drafts are not publishable without visuals and a phone-readable preview.
 3. **Phases 2 and 3** together next, since they are the quality bar. Build the deterministic gates (phase 2) before the AI reviewers (phase 3) so agents only judge what tools cannot.
 4. **Phase 4** once articles flow, so ideas keep the queue full.
