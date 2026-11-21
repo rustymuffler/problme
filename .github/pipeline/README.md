@@ -40,3 +40,26 @@ The interview stage and the draft stage (`notify` job) each post an issue commen
 - Wait for the limit to reset, then retry: comment again during the interview, or `@claude draft` once drafting has been reached.
 - There is no automatic fallback to a pay-per-token API key. Using one needs your explicit approval and a hard spend cap set in the Anthropic console.
 - Heavy research runs are the most likely to hit the limit. Measuring the quota per article is part of the full test run (roadmap, issue #166).
+
+### Images
+
+- After the draft passes the lint, an Image Creator run writes SVG drawings (a hero plus one diagram per `[IMAGE - ...]` placeholder) and a manifest into `.pipeline-tmp/images/`. It has no shell and no web access.
+- `scripts/process-images.mjs` then validates every SVG against a strict allowlist (`scripts/lib/svg-safety.mjs`: no script, links, external references, embedded HTML; Workshop palette colors and brand fonts only), renders PNG and WebP with `sharp`, checks the size budgets, writes `public/assets/posts/<slug>/` and the source SVGs under `src/content/posts/<slug>/images/`, sets `heroImage` and `imageCredit`, and replaces each placeholder with an image and its alt text.
+- If the Image Creator or the processor fails, the draft PR still opens without images and the `Content lint` check blocks the merge until the hero and the in-article images exist.
+- CI checks every changed article's images (`scripts/check-post-images.mjs`): hero 1200x630 and within 450 KB, WebP variants present, in-article images self-hosted, within 1,600 px and 400 KB.
+- Fonts: the renderer uses the runner's fallback fonts, which are wider than the brand fonts, so drawings keep generous padding around text.
+
+### Photos and emotional imagery (manual)
+
+The SVG pipeline is geometric. When an article needs a photograph or a human moment, do it by hand:
+1. Choose an image from a free-commercial-use library with no attribution required (Unsplash, Pexels, Pixabay) and confirm the licence on that image's page.
+2. Apply the dark overlay or duotone treatment from `BRAND.md` section 6, save it as `public/assets/posts/<slug>/hero.png` at 1200x630, and run `node scripts/generate-webp-heroes.mjs`.
+3. Set `imageCredit: "Stock photo - <Source>, royalty-free"` (use a plain hyphen) in the frontmatter and write descriptive alt text.
+
+### Phone preview (Vercel)
+
+`vercel.json` makes a Vercel project build every pull request with future-dated posts included, marked `noindex`, and never deploy `main` (the production site stays on GitHub Pages). One-time setup in your Vercel account, about five minutes:
+1. In Vercel, Add New, Project, import `rustymuffler/problme`. Install the Vercel GitHub app on this repository only.
+2. Leave the framework preset on Astro; the build and install commands come from `vercel.json`. Do not add any secrets or environment variables to this project.
+3. Turn on "Vercel for GitHub" pull request comments. Each PR then gets a comment with a preview link you can open on your phone.
+4. Because the repository is public, previews are unlisted but not secret. In the Vercel project settings, keep Deployment Protection on if you want previews to need a Vercel login, and keep deployments for pull requests from forks requiring authorization.
