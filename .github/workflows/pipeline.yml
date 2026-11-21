@@ -33,6 +33,9 @@ jobs:
     name: Interview stage
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      finalized: ${{ steps.commit.outputs.finalized }}
+      branch: ${{ steps.commit.outputs.branch }}
     # Owner-only gate, evaluated before any step (or secret) is available.
     if: >-
       github.event.issue.user.login == 'rustymuffler' &&
@@ -146,6 +149,7 @@ jobs:
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-assignee "$OWNER" || true
 
       - name: Commit interview notes (finalize)
+        id: commit
         if: steps.route.outputs.stage == 'finalize'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -186,6 +190,8 @@ jobs:
           gh_git push origin "$branch"
           echo "NOTES_FILE=$file" >> "$GITHUB_ENV"
           echo "NOTES_BRANCH=$branch" >> "$GITHUB_ENV"
+          echo "finalized=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Move issue to drafting (finalize)
         if: steps.route.outputs.stage == 'finalize'
@@ -195,4 +201,47 @@ jobs:
           set -euo pipefail
           gh label create "stage:drafting" --repo "$REPO" --color 1D76DB --description "Interview done; drafting" 2>/dev/null || true
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:interview" --add-label "stage:drafting" --remove-assignee "$OWNER"
-          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Interview captured: [\`$NOTES_FILE\`](https://github.com/$REPO/blob/$NOTES_BRANCH/$NOTES_FILE) on branch \`$NOTES_BRANCH\`. Moved to \`stage:drafting\`. Research and drafting are not automated yet; that is the next build phase."
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "<!-- pipeline:branch $NOTES_BRANCH -->Interview captured: [\`$NOTES_FILE\`](https://github.com/$REPO/blob/$NOTES_BRANCH/$NOTES_FILE) on branch \`$NOTES_BRANCH\`. Moved to \`stage:drafting\`. Research and drafting are starting now; you will be notified here when the draft PR is ready."
+
+  # Research, draft, lint, PR and review. Starts right after "@claude done" has captured the
+  # interview. The reusable workflow re-checks the owner gate in every job.
+  draft:
+    name: Research and draft
+    needs: interview
+    if: needs.interview.outputs.finalized == 'true'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    uses: ./.github/workflows/draft.yml
+    with:
+      issue_number: ${{ github.event.issue.number }}
+      branch: ${{ needs.interview.outputs.branch }}
+      mode: finalize
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+  # Re-run after a failure: Richard comments "@claude draft" on an issue labelled stage:drafting.
+  # The called workflow validates the exact command, the label, and the article branch.
+  resume:
+    name: Resume drafting
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.user.login == 'rustymuffler' &&
+      github.event.sender.login == 'rustymuffler' &&
+      github.event.issue.pull_request == null &&
+      contains(github.event.comment.body, '@claude draft') &&
+      contains(join(github.event.issue.labels.*.name, ','), 'stage:drafting')
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+    uses: ./.github/workflows/draft.yml
+    with:
+      issue_number: ${{ github.event.issue.number }}
+      mode: resume
+      comment_body: ${{ github.event.comment.body }}
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

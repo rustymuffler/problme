@@ -199,6 +199,25 @@ export function lintPost(raw, ctx) {
 
   // ---- Punctuation and banned phrases (whole file, frontmatter included) ---
   for (const line of scanLines(raw)) {
+    // MDX executes at build time. Articles may use the Callout component and nothing else:
+    // no other imports, components, inline expressions, scripts, or event handlers.
+    if (!line.code && line.n > bodyOffset) {
+      if (/^\s*import\s/.test(line.raw) && !/^\s*import Callout from '\.\.\/\.\.\/\.\.\/components\/Callout\.astro';?\s*$/.test(line.raw)) {
+        add('error', 'mdx-import', line.n, "Only `import Callout from '../../../components/Callout.astro';` is allowed in articles.");
+      }
+      if (!/^\s*import\s/.test(line.raw)) {
+        if (/<\s*(script|iframe|style|object|embed|form|link|meta|base)\b/i.test(line.prose) || /<[^>]*\son[a-z]+\s*=/i.test(line.prose)) {
+          add('error', 'mdx-unsafe-html', line.n, 'Script, iframe, style, form tags and on* event attributes are not allowed in articles.');
+        }
+        for (const m of line.prose.matchAll(/<([A-Z][A-Za-z0-9]*)/g)) {
+          if (m[1] !== 'Callout') add('error', 'mdx-component', line.n, `Component <${m[1]}> is not allowed; only <Callout>.`);
+        }
+        // MDX comments {/* ... */} are inert and allowed.
+        if (/\{[^}]*\}/.test(line.prose.replace(/\{\s*\/\*.*?\*\/\s*\}/g, ''))) {
+          add('error', 'mdx-expression', line.n, 'Curly-brace expressions run code in MDX. Put literal braces inside a code span or fence.');
+        }
+      }
+    }
     if (line.code || /^\s*import\s/.test(line.raw)) continue;
     // Link URLs are not prose: drop them before looking for dashes and phrases.
     const text = normaliseQuotes(line.prose.replace(/\]\([^)]*\)/g, ']'));
@@ -213,6 +232,10 @@ export function lintPost(raw, ctx) {
         add('error', 'en-dash', line.n, 'En dash used outside a numeric range. Use a hyphen or comma.');
         break;
       }
+    }
+    // Placeholders the pipeline leaves for Richard. A post cannot merge while any remain.
+    if (/\[(UNVERIFIED|NOT ANSWERED|IMAGE)\b/.test(line.prose)) {
+      add('error', 'unresolved-marker', line.n, 'Unresolved placeholder ([UNVERIFIED], [NOT ANSWERED], or [IMAGE]). Resolve it before merging.');
     }
     for (const { re, say } of BANNED_PHRASES) {
       if (re.test(text)) add('error', 'banned-phrase', line.n, `Banned phrase: ${say}.`);

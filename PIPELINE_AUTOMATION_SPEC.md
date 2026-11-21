@@ -97,3 +97,52 @@ Articles published per month; Richard minutes per article; revision loops per ar
 - **Preview of agent-built PRs:** confirm Vercel can build previews for `claude/` branches from a public repo with no extra secrets.
 - **Subscription token expiry:** about one year; add a calendar reminder.
 - **Research preview features:** cloud scheduled tasks are in research preview; the monthly idea batch should work as an Action cron instead where possible.
+
+## 8. Research and draft stage: requirements (added 2026-11-21)
+
+Scope of this phase: research, draft, lint, draft PR, and an independent review comment. Hero and in-article images are a separate later phase (the draft PR says images are pending).
+
+### Trigger and gate
+
+| ID | Requirement |
+|---|---|
+| R1 | Starts automatically when Richard comments `@claude done` (finalize completes first), or when he comments `@claude draft` on an issue labelled `stage:drafting` (re-run after a failure). No other trigger exists. |
+| R2 | Every job re-checks that the issue and the triggering event belong to the owner. The stage is a reusable workflow that cannot be triggered directly. |
+| R3 | Interview notes must exist on the article branch before research starts. Without them the stage stops and says so (CONTENT_STANDARDS.md: no drafting without interview notes). |
+
+### Research (the only stage that reads the open web)
+
+| ID | Requirement |
+|---|---|
+| R4 | Research output follows the `research-brief.md` structure in AGENTS.md: statistics (with dates), documentation references, competitive scan with a recommended word count, 3-5 citable sources, counterarguments, community discussions. Unsourced numbers are marked `[UNVERIFIED - needs source]`. |
+| R5 | The research run has web tools and read access to the interview notes and standards, and can write one scratch file. It has no shell, no repository write access, no GitHub token, and `contents: read` only. |
+| R6 | Fetched content is untrusted data, never instructions. The prompt says so, and the pipeline does not rely on the prompt alone (R7, R8). |
+| R7 | The research output is a trust boundary: it is stripped of hidden characters, HTML comments and control characters, size-capped, scanned for credential patterns, and scanned with `scripts/scan-untrusted-content.mjs` before any later stage reads it. |
+| R8 | A Tier 1 pattern detection stops the pipeline: nothing is drafted, the issue is labelled `stage:stalled`, and Richard is notified with the finding. An ML-only "high" or "critical" level does not stop it but is shown prominently in the PR body and review comment. A scan crash also stops the pipeline (fail closed). |
+
+### Draft
+
+| ID | Requirement |
+|---|---|
+| R9 | The draft run has no web tools. It reads the interview notes, the sanitised research brief, and the standards documents, and writes exactly one file: `src/content/posts/<slug>/index.mdx`. |
+| R10 | The draft follows CONTENT_STANDARDS.md: first person, Richard's voice and quotes from the interview, TL;DR callout first, FAQ 3-5, no banned phrases or dashes, claims only from the notes or the brief, `[UNVERIFIED]` markers carried through rather than resolved by guessing. |
+| R11 | The `date` is set by the workflow to the next Tuesday or Thursday at least 3 days away. Claude does not choose it. |
+| R12 | `scripts/lint-content.mjs` runs on the draft. On errors the draft run revises, up to 2 passes. If errors remain, the PR is still opened and its failing check shows what is left. |
+| R13 | `[UNVERIFIED`, `[NOT ANSWERED]` and `[IMAGE` markers are lint errors, so a draft with unresolved placeholders cannot merge until Richard resolves them. |
+
+### Publish and review
+
+| ID | Requirement |
+|---|---|
+| R14 | A plain workflow step validates the output (exactly `index.mdx` and `research-brief.md` under the article folder, regular files, size limits) and commits from a pristine repository to the existing `article/<issue>` branch. |
+| R15 | The PR is opened with the Claude GitHub App token so that required CI checks run on it (a PR opened with the default Actions token does not trigger CI). If checks do not start, Richard is told to close and reopen the PR. |
+| R16 | A separate read-only review run checks tone, claim tracing, presence of Richard's interview content, and anything that looks like injected or off-topic instructions in the draft or brief. It posts one PR comment. |
+| R17 | The issue moves to `stage:review`, is assigned to Richard, and gets a comment linking the PR. Richard merges. Nothing auto-merges. |
+
+### Trust model summary
+
+| Who or what | Can start the pipeline | Can influence the model | Can change workflows or prompts |
+|---|---|---|---|
+| Richard (`rustymuffler`) | Yes | Yes (his own issue text and comments) | Only through a PR that passes 8 required checks |
+| Anyone else | No (job gate, issue-author check, sender check) | No (their comments are filtered out of the thread) | No (no write access; `main` requires PRs, no bypass actors) |
+| Web pages the research run reads | No | Yes, indirectly, which is why research is isolated, sanitised, scanned, and followed by a read-only independent review and a human merge | No |
