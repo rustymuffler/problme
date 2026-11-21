@@ -25,6 +25,9 @@ Automated draft from the content pipeline (interview notes, research brief, draf
 - Images: not created yet. Hero and in-article images are a later pipeline step.
 - Publish date was set by the pipeline to the next Tuesday or Thursday; change \`date\` in the frontmatter if you prefer another day.
 
+## Reviews that have NOT run yet
+- Proofreader review (grammar, tone checklist), SEO review (keyword, links, headings) and the AEO check are not automated yet (see PIPELINE_ROADMAP.md, phases 2 and 3). This PR is a draft for that reason. Check those items yourself, then use "Ready for review" before merging.
+
 An independent review comment follows. Read it first.
 BODY
 
@@ -33,7 +36,8 @@ existing="$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json url -
 if [ -n "$existing" ]; then
   pr_url="$existing"
 else
-  create=(gh pr create --repo "$REPO" --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "$title" --body-file .pipeline-tmp/pr-body.md)
+  # Opened as a draft until the Proofreader and SEO review stages exist (MILESTONES invariants 4 and 8).
+  create=(gh pr create --draft --repo "$REPO" --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "$title" --body-file .pipeline-tmp/pr-body.md)
   pr_url="$(try "$GH_TOKEN" "${create[@]}" || try "$GH_TOKEN_FALLBACK" "${create[@]}")"
 fi
 pr_number="$(gh pr view "$pr_url" --repo "$REPO" --json number --jq .number)"

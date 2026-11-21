@@ -14,4 +14,4 @@ perl -CS -pe 's/(?<!`)@(?=\w)/@\x{200B}/g' .pipeline-tmp/review-trimmed.md > .pi
 gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file .pipeline-tmp/review-final.md
 gh label create "stage:review" --repo "$REPO" --color 5319E7 --description "Draft PR open for review" 2>/dev/null || true
 gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:drafting" --add-label "stage:review" --add-assignee "$OWNER"
-gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Draft ready for your review: $PR_URL. Read the automated review comment first, resolve any open placeholders, check the CI results, then merge."
+gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Draft ready for your review: $PR_URL. Read the automated review comment first, resolve any open placeholders, check the CI results, then check grammar and SEO yourself (those reviews are not automated yet), tap Ready for review, and merge."
