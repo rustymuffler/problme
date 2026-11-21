@@ -29,7 +29,21 @@ export function addDictionaryWords(words) {
 const words = (text) => text.toLowerCase().match(/[a-z0-9][a-z0-9'-]*/g) ?? [];
 const countWords = (text) => (text.match(/\S+/g) ?? []).length;
 const normalise = (text) => words(text).join(' ');
-const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const isWordChar = (c) => c !== undefined && /[A-Za-z0-9]/.test(c);
+
+/** Whole-word, case-insensitive substring search with no dynamic regular expression. */
+function containsWord(haystack, term) {
+  const h = haystack.toLowerCase();
+  const t = term.toLowerCase();
+  if (!t) return false;
+  let from = 0;
+  for (;;) {
+    const at = h.indexOf(t, from);
+    if (at === -1) return false;
+    if (!isWordChar(h[at - 1]) && !isWordChar(h[at + t.length])) return true;
+    from = at + 1;
+  }
+}
 
 function shingles(text, n) {
   const w = words(text);
@@ -331,7 +345,7 @@ export function qualityFindings({ slug, frontmatter, raw, body, bodyOffset, pros
     }
   });
   for (const term of ctx?.sensitiveTerms ?? []) {
-    if (term && new RegExp(`(?<![A-Za-z0-9])${escapeRegExp(String(term).slice(0, 200))}(?![A-Za-z0-9])`, 'i').test(raw)) {
+    if (term && containsWord(raw, String(term).slice(0, 200))) {
       add('error', 'sensitive-term', 1, `Contains a term from scripts/sensitive-terms.txt: "${term}".`);
     }
   }
