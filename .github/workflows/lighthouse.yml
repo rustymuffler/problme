@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+env:
+  # Pull request builds include future-dated (scheduled) posts so accessibility, Lighthouse and
+  # link checks cover a new article before it goes live. Pushes to main build as production does.
+  INCLUDE_FUTURE_POSTS: ${{ github.event_name == 'pull_request' && 'true' || 'false' }}
+
 jobs:
   lighthouse:
     name: Lighthouse CI
@@ -14,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0  # needed to find the posts this PR changes
 
       - name: Set up Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
@@ -35,6 +42,10 @@ jobs:
         run: |
           npx astro preview --port 4321 &
           timeout 30 bash -c 'until curl -sf http://localhost:4321 > /dev/null 2>&1; do sleep 1; done'
-          npx lhci autorun
+          # The configured URLs plus the page of every post this PR adds or changes.
+          urls="$(node scripts/lhci-urls.mjs "origin/${BASE_REF}")"
+          # shellcheck disable=SC2086
+          npx lhci autorun $urls
         env:
+          BASE_REF: ${{ github.base_ref }}
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
