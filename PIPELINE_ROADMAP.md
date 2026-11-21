@@ -123,7 +123,7 @@ Independent reviewers check what tools cannot, and the draft is revised until it
 | P3-5 | Voice and value reviewer: Richard's insight is present and quoted, a clear takeaway, better than the competing articles from the research scan, concrete examples, reads like a person. | ✅ |
 | P3-6 | Quality scorecard in every PR: originality and insight, accuracy, voice, structure, SEO, AEO, images, readability, with pass thresholds, revision count and open items. "Ready" only when every line passes. | ✅ |
 | P3-7 | Revision loop orchestration across all reviewers, maximum 3 passes, then stage:stalled with a summary of what is unresolved. | ✅ |
-| P3-8 | Second research pass on request: fill gaps, thin counterarguments and unverified items (the C2 article needed this manually). | ⬜ |
+| P3-8 | Second research pass on request: fill gaps, thin counterarguments and unverified items (the C2 article needed this manually). | ✅ |
 | P3-9 | Reviewer independence: separate runs and prompts from the Writer; never the drafting run reviewing itself. | ✅ |
 
 ## Phase 4: Ideas and planning
