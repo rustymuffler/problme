@@ -1,0 +1,36 @@
+name: Token renewal reminder
+
+# Opens an issue assigned to the owner every 15 October, a month before the
+# CLAUDE_CODE_OAUTH_TOKEN secret (created 2026-11-19, valid about one year) expires.
+# Renewal steps are in .github/pipeline/README.md.
+
+on:
+  schedule:
+    - cron: '17 9 15 10 *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  remind:
+    name: Open renewal issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          title="Renew CLAUDE_CODE_OAUTH_TOKEN before it expires"
+          open="$(gh issue list --repo "$REPO" --state open --search "$title in:title" --json number --jq 'length')"
+          if [ "$open" -gt 0 ]; then
+            echo "A renewal issue is already open."
+            exit 0
+          fi
+          gh issue create --repo "$REPO" --assignee rustymuffler --title "$title" \
+            --body "The pipeline's Claude subscription token was created on 2026-11-19 and is valid for about one year. Renew it now: run \`claude.cmd setup-token\` on your PC, then replace the \`CLAUDE_CODE_OAUTH_TOKEN\` secret in Settings, Secrets and variables, Actions. Details: .github/pipeline/README.md. Close this issue when done."

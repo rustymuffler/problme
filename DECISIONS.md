@@ -296,6 +296,56 @@
 
 ---
 
+## Decision 17: GitHub-Native, Phone-First Content Pipeline
+
+**Date:** 2026-11-21
+**Status:** Accepted
+
+**Context:** Richard has little time for the blog and often cannot reach Claude Desktop. The Cowork-based agents and scheduled tasks needed a desktop session. A phone is available for answering interview questions, reviewing and merging.
+
+**Decisions:**
+1. **The pipeline runs in GitHub.** An article is an issue, the interview happens in issue comments, drafting runs in GitHub Actions (`pipeline.yml` and the reusable `draft.yml`), and the result is a pull request. The four Cowork scheduled tasks were paused on 2026-11-19.
+2. **Authentication uses the Claude Pro subscription** through `CLAUDE_CODE_OAUTH_TOKEN`, so the extra cost is zero. A pay-per-token fallback needs Richard's approval and a hard spend cap.
+3. **Owner-only gate.** Jobs run only for events from `rustymuffler` on issues that account opened, and every job in the reusable workflow re-checks it. Comments from anyone else are filtered out before a model sees them.
+4. **Isolation by job.** The research job is the only one with web tools and has no repository write access. Its output is sanitised and scanned (`scripts/scan-untrusted-content.mjs`) before any other job reads it; a Tier 1 detection or a scan failure stops the pipeline. The draft job has no web tools and one writable path. Plain workflow steps, not the model, do every commit, comment, label and PR, after validating what the model produced, and commit from a pristine repository.
+5. **Draft PRs until the reviews exist.** Pipeline PRs open as drafts until the Proofreader and SEO review stages are built, because MILESTONES invariants 4 and 8 require both before a content PR opens.
+6. **Scheduled publishing.** Future-dated posts are excluded from builds; a Tuesday and Thursday deploy releases them.
+7. **Executable MDX is an error.** Articles may use only the Callout component; the lint rejects other imports, components, expressions and scripts. Link hosts in a draft must appear in the research brief.
+
+**Consequences:** All stages are built from the roadmap in `PIPELINE_ROADMAP.md`. Pipeline code changes use the code workflow (Developer, Test Writer, Security Auditor, Code Reviewer, then Richard merges).
+
+---
+
+## Decision 18: Repository Lockdown for a Single-Owner Public Repo
+
+**Date:** 2026-11-21
+**Status:** Accepted
+
+**Context:** The repository is public, so strangers can open issues, comment and open fork PRs. The pipeline runs a model with a subscription token, so only the owner may reach it.
+
+**Decisions (applied 2026-11-21):**
+1. Fork PR workflows need approval for all external contributors.
+2. The default workflow token is read-only; every workflow declares its own permissions.
+3. Allowed Actions are limited to GitHub-owned actions plus eight named third-party actions, and full-SHA pinning is required. Composite actions call other actions, so a new action must be checked for nested `uses:` entries before it is added to the allowlist (the Claude action needs `oven-sh/setup-bun`).
+4. Secret scanning and push protection are on.
+5. The `Main` ruleset requires pull requests and nine status checks (Build, Link checker, Gitleaks, Semgrep, Trivy, Checkov, Lighthouse CI, Accessibility, Content lint) with no bypass actors, and blocks deletion and force pushes.
+6. Not applied: interaction limits (they would also stop readers from commenting).
+
+---
+
+## Decision 19: No Live Pipeline Test Until the Pipeline Is Complete
+
+**Date:** 2026-11-21
+**Status:** Accepted
+
+**Context:** An interview-only trial was started before images, quality gates and reviews existed, and was parked.
+
+**Decision:** The first end-to-end test runs once, after phases 0 to 3 plus publish tracking are built (the gate in `PIPELINE_ROADMAP.md`, issue #166), so it exercises the finished pipeline and produces a fully completed article. The interview start stage was verified live during the parked trial.
+
+**Addendum to Decision 16:** CI builds for pull requests include future-dated posts (`INCLUDE_FUTURE_POSTS=true`) and Lighthouse CI also audits every post a PR changes, so a scheduled article is checked before it goes live.
+
+---
+
 ## Future Decision: Distribution Agent (Phase 4)
 
 **Logged:** 2026-06-22

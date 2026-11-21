@@ -301,6 +301,8 @@ External links automatically open in a new tab with `target="_blank" rel="noopen
 
 The complete workflow from idea to published article:
 
+> **Status 2026-11-21.** Steps 2 (interview), 3 (research), 4 (draft) and 8 (draft PR) now run in GitHub Actions, driven from issues and pull requests, and the lint covers the mechanical parts of steps 6 and 7. Step 1 (ideas), step 5 (images) and the judgment parts of steps 6 and 7 are not automated yet. Step 9 is always Richard. The build plan and the definition of a fully completed article are in `PIPELINE_ROADMAP.md`.
+
 ### Step 1: Content Strategist Agent — Idea Batch (Scheduled)
 
 This step runs automatically on a Monday morning schedule — Richard does not need to prompt it.

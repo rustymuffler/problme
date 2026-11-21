@@ -17,6 +17,34 @@ To maintain quality and accountability across both tracks, Claude uses a **multi
 
 ---
 
+## Current Execution Model (updated 2026-11-21)
+
+The content track no longer depends on Claude Desktop or Cowork sessions. It runs as a GitHub-native pipeline driven from issues and pull requests, and can be operated from a phone. The four Cowork scheduled tasks were paused on 2026-11-19 and are superseded by the pipeline. Details live in `PIPELINE_AUTOMATION_SPEC.md` (requirements), `PIPELINE_ROADMAP.md` (what is built, what is next, the quality bar, and the full test gate), and `.github/pipeline/README.md` (prompts and operations).
+
+| Role | Where it runs now | Status |
+|---|---|---|
+| Content Strategist | Manual until the monthly idea batch is built (roadmap phase 4) | Not automated |
+| Interview Agent | `pipeline.yml`, in issue comments (label `stage:interview`, finish with `@claude done`) | Built |
+| Research Agent | `draft.yml` research job: web tools, read-only token, sanitised and injection-scanned output | Built |
+| Writer Agent | `draft.yml` draft job: no web tools, one writable file, lint loop | Built |
+| Image Creator Agent | Not automated (roadmap phase 1) | Manual |
+| SEO Reviewer Agent | Mechanical rules only, in the content lint (agent review is roadmap phase 3) | Partial |
+| Proofreader Agent | Banned phrases, dashes and length rules only, in the content lint (agent review is roadmap phase 3) | Partial |
+| Publisher Agent | `draft.yml` publish steps commit from a pristine repository and open the PR (as a draft until the Proofreader and SEO gates exist) | Built |
+| Independent reviewer | `draft.yml` review job: read-only, posts one PR comment | Built |
+| PM Agent | Issue labels, assignee and the roadmap issues; Cowork scheduled tasks paused | Partial |
+| Developer, Test Writer, Security Auditor, Code Reviewer | Unchanged: code sessions, also used for any change to the pipeline's own code | Manual |
+
+Rules that hold for the whole pipeline:
+
+- **Owner gate.** Only Richard's GitHub account (`rustymuffler`) can start or steer any stage. Each job re-checks the issue author and the event sender. Everyone else's comments are filtered out before a model sees them.
+- **No self-review.** The draft, the independent review and (when built) the Proofreader, SEO and fact-check reviews are separate runs.
+- **Human merge.** Only Richard merges. Nothing auto-merges, and `main` requires pull requests and nine passing checks with no bypass.
+- **Untrusted content stays contained.** Web pages are read only by the research job, which has no repository write access and no write token. Its output is sanitised and scanned before any other job reads it.
+- **Article PRs are narrow.** Pipeline PRs may change only one article folder and its images; anything else goes through the code workflow.
+
+---
+
 ## Agent Roster
 
 ### Development Agents
@@ -305,6 +333,8 @@ Structured data (`BlogPosting`, `FAQPage`, `Person`), canonical URLs, and the ta
 ---
 
 ## Scheduling & Loops
+
+> **Superseded 2026-11-21.** The Cowork scheduled tasks described below are paused. Their replacements are the GitHub-native pipeline (see "Current Execution Model" above) and the items in `PIPELINE_ROADMAP.md` (monthly idea batch, stalled-issue timer, retrospective). This section is kept for history and as the source of the original task prompts.
 
 The content pipeline is designed to run with minimal manual prompting from Richard. Claude's scheduling tools and looped workflows handle the cadence automatically. Richard only needs to show up for the interview step and the final PR review.
 

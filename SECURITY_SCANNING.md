@@ -265,6 +265,25 @@ There's no suppression file — this is advisory output reviewed inline by whoev
 
 ---
 
+### 10. Content Pipeline Workflows (GitHub Actions)
+
+The content pipeline runs a model with a subscription token on a public repository, so its workflows (`pipeline.yml`, `draft.yml`, `.github/pipeline/*`) are security-sensitive code. Any change to them goes through the code workflow with the full scan stack, Checkov, and an independent security review.
+
+| Control | How |
+|---|---|
+| Who can start it | Owner-only gate on the issue author and the event sender, checked at the caller and again in every job of the reusable workflow |
+| What the model sees | A thread file built from the owner's comments and the workflow's own marked comments; everyone else is dropped |
+| What the model can do | Path-scoped file read and write only; no shell, no GitHub tools; `/proc`, `/etc`, `.git` and `.github` denied; the research job alone has web tools and a read-only token |
+| Untrusted content | Research output is sanitised (HTML, images, hidden and control characters), credential-scanned and run through `scripts/scan-untrusted-content.mjs`; a detection or a scan failure stops the pipeline |
+| What reaches the build | Drafts must pass the lint: only the Callout component, no expressions, scripts or event handlers; links only to hosts in the research brief |
+| Commits and PRs | Plain steps validate the file list, then commit from a pristine repository with hooks disabled |
+| Merge | Richard only; `main` requires PRs and nine checks, no bypass |
+| Repository settings | See DECISIONS.md Decision 18 |
+
+Open items: `Content PR path guard` and `Workflow lint (actionlint)` become required checks once they have run green (roadmap P0-4, P0-5). The injection scanner's behaviour on the Actions runner is unproven until the full test run.
+
+---
+
 ## Scanning Triggers — Quick Reference
 
 ```
