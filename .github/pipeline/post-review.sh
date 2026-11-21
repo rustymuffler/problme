@@ -3,8 +3,10 @@
 # Env: GH_TOKEN, REPO, PR_NUMBER, PR_URL, ISSUE_NUMBER, OWNER.
 set -euo pipefail
 test -s .pipeline-tmp/review.md || { echo "Reviewer wrote no review"; exit 1; }
-head -c 6000 .pipeline-tmp/review.md > .pipeline-tmp/review-trimmed.md
-if grep -qE 'gh[pousr]_[A-Za-z0-9]{20,}|github_pat_|sk-ant-|eyJ[A-Za-z0-9_-]{20,}|[A-Za-z0-9+/=]{80,}' .pipeline-tmp/review-trimmed.md; then
+# Strip HTML comments and tags, hidden characters and control characters, then cap the size.
+perl -CSD -0777 -pe 's/<!--.*?-->//gs; s/<\/?[A-Za-z][^>]*>//g; s/[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{FEFF}\x{E0000}-\x{E007F}]//g; s/(?![\n\t])\p{Cc}//g' .pipeline-tmp/review.md | head -c 6000 > .pipeline-tmp/review-trimmed.md
+# Credential check (URLs are removed first so long links do not trigger it).
+if sed -E 's#https?://[^ )>]+##g' .pipeline-tmp/review-trimmed.md | grep -qE 'gh[pousr]_[A-Za-z0-9]{20,}|github_pat_|sk-ant-|eyJ[A-Za-z0-9_-]{20,}|[A-Za-z0-9+/=]{120,}'; then
   echo "Review looks like it contains a secret; not posting."; exit 1
 fi
 perl -CS -pe 's/(?<!`)@(?=\w)/@\x{200B}/g' .pipeline-tmp/review-trimmed.md > .pipeline-tmp/review-safe.md

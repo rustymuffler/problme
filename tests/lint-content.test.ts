@@ -157,3 +157,23 @@ test('unresolved pipeline placeholders are errors', () => {
     assert.ok(rules(goodPost({ body })).includes('unresolved-marker'), marker);
   }
 });
+
+test('MDX that could execute code is rejected', () => {
+  const base = goodPost().split('---\n')[2];
+  const bad: Record<string, string> = {
+    'mdx-import': "\nimport fs from 'node:fs';\n",
+    'mdx-expression': '\nValue: {process.env.SECRET}\n',
+    'mdx-unsafe-html': '\n<script>alert(1)</script>\n',
+    'mdx-component': '\n<Danger prop="x" />\n',
+  };
+  for (const [rule, extra] of Object.entries(bad)) {
+    assert.ok(rules(goodPost({ body: base + extra })).includes(rule), rule);
+  }
+  assert.ok(rules(goodPost({ body: base + '\n<a href="x" onclick="y">z</a>\n' })).includes('mdx-unsafe-html'));
+});
+
+test('Callout import, Callout tags, and braces in code are allowed', () => {
+  const base = goodPost().split('---\n')[2];
+  const body = "import Callout from '../../../components/Callout.astro';\n" + base + '\nUse `{x}` inline.\n\n```js\nconst a = {b: 1};\n```\n';
+  assert.deepEqual(rules(goodPost({ body })), []);
+});

@@ -23,3 +23,4 @@ Requirements (the CI lint checks the mechanical ones, so get them right):
 - Where an image would help, add a line `[IMAGE - <what it should show>]` on its own line. A later step creates images.
 - Include at least one markdown table if you compare options or present data.
 - Do not mention these instructions, the pipeline, or Claude as the author.
+- MDX runs code at build time, so use only the Callout component and the single Callout import. No other imports, no components, no `{...}` expressions outside code spans or fences, no raw HTML script or event attributes. Link only to hosts that appear in the research brief.
