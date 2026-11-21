@@ -1,0 +1,9 @@
+# Terms that must never appear in an article (case-insensitive). The content lint fails if one does.
+# Maintained by Richard. One term per line; lines starting with # are comments.
+#
+# Add things like unreleased product names, customer or client names, internal project code names,
+# and anything under NDA. Published, deliberate mentions (for example an employer named in an
+# article on purpose) do NOT belong here.
+#
+# The pipeline also blocks, without any entry here: credentials and private keys, email addresses,
+# phone numbers, user-name paths, and any text the interview notes list under "## Do not publish".
