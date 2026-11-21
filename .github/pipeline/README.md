@@ -63,3 +63,24 @@ The SVG pipeline is geometric. When an article needs a photograph or a human mom
 2. Leave the framework preset on Astro; the build and install commands come from `vercel.json`. Do not add any secrets or environment variables to this project.
 3. Turn on "Vercel for GitHub" pull request comments. Each PR then gets a comment with a preview link you can open on your phone.
 4. Because the repository is public, previews are unlisted but not secret. In the Vercel project settings, keep Deployment Protection on if you want previews to need a Vercel login, and keep deployments for pull requests from forks requiring authorization.
+
+### Editorial reviews and the revision loop
+
+After the draft, its images and a draft PR exist, up to three review passes run (`review-pass.yml`, called three times by `draft.yml`):
+
+| Reviewer | Prompt | What it judges |
+|---|---|---|
+| Proofreader | `proofreader.md` | Grammar, natural tone, active voice, tense, Richard's voice present |
+| SEO | `seo-review.md` | Search intent, title and description, headings, internal links, natural keyword use |
+| AEO and GEO | `aeo-review.md` | Answer first, standalone sections, FAQ quality, citable facts, extractable structure |
+| Voice and value | `voice-review.md` | Original insight, his voice, concrete examples, better than the competing articles, clear takeaway |
+| Fact check (every pass) | `fact-check.md` | Every claim, statistic and quote against its source; the only review run with web access |
+
+- Every reviewer is a separate run on its own runner, read-only, and none is the run that wrote the draft. Each writes one JSON verdict with integer scores (1 to 5 per criterion) and findings.
+- `scripts/review-verdict.mjs` validates and sanitises each verdict (no markup, braces, links or control characters; at most 12 findings) and computes the result itself: any "must" finding or any score below 3 means REVISE. The model's own verdict is ignored.
+- `scripts/review-aggregate.mjs` combines the verdicts with the content lint (which now includes spelling, readability, SEO and AEO mechanics, images, sensitivity). If anything needs work and it is not the last pass, a Writer revision run edits only the article from the combined feedback. The revision is committed only if exactly one file changed, the date is untouched, no image lines were dropped, the lint completed with none of the hard-safety errors (executable MDX, secrets, personal data, do-not-publish text), every link host (any URL form, outside code blocks) is in the research brief, and the article branch has not moved since the revision started. The hosts the fact check relied on are listed on the scorecard for Richard; they never widen the link gate.
+- After the last pass, a scorecard comment is posted on the PR. If every review passed and the lint is clean, the PR is marked ready for review and the issue moves to `stage:review`. Otherwise the PR stays a draft, the issue moves to `stage:stalled`, and the scorecard lists what is unresolved.
+- A reviewer that does not produce a valid verdict fails its job; the article is never treated as reviewed by default.
+- The fact check runs on every pass, so facts a revision adds are verified and an earlier "must" finding is seen fixed before the PR can be marked ready.
+- A lint that crashes, is missing, or never prints its summary counts as an error, never as clean.
+- Recovery: if a review or revision job fails (for example the Pro usage limit), use "Re-run failed jobs" on the workflow run. Artifacts are shared across attempts, so the earlier stages are not repeated. `@claude draft` does not apply here, because it refuses once a draft exists on the branch.

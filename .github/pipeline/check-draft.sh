@@ -17,17 +17,19 @@ set +e
 node scripts/lint-content.mjs "$SLUG" > .pipeline-tmp/lint-output.txt 2>&1
 code=$?
 
-# Link gate: every external link must point at a host that appears in the research brief
-# (or probl.me / github.com). A poisoned brief cannot add new destinations here.
-allowed="$(grep -oE 'https?://[^/) >]+' .pipeline-tmp/research-brief.md | sed -E 's#https?://##; s#^www\.##' | tr 'A-Z' 'a-z' | sort -u)"
+# Link gate: every external host in the article (outside code blocks: markdown links, autolinks, bare
+# URLs, reference definitions, href and src, protocol-relative) must appear in the research brief, or be
+# probl.me or github.com. A poisoned brief cannot add new destinations here.
+allowed="$(node scripts/link-hosts.mjs .pipeline-tmp/research-brief.md --all)"
 extra=0
-for host in $(grep -oE '\]\(https?://[^/) ]+' "$file" | sed -E 's#\]\(https?://##; s#^www\.##' | tr 'A-Z' 'a-z' | sort -u); do
+while IFS= read -r host; do
+  [ -z "$host" ] && continue
   case "$host" in probl.me|github.com) continue ;; esac
-  if ! printf '%s\n' "$allowed" | grep -qxF "$host"; then
+  if ! printf '%s\n' "$allowed" | grep -qxF -- "$host"; then
     echo "  error   $file:1  [link-domain] Link host not found in the research brief: $host" >> .pipeline-tmp/lint-output.txt
     extra=1
   fi
-done
+done < <(node scripts/link-hosts.mjs "$file")
 cat .pipeline-tmp/lint-output.txt
 if [ "$code" -ne 0 ] || [ "$extra" -ne 0 ]; then
   echo "lint_errors=true" >> "$GITHUB_OUTPUT"
