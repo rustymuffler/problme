@@ -45,7 +45,9 @@ function main() {
     return;
   }
   if (!base || !/^(?!-)[\w./-]+$/.test(base)) throw new Error('Usage: check-pr-paths.mjs <base-ref>');
-  const out = execFileSync('git', ['diff', '--name-only', `${base}...HEAD`], { encoding: 'utf8' });
+  // --no-renames lists both the old and new path of a move, so a component moved into an article
+  // folder cannot hide its deletion.
+  const out = execFileSync('git', ['diff', '--name-only', '--no-renames', `${base}...HEAD`], { encoding: 'utf8' });
   const files = out.split('\n').map((s) => s.trim()).filter(Boolean);
   const problems = checkPaths(files);
   if (problems.length) {
