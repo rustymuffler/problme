@@ -41,6 +41,10 @@ The interview stage and the draft stage (`notify` job) each post an issue commen
 - There is no automatic fallback to a pay-per-token API key. Using one needs your explicit approval and a hard spend cap set in the Anthropic console.
 - Heavy research runs are the most likely to hit the limit. Measuring the quota per article is part of the full test run (roadmap, issue #166).
 
+### Second research pass
+
+After the first research pass, `scripts/research-gaps.mjs` checks the brief: fewer than 3 competitor articles, fewer than 3 credible sources, fewer than 2 counterarguments, any `[UNVERIFIED]` claim, or no recommended target length. If there are gaps, one second pass runs with the same web-only isolation and fills them (prompt: `research-gaps.md`). The first-pass brief is injection-scanned before the second agent reads it, and the final brief is scanned again. If the second pass fails or its output does not pass sanitising, the scanned first-pass brief is used. It costs extra Pro quota only when gaps exist.
+
 ### Images
 
 - After the draft passes the lint, an Image Creator run writes SVG drawings (a hero plus one diagram per `[IMAGE - ...]` placeholder) and a manifest into `.pipeline-tmp/images/`. It has no shell and no web access.
