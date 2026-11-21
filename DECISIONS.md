@@ -342,7 +342,7 @@
 
 **Decision:** The first end-to-end test runs once, after phases 0 to 3 plus publish tracking are built (the gate in `PIPELINE_ROADMAP.md`, issue #166), so it exercises the finished pipeline and produces a fully completed article. The interview start stage was verified live during the parked trial.
 
-**Addendum to Decision 16:** CI builds for pull requests include future-dated posts (`INCLUDE_FUTURE_POSTS=true`) and Lighthouse CI also audits every post a PR changes, so a scheduled article is checked before it goes live.
+**Addendum to Decision 16 (takes effect when PR 168 merges):** CI builds for pull requests include future-dated posts (`INCLUDE_FUTURE_POSTS=true`) and Lighthouse CI also audits every post a PR changes, so a scheduled article is checked before it goes live.
 
 ---
 

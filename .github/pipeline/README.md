@@ -25,13 +25,14 @@ Rules that apply to every prompt:
 | Comment `@claude done` on its own line | The same issue | Notes are saved, then research, drafting, lint, PR and review run |
 | Comment `@claude draft` on its own line | An issue labelled `stage:drafting` | Re-runs research and drafting after a failure |
 
-Every stage that stops tells you why in an issue comment with a link to the run.
+The interview stage and the draft stage (`notify` job) each post an issue comment with a link to the run when they stop. The independent review step posts its result on the PR.
 
 ### The subscription token
 
 - The pipeline authenticates with the repository secret `CLAUDE_CODE_OAUTH_TOKEN`, created with `claude setup-token` on 2026-11-19. It is valid for about one year.
 - A scheduled workflow (`token-reminder.yml`) opens an issue assigned to you every 15 October as the reminder to renew it. To renew: run `claude.cmd setup-token` on your PC, then replace the secret in Settings, Secrets and variables, Actions. Never paste the token anywhere else.
 - If the token expires or is revoked, runs fail at the Claude step and post a failure comment.
+- GitHub can disable scheduled workflows in a public repository after 60 days without repository activity. Weekly merges keep this one alive; if the reminder issue ever fails to appear in October, check the Actions tab.
 
 ### When the Pro usage limit is reached
 

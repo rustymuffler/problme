@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           title="Renew CLAUDE_CODE_OAUTH_TOKEN before it expires"
-          open="$(gh issue list --repo "$REPO" --state open --search "$title in:title" --json number --jq 'length')"
+          open="$(gh issue list --repo "$REPO" --state open --search "\"$title\" in:title" --json number --jq 'length')"
           if [ "$open" -gt 0 ]; then
             echo "A renewal issue is already open."
             exit 0
