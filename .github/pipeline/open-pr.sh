@@ -22,13 +22,13 @@ Automated draft from the content pipeline (interview notes, research brief, draf
 - Open placeholders to resolve: $markers (\`[UNVERIFIED]\`, \`[NOT ANSWERED]\`, \`[IMAGE]\`). The lint blocks merge until these are resolved.
 - Research safety scan: $scan
 - External link hosts in the article: ${domains:-none}
-- Images: not created yet. Hero and in-article images are a later pipeline step.
+- Images: made by the Image Creator step when it succeeds. If the hero or the required in-article images are missing, the content lint blocks the merge.
 - Publish date was set by the pipeline to the next Tuesday or Thursday; change \`date\` in the frontmatter if you prefer another day.
 
-## Reviews that have NOT run yet
-- Proofreader review (grammar, tone checklist), SEO review (keyword, links, headings) and the AEO check are not automated yet (see PIPELINE_ROADMAP.md, phases 2 and 3). This PR is a draft for that reason. Check those items yourself, then use "Ready for review" before merging.
+## Reviews
+- Proofreader, SEO, AEO and GEO, voice and value, and fact-check reviews run next, as separate runs (up to three passes, with revisions committed to this branch; each push re-runs CI).
+- This PR stays a draft until every review passes and the content lint is clean. A scorecard comment follows with each review's scores and anything unresolved. If it is still a draft after the last pass, the scorecard lists what needs you.
 
-An independent review comment follows. Read it first.
 BODY
 
 try() { GH_TOKEN="$1" "${@:2}"; }
