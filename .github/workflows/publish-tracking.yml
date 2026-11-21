@@ -1,0 +1,94 @@
+name: Publish tracking
+
+# Roadmap items P5-1 and P5-2. No model is involved.
+#   merged: an article PR (branch article/<n>) is merged -> its issue becomes stage:scheduled, with the
+#           slug and publish date recorded
+#   verify: after each deploy, daily, or on demand -> every scheduled article whose date has arrived is
+#           checked live (page, sitemap, rss.xml, llms.txt), then marked stage:published and closed
+# Decisions: scripts/lib/tracking.mjs.
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  workflow_run:
+    workflows: ['Deploy to GitHub Pages']
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '41 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-tracking
+  cancel-in-progress: false
+
+jobs:
+  merged:
+    name: Mark the article scheduled
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Same-repository article branches only, merged (not just closed), by the owner.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'article/') &&
+      github.event.pull_request.merged_by.login == 'rustymuffler'
+    permissions:
+      issues: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}   # always run the default branch's scripts
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Record the schedule on the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: node scripts/publish-tracking.mjs merged
+
+  verify:
+    name: Confirm scheduled articles are live
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: >-
+      github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}   # always run the default branch's scripts
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Check the live site and close finished issues
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          # Retry while Pages catches up only right after a deploy; the daily run checks once.
+          VERIFY_RETRIES: ${{ github.event_name == 'workflow_run' && '5' || '0' }}
+        run: node scripts/publish-tracking.mjs verify

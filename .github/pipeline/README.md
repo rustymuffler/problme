@@ -84,3 +84,10 @@ After the draft, its images and a draft PR exist, up to three review passes run 
 - The fact check runs on every pass, so facts a revision adds are verified and an earlier "must" finding is seen fixed before the PR can be marked ready.
 - A lint that crashes, is missing, or never prints its summary counts as an error, never as clean.
 - Recovery: if a review or revision job fails (for example the Pro usage limit), use "Re-run failed jobs" on the workflow run. Artifacts are shared across attempts, so the earlier stages are not repeated. `@claude draft` does not apply here, because it refuses once a draft exists on the branch.
+
+### Timers and tracking (no model involved)
+
+- **Stalled interviews** (`stalled-timer.yml`, daily): an issue labelled `stage:interview` that is waiting on your answers gets one nudge comment after 3 days and is moved to `stage:stalled` (assigned to you) after 7. Nothing else is blocked. To restart, add the label `stage:interview` again; the Interview Agent continues from the answers already in the thread instead of repeating the questions. Running it by hand from the Actions tab is always a dry run: it prints what the timer would do and changes nothing (only the daily schedule acts).
+- **Merge** (`publish-tracking.yml`, on an article PR merge): the issue moves to `stage:scheduled`, you are unassigned, and a comment records the slug and the publish date.
+- **Publish day** (`publish-tracking.yml`, after every deploy and daily): for each scheduled article whose date has arrived, the live page, `sitemap-0.xml`, `rss.xml` and `llms.txt` are checked (retrying for a few minutes while Pages catches up). When all four are right the issue becomes `stage:published` and is closed. If an article is two or more days overdue and still not live, you get one warning comment and the issue is assigned to you.
+- The decisions live in `scripts/lib/tracking.mjs` and only touch issues the owner opened; the only host contacted is `https://probl.me`.

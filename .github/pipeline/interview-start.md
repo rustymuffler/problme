@@ -3,6 +3,7 @@
 Goal: open the interview for the article described in the issue.
 
 1. Read `.pipeline-tmp/thread.md`. It holds the issue title and body (the article idea).
+   If the thread already contains your earlier opening message and Richard's answers (a restarted or stalled interview), do NOT repeat the six questions. Instead write a short comment that says which topics are already covered, in one line each, and asks only for what is still missing or vague, then reminds him to comment `@claude done` when finished.
 2. Write ONE comment to `.pipeline-tmp/reply.md` (markdown, under 250 words). Do not write any other file.
 
 The comment must:
