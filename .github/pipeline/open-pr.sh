@@ -31,14 +31,12 @@ Automated draft from the content pipeline (interview notes, research brief, draf
 
 BODY
 
-# The Claude App token is revoked when the Claude action step ends, so it is usually dead by now (first live
-# run: HTTP 401). Probe it once and use the default Actions token for everything below when it fails.
-# Probe with the same kind of call the script makes (GraphQL): the first live run showed the REST probe passing while
-# GraphQL still returned 401.
-if ! GH_TOKEN="$GH_TOKEN" gh pr list --repo "$REPO" --limit 1 --json number >/dev/null 2>&1; then
-  echo "The preferred token is not valid; using the default Actions token (CI will not start automatically)."
-  export GH_TOKEN="$GH_TOKEN_FALLBACK"
-fi
+# The Claude App token is not usable here: it is revoked when the Claude action step ends (the branch push has
+# already fallen back to the default token), and two live runs returned HTTP 401 on GraphQL calls even though a
+# probe with it passed. Use the default Actions token for every call below. CI does not start for PRs it opens;
+# the PR comment below and the handover tell Richard to close and reopen once.
+export GH_TOKEN="$GH_TOKEN_FALLBACK"
+trap 'echo "open-pr.sh failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 existing="$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json url --jq '.[0].url // ""')"
 if [ -n "$existing" ]; then
   pr_url="$existing"
