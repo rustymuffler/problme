@@ -41,8 +41,8 @@ trap 'echo "open-pr.sh failed at line $LINENO: $BASH_COMMAND" >&2' ERR
 # Diagnostics for the first live runs (prints only token prefix, length and HTTP status codes).
 diag() { # $1 label, $2 token
   local t="$2" r g
-  r="$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $t" "https://api.github.com/repos/$REPO" || echo curl-failed)"
-  g="$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $t" -X POST -d '{"query":"{viewer{login}}"}' https://api.github.com/graphql || echo curl-failed)"
+  r="$(curl -q --max-time 10 -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $t" "https://api.github.com/repos/$REPO" || echo curl-failed)"
+  g="$(curl -q --max-time 10 -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $t" -X POST -d '{"query":"{viewer{login}}"}' https://api.github.com/graphql || echo curl-failed)"
   echo "token-check $1: prefix=${t:0:4} length=${#t} rest=$r graphql=$g"
 }
 diag fallback "$GH_TOKEN_FALLBACK"
