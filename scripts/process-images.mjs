@@ -18,7 +18,7 @@
  * manifest.json: { "hero": { "file": "hero.svg", "alt": "..." },
  *                  "images": [ { "file": "flow.svg", "alt": "..." } ] }
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -42,12 +42,14 @@ export function checkAlt(alt) {
 }
 
 /** Validate the manifest object. Returns [problems, entries]. */
-export function checkManifest(manifest) {
+export function checkManifest(manifest, { heroOptional = false } = {}) {
   const problems = [];
   const entries = [];
   if (!manifest || typeof manifest !== 'object') return [['manifest.json is not an object'], entries];
   const hero = manifest.hero;
-  if (!hero || !FILE.test(String(hero.file ?? ''))) problems.push('manifest.hero.file must be a lowercase-hyphen .svg name');
+  if (!hero && heroOptional) {
+    // A revision that does not touch the hero.
+  } else if (!hero || !FILE.test(String(hero.file ?? ''))) problems.push('manifest.hero.file must be a lowercase-hyphen .svg name');
   else {
     const altProblem = checkAlt(hero.alt);
     if (altProblem) problems.push(`hero: ${altProblem}`);
@@ -86,35 +88,61 @@ function e0(outputs, publicDir) {
   return outputs.some(({ e }) => e.kind === 'hero') && ['hero.webp', 'hero-640.webp'].some((f) => existsSync(path.join(publicDir, f)));
 }
 
-/** Set heroImage and imageCredit in the frontmatter, and fill [IMAGE ...] placeholders in order. */
-export function updateArticle(mdx, slug, entries) {
+const cleanAlt = (alt) => alt.replace(/[\r\n{}<>\[\]()`*_#|\\]/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * Set heroImage and imageCredit in the frontmatter, and fill [IMAGE ...] placeholders in order.
+ *
+ * Revise mode (`revise: true`, the owner's `@claude revise`): the frontmatter is left alone, only the
+ * entries listed in `fresh` fill placeholders, and every entry in `replaced` updates the alt text of the
+ * existing image line that already points at /assets/posts/<slug>/<name>.png.
+ */
+export function updateArticle(mdx, slug, entries, { revise = false, fresh = null, replaced = [] } = {}) {
   const text = mdx.replace(/\r\n/g, '\n');
   const lines = text.split('\n');
   if (lines[0] !== '---') throw new Error('Article has no frontmatter.');
   const end = lines.indexOf('---', 1);
   if (end === -1) throw new Error('Article frontmatter is not closed.');
-  const fm = lines.slice(1, end).filter((l) => !/^(heroImage|imageCredit):/.test(l));
-  const readTime = fm.findIndex((l) => /^readTime:/.test(l));
-  const insertAt = readTime === -1 ? fm.length : readTime + 1;
-  fm.splice(insertAt, 0, `heroImage: /assets/posts/${slug}/hero.png`, `imageCredit: "${CREDIT}"`);
+  let fm = lines.slice(1, end);
+  if (!revise) {
+    fm = fm.filter((l) => !/^(heroImage|imageCredit):/.test(l));
+    const readTime = fm.findIndex((l) => /^readTime:/.test(l));
+    const insertAt = readTime === -1 ? fm.length : readTime + 1;
+    fm.splice(insertAt, 0, `heroImage: /assets/posts/${slug}/hero.png`, `imageCredit: "${CREDIT}"`);
+  }
 
   const body = lines.slice(end + 1);
-  const diagrams = entries.filter((e) => e.kind === 'diagram');
+  const diagrams = (fresh ?? entries).filter((e) => e.kind === 'diagram');
+  const altUpdates = new Map(replaced.filter((e) => e.kind === 'diagram').map((e) => [`/assets/posts/${slug}/${e.name}.png`, cleanAlt(e.alt)]));
+  const altDone = new Set();
   let next = 0;
   let inFence = false;
-  const replaced = [];
+  const placedFiles = [];
   const out = body.map((line) => {
     if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
-    if (!inFence && next < diagrams.length && /^\[IMAGE\b[^\]]*\]\s*$/.test(line)) {
+    if (inFence) return line;
+    if (next < diagrams.length && /^\[IMAGE\b[^\]]*\]\s*$/.test(line)) {
       const d = diagrams[next];
       next += 1;
-      replaced.push(d.file);
-      const safeAlt = d.alt.replace(/[\r\n{}<>\[\]()`*_#|\\]/g, ' ').replace(/\s+/g, ' ').trim();
-      return `![${safeAlt}](/assets/posts/${slug}/${d.name}.png)`;
+      placedFiles.push(d.file);
+      return `![${cleanAlt(d.alt)}](/assets/posts/${slug}/${d.name}.png)`;
+    }
+    if (altUpdates.size && line.startsWith('![')) {
+      for (const [url, alt] of altUpdates) {
+        if (line.endsWith(`](${url})`)) {
+          altDone.add(url);
+          return `![${alt}](${url})`;
+        }
+      }
     }
     return line;
   });
-  return { mdx: ['---', ...fm, '---', ...out].join('\n'), placed: replaced, unplaced: diagrams.slice(next).map((d) => d.file) };
+  return {
+    mdx: ['---', ...fm, '---', ...out].join('\n'),
+    placed: placedFiles,
+    unplaced: diagrams.slice(next).map((d) => d.file),
+    altMissing: [...altUpdates.keys()].filter((u) => !altDone.has(u)),
+  };
 }
 
 async function render(svg, entry, size) {
@@ -147,18 +175,31 @@ async function main() {
   } catch (err) {
     return fail([`manifest.json could not be read: ${err.message}`]);
   }
-  const [manifestProblems, entries] = checkManifest(manifest);
+  // Revise mode (the owner's `@claude revise`): the hero is optional, and an entry whose PNG already exists
+  // REPLACES that image (files overwritten, alt text updated) instead of filling a placeholder.
+  const revise = get('--mode') === 'revise';
+  const [manifestProblems, entries] = checkManifest(manifest, { heroOptional: revise });
   if (manifestProblems.length) return fail(manifestProblems);
 
-  // Count the placeholders first: a diagram without a placeholder is dropped, never committed.
-  const placeholders = countPlaceholders(readFileSync(path.resolve('src/content/posts', slug, 'index.mdx'), 'utf8'));
-  const diagramsAll = entries.filter((e) => e.kind === 'diagram');
-  const dropped = diagramsAll.slice(placeholders).map((e) => e.file);
-  for (const e of entries.filter((x) => x.kind === 'diagram' && dropped.includes(x.file))) entries.splice(entries.indexOf(e), 1);
-  for (const f of dropped) console.log(`::warning::[images] ${f} has no [IMAGE] placeholder and was dropped`);
   const publicDir = path.resolve('public/assets/posts', slug);
   const sourceDir = path.resolve('src/content/posts', slug, 'images');
   const articleFile = path.resolve('src/content/posts', slug, 'index.mdx');
+  const articleText = readFileSync(articleFile, 'utf8');
+  const exists = (e) => existsSync(path.join(publicDir, `${e.name}.png`));
+  // Decided once, before any file is written (afterwards every new diagram would look like an existing one).
+  const replaceFiles = new Set(entries.filter((e) => revise && (e.kind === 'hero' || exists(e))).map((e) => e.file));
+  const replacing = (e) => replaceFiles.has(e.file);
+
+  // A replaced diagram must already be in the article, so a stray file name cannot add an unreferenced image.
+  const missingRefs = entries.filter((e) => e.kind === 'diagram' && replacing(e) && !articleText.includes(`](/assets/posts/${slug}/${e.name}.png)`));
+  if (missingRefs.length) return fail(missingRefs.map((e) => `${e.file}: the article has no image named ${e.name}.png to replace`));
+
+  // Count the placeholders first: a new diagram without a placeholder is dropped, never committed.
+  const placeholders = countPlaceholders(articleText);
+  const freshAll = entries.filter((e) => e.kind === 'diagram' && !replacing(e));
+  const dropped = freshAll.slice(placeholders).map((e) => e.file);
+  for (const e of entries.filter((x) => x.kind === 'diagram' && dropped.includes(x.file))) entries.splice(entries.indexOf(e), 1);
+  for (const f of dropped) console.log(`::warning::[images] ${f} has no [IMAGE] placeholder and was dropped`);
   const written = [];
   const problems = [];
   const outputs = [];
@@ -180,14 +221,27 @@ async function main() {
   }
   if (problems.length) return fail(problems);
 
-  // Never overwrite: a re-run or an existing article must not have its files replaced.
+  // Never overwrite, except in revise mode where an entry deliberately replaces its own existing image.
   for (const { e } of outputs) {
+    if (replacing(e)) continue;
     for (const f of [path.join(publicDir, `${e.name}.png`), path.join(sourceDir, e.file)]) {
       if (existsSync(f)) problems.push(`${path.relative(process.cwd(), f)} already exists; refusing to overwrite it`);
     }
   }
-  if (e0(outputs, publicDir)) problems.push('hero webp files already exist; refusing to overwrite them');
+  if (!revise && e0(outputs, publicDir)) problems.push('hero webp files already exist; refusing to overwrite them');
   if (problems.length) return fail(problems);
+
+  // Never write through a symlink: a link already in the article folders (they come from the PR branch) could
+  // point outside the repository. Check the folders and every file about to be overwritten.
+  const linked = [publicDir, sourceDir, articleFile, ...outputs.flatMap(({ e }) => [path.join(publicDir, `${e.name}.png`), path.join(sourceDir, e.file)]), ...['hero.webp', 'hero-640.webp'].map((f) => path.join(publicDir, f))]
+    .filter((f) => {
+      try {
+        return lstatSync(f).isSymbolicLink();
+      } catch {
+        return false; // does not exist yet
+      }
+    });
+  if (linked.length) return fail(linked.map((f) => `${path.relative(process.cwd(), f)} is a symbolic link; refusing to write through it`));
 
   mkdirSync(publicDir, { recursive: true });
   mkdirSync(sourceDir, { recursive: true });
@@ -221,9 +275,17 @@ async function main() {
   }
   if (problems.length) return fail(problems);
 
-  const updated = updateArticle(readFileSync(articleFile, 'utf8'), slug, entries);
+  const updated = revise
+    ? updateArticle(articleText, slug, entries, { revise: true, fresh: entries.filter((e) => !replacing(e)), replaced: entries.filter((e) => replacing(e)) })
+    : updateArticle(articleText, slug, entries);
+  if (revise && countPlaceholders(updated.mdx) > 0) {
+    // A placeholder left behind (fewer diagrams than placeholders, or a name that matched an existing image)
+    // would be committed as an unresolved marker. Fail so the whole image step is undone.
+    return fail(['An [IMAGE] placeholder is still unfilled after placing the images; check that each new diagram has a new name and that there is one diagram per placeholder.']);
+  }
   writeFileSync(articleFile, updated.mdx);
   console.log(JSON.stringify({ slug, written, placed: updated.placed, unplaced: updated.unplaced }, null, 2));
+  for (const u of updated.altMissing ?? []) console.log(`::warning::[images] no image line found for ${u}; its alt text was not updated`);
   for (const f of updated.unplaced) console.log(`::warning::[images] ${f} has no [IMAGE] placeholder to replace and was not added to the article`);
 }
 
