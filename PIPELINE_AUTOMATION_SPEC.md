@@ -38,7 +38,7 @@ Idea issue (monthly batch, 👍 to select)
 | F1 | No step requires Richard's desktop or any locally running app. |
 | F2 | The interview runs in issue comments. Claude posts the six interview questions from `AGENTS.md`, asks follow-ups on vague answers, and on "interview done" writes `interview-notes.md` to the article branch. |
 | F3 | After "interview done", the pipeline runs research, draft, images, and review with no further input, ending in a draft PR that closes the article issue. |
-| F4 | Every draft PR contains: a one-paragraph summary, the preview link, the CI check summary, and `Closes #<issue>`. |
+| F4 | Every draft PR contains: a one-paragraph summary, the preview link, the CI check summary, and a plain `#<issue>` reference (never a closing keyword: the issue must stay open until publish tracking confirms the page is live). |
 | F5 | CI enforces the mechanical content rules and blocks merge on failure: no em/en dashes as dashes, banned phrases (`CONTENT_STANDARDS.md` §4), title 50-60 chars, description 150-160, word count 1,200-2,500, no sentence over 35 words, no paragraph over 4 sentences, heading levels, alt text on all images, frontmatter schema, FAQ 3-5 items, 2-5 tags, one valid category. |
 | F6 | A separate agent run (not the drafting run) does judgment review: tone and voice, every claim traces to `interview-notes.md` / `research-brief.md`, Richard's interview content is present. It posts findings as a PR comment. |
 | F7 | Merging the PR is the only approval action. Nothing auto-merges. |
@@ -71,7 +71,7 @@ Articles published per month; Richard minutes per article; revision loops per ar
 | **Labels: category** (exactly one) | `cat:pm-craft`, `cat:ai-development`, `cat:tech-tools` (match the site schema). |
 | **Label: flag** | `time-sensitive`, `celly-tie-in` (optional). |
 | **Assignee** | Richard only while the issue is waiting on him. Claude unassigns him when it takes over. Filter `assignee:@me` = phone to-do list. |
-| **Development** | Auto-linked PR via `Closes #N`. No manual use. |
+| **Development** | Linked by a plain `#N` reference in the PR body (not a closing keyword, so the issue stays open until the article is live). No manual use. |
 | **Project board** | Columns mirror the stage labels. Custom fields: **Publish date** (date), **Category** (single select), **Slug** (text). |
 | **Notifications** | Subscribed by default; GitHub mobile push on. |
 | **Not used** | Milestones, Relationships (revisit if articles gain subtasks). |
