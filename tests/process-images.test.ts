@@ -238,6 +238,8 @@ test('revise mode: replaces an existing diagram and hero, fills a new placeholde
 
 test('revise mode: hero is optional, and a replace needs an image the article already has', async () => {
   const ok = await setupRevise({ images: [{ file: 'flow.svg', alt: ALT2 }] }, { 'flow.svg': diagramSvg });
+  const mdxPath = path.join(ok.root, 'src/content/posts', ok.slug, 'index.mdx');
+  writeFileSync(mdxPath, readFileSync(mdxPath, 'utf8').replace('[IMAGE - a new diagram of the review loop]', 'No placeholder here.'));
   try {
     assert.equal(runRevise(ok.root, ok.slug, ok.dir).status, 0);
   } finally {
@@ -288,4 +290,17 @@ test('updateArticle revise mode touches only alt text and placeholders', () => {
   assert.ok(out.mdx.includes('heroImage: /assets/posts/sample-article-slug/hero.png'));
   const missing = updateArticle(revArticle, 'sample-article-slug', [], { revise: true, fresh: [], replaced: [{ kind: 'diagram', file: 'nope.svg', name: 'nope', alt: ALT2 }] });
   assert.deepEqual(missing.altMissing, ['/assets/posts/sample-article-slug/nope.png']);
+});
+
+test('revise mode: a placeholder left unfilled fails the run and writes no article change', async () => {
+  const a = await setupRevise({ images: [{ file: 'flow.svg', alt: ALT2 }] }, { 'flow.svg': diagramSvg });
+  try {
+    // The article still has its [IMAGE] placeholder, but the manifest only replaces an existing image.
+    const r = runRevise(a.root, a.slug, a.dir);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stdout, /placeholder is still unfilled/);
+    assert.match(readFileSync(path.join(a.root, 'src/content/posts', a.slug, 'index.mdx'), 'utf8'), /\[IMAGE - a new diagram/);
+  } finally {
+    cleanup(a.root);
+  }
 });

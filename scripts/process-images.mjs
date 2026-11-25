@@ -18,7 +18,7 @@
  * manifest.json: { "hero": { "file": "hero.svg", "alt": "..." },
  *                  "images": [ { "file": "flow.svg", "alt": "..." } ] }
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -231,6 +231,18 @@ async function main() {
   if (!revise && e0(outputs, publicDir)) problems.push('hero webp files already exist; refusing to overwrite them');
   if (problems.length) return fail(problems);
 
+  // Never write through a symlink: a link already in the article folders (they come from the PR branch) could
+  // point outside the repository. Check the folders and every file about to be overwritten.
+  const linked = [publicDir, sourceDir, articleFile, ...outputs.flatMap(({ e }) => [path.join(publicDir, `${e.name}.png`), path.join(sourceDir, e.file)]), ...['hero.webp', 'hero-640.webp'].map((f) => path.join(publicDir, f))]
+    .filter((f) => {
+      try {
+        return lstatSync(f).isSymbolicLink();
+      } catch {
+        return false; // does not exist yet
+      }
+    });
+  if (linked.length) return fail(linked.map((f) => `${path.relative(process.cwd(), f)} is a symbolic link; refusing to write through it`));
+
   mkdirSync(publicDir, { recursive: true });
   mkdirSync(sourceDir, { recursive: true });
 
@@ -266,6 +278,11 @@ async function main() {
   const updated = revise
     ? updateArticle(articleText, slug, entries, { revise: true, fresh: entries.filter((e) => !replacing(e)), replaced: entries.filter((e) => replacing(e)) })
     : updateArticle(articleText, slug, entries);
+  if (revise && countPlaceholders(updated.mdx) > 0) {
+    // A placeholder left behind (fewer diagrams than placeholders, or a name that matched an existing image)
+    // would be committed as an unresolved marker. Fail so the whole image step is undone.
+    return fail(['An [IMAGE] placeholder is still unfilled after placing the images; check that each new diagram has a new name and that there is one diagram per placeholder.']);
+  }
   writeFileSync(articleFile, updated.mdx);
   console.log(JSON.stringify({ slug, written, placed: updated.placed, unplaced: updated.unplaced }, null, 2));
   for (const u of updated.altMissing ?? []) console.log(`::warning::[images] no image line found for ${u}; its alt text was not updated`);

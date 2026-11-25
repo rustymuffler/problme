@@ -165,7 +165,9 @@ jobs:
           set -uo pipefail
           cp -- .pipeline-tmp/index.before-images.mdx "src/content/posts/$SLUG/index.mdx"
           sed -i -E '/^\[IMAGE\b[^]]*\][[:space:]]*$/d' "src/content/posts/$SLUG/index.mdx"
-          git checkout -- "public/assets/posts/$SLUG" "src/content/posts/$SLUG/images" 2>/dev/null || true
+          # One command per folder: with two pathspecs git aborts both when either has no tracked file.
+          git checkout -- "public/assets/posts/$SLUG" 2>/dev/null || true
+          git checkout -- "src/content/posts/$SLUG/images" 2>/dev/null || true
           git clean -fdq -- "public/assets/posts/$SLUG" "src/content/posts/$SLUG/images" || true
           echo "Image changes were not applied; the text changes continue."
 

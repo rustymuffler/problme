@@ -44,9 +44,14 @@ for f in "${extra[@]}"; do
   cp -- "$RUNNER_TEMP/rev/$f" "$f"
 done
 git add -- "$file" "${extra[@]}"
-expected="$(printf '%s\n' "$file" "${extra[@]}" | sort -u)"
+# The staged set must be non-empty and a subset of the allowed set. (It may lack the article itself when the
+# revision only replaced images and the article text came out identical.)
+allowed="$(printf '%s\n' "$file" "${extra[@]}" | sort -u)"
 staged="$(git diff --cached --name-only | sort -u)"
-[ "$staged" = "$expected" ] || { echo "Unexpected staged files: $staged"; exit 1; }
+[ -n "$staged" ] || { echo "Nothing to commit."; exit 1; }
+while IFS= read -r s; do
+  printf '%s\n' "$allowed" | grep -qxF -- "$s" || { echo "Unexpected staged file: $s"; exit 1; }
+done <<< "$staged"
 msg="${COMMIT_MESSAGE:-content: revision after review pass $PASS_NUMBER for issue #$ISSUE_NUMBER}"
 git -c core.hooksPath=/dev/null commit -q -m "$msg"
 if ! gh_git "$GH_TOKEN" push origin "$BRANCH"; then
