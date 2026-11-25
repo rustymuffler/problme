@@ -56,3 +56,5 @@ Source: Richard's own requests and decisions during the build session (2026-11-1
 - If the Claude Pro usage limit is reached, the Claude step fails and the workflow posts a comment asking him to retry later. There is no automatic fallback to a paid API key; using one needs his approval.
 - The `@claude revise` command: a separate Image Creator step draws new or redrawn diagrams and heroes as SVG, validated by the same allowlist used for drafting; it cannot make photos or screenshots; it works only on open pull requests from article branches; the review agents do not re-run on a manual revision. It was merged on 2026-11-25 and had not been used on a real article when the article was written.
 - Three theories about the HTTP 401 were tried in order and none of them fixed it: a dead Claude App token, a token probe that passed, and a REST versus GraphQL difference. The cause was the stale script (see above).
+
+- Publishing decision (Richard, 2026-11-25): publish this article today, and mention in it that the first article from the test run goes live next Tuesday (1 December 2026).
