@@ -125,7 +125,7 @@ jobs:
           placeholders="$(grep -cE '^\[IMAGE\b' "src/content/posts/$SLUG/index.mdx" || true)"
           if [ -s .pipeline-tmp/image-plan.clean ] || [ "$placeholders" -gt 0 ]; then echo "needed=true" >> "$GITHUB_OUTPUT"; else echo "needed=false" >> "$GITHUB_OUTPUT"; fi
           # The names of the images this article already has (file stems), for replacements.
-          ( cd "public/assets/posts/$SLUG" 2>/dev/null && ls -1 *.png 2>/dev/null | sed 's/\.png$//' ) > .pipeline-tmp/existing-images.txt || true
+          find "public/assets/posts/$SLUG" -maxdepth 1 -type f -name '*.png' -printf '%f\n' 2>/dev/null | sed 's/\.png$//' > .pipeline-tmp/existing-images.txt || true
           cp -- "src/content/posts/$SLUG/index.mdx" .pipeline-tmp/index.before-images.mdx
 
       - name: Run Image Creator
