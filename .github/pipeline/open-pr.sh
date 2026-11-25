@@ -33,7 +33,9 @@ BODY
 
 # The Claude App token is revoked when the Claude action step ends, so it is usually dead by now (first live
 # run: HTTP 401). Probe it once and use the default Actions token for everything below when it fails.
-if ! GH_TOKEN="$GH_TOKEN" gh api "repos/$REPO" --silent >/dev/null 2>&1; then
+# Probe with the same kind of call the script makes (GraphQL): the first live run showed the REST probe passing while
+# GraphQL still returned 401.
+if ! GH_TOKEN="$GH_TOKEN" gh pr list --repo "$REPO" --limit 1 --json number >/dev/null 2>&1; then
   echo "The preferred token is not valid; using the default Actions token (CI will not start automatically)."
   export GH_TOKEN="$GH_TOKEN_FALLBACK"
 fi
