@@ -172,3 +172,120 @@ test('a diagram without a placeholder is dropped, and existing files are never o
     cleanup(root);
   }
 });
+
+// ---- revise mode (the owner's @claude revise) ----
+
+const ALT2 = 'A redrawn flow diagram with four labelled steps from request to merged article.';
+const revArticle = `---
+title: "A title"
+description: "A description"
+category: tech-tools
+tags: ["one", "two"]
+date: 2026-11-24
+readTime: "7 min"
+heroImage: /assets/posts/sample-article-slug/hero.png
+imageCredit: "AI-generated with Claude"
+---
+
+Intro paragraph.
+
+![Old alt text for the flow diagram that was drawn first.](/assets/posts/sample-article-slug/flow.png)
+
+More text.
+
+[IMAGE - a new diagram of the review loop]
+
+Tail.
+`;
+
+async function setupRevise(manifest: unknown, files: Record<string, string>) {
+  const { root, slug, dir } = setup(manifest, files);
+  writeFileSync(path.join(root, 'src/content/posts', slug, 'index.mdx'), revArticle);
+  const pub = path.join(root, 'public/assets/posts', slug);
+  mkdirSync(pub, { recursive: true });
+  const old = await sharp({ create: { width: 800, height: 400, channels: 3, background: '#111111' } }).png().toBuffer();
+  writeFileSync(path.join(pub, 'flow.png'), old);
+  writeFileSync(path.join(pub, 'hero.png'), old);
+  writeFileSync(path.join(pub, 'hero.webp'), old);
+  return { root, slug, dir, pub, old };
+}
+const runRevise = (root: string, slug: string, dir: string) =>
+  spawnSync('node', [script, '--slug', slug, '--dir', dir, '--mode', 'revise'], { cwd: root, encoding: 'utf8', env: { ...process.env, NODE_PATH: path.resolve('node_modules') } });
+
+test('revise mode: replaces an existing diagram and hero, fills a new placeholder, leaves frontmatter alone', async () => {
+  const { root, slug, dir, pub, old } = await setupRevise(
+    { hero: { file: 'hero.svg', alt: ALT }, images: [{ file: 'flow.svg', alt: ALT2 }, { file: 'review-loop.svg', alt: ALT }] },
+    { 'hero.svg': heroSvg, 'flow.svg': diagramSvg, 'review-loop.svg': diagramSvg },
+  );
+  try {
+    const result = runRevise(root, slug, dir);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.ok(!readFileSync(path.join(pub, 'flow.png')).equals(old), 'flow.png was overwritten');
+    assert.ok(!readFileSync(path.join(pub, 'hero.png')).equals(old), 'hero.png was overwritten');
+    assert.ok(existsSync(path.join(pub, 'review-loop.png')), 'the new diagram was added');
+    assert.ok(existsSync(path.join(pub, 'hero-640.webp')));
+    const mdx = readFileSync(path.join(root, 'src/content/posts', slug, 'index.mdx'), 'utf8');
+    assert.match(mdx, /!\[A redrawn flow diagram[^\]]*\]\(\/assets\/posts\/sample-article-slug\/flow\.png\)/);
+    assert.ok(!mdx.includes('Old alt text'));
+    assert.match(mdx, /!\[A flow diagram with three labelled steps[^\]]*\]\(\/assets\/posts\/sample-article-slug\/review-loop\.png\)/);
+    assert.ok(!mdx.includes('[IMAGE'));
+    assert.equal((mdx.match(/^heroImage:/gm) ?? []).length, 1);
+    assert.equal((mdx.match(/^imageCredit:/gm) ?? []).length, 1);
+  } finally {
+    cleanup(root);
+  }
+});
+
+test('revise mode: hero is optional, and a replace needs an image the article already has', async () => {
+  const ok = await setupRevise({ images: [{ file: 'flow.svg', alt: ALT2 }] }, { 'flow.svg': diagramSvg });
+  try {
+    assert.equal(runRevise(ok.root, ok.slug, ok.dir).status, 0);
+  } finally {
+    cleanup(ok.root);
+  }
+  // hero.png exists on disk but no diagram file named "stray" does, so a new diagram fills the placeholder instead;
+  // a name that exists on disk but is not referenced in the article is refused.
+  const bad = await setupRevise({ images: [{ file: 'orphan.svg', alt: ALT2 }] }, { 'orphan.svg': diagramSvg });
+  writeFileSync(path.join(bad.pub, 'orphan.png'), bad.old);
+  try {
+    const r = runRevise(bad.root, bad.slug, bad.dir);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stdout, /no image named orphan\.png/);
+  } finally {
+    cleanup(bad.root);
+  }
+});
+
+test('revise mode: a new diagram with no placeholder is dropped, and normal mode still refuses to overwrite', async () => {
+  const a = await setupRevise({ images: [{ file: 'extra.svg', alt: ALT2 }, { file: 'extra-two.svg', alt: ALT2 }] }, { 'extra.svg': diagramSvg, 'extra-two.svg': diagramSvg });
+  try {
+    const r = runRevise(a.root, a.slug, a.dir);
+    assert.equal(r.status, 0, r.stdout);
+    assert.ok(existsSync(path.join(a.pub, 'extra.png')));
+    assert.ok(!existsSync(path.join(a.pub, 'extra-two.png')));
+    assert.match(r.stdout, /extra-two\.svg has no \[IMAGE\] placeholder/);
+  } finally {
+    cleanup(a.root);
+  }
+  const b = await setupRevise({ hero: { file: 'hero.svg', alt: ALT }, images: [] }, { 'hero.svg': heroSvg });
+  try {
+    const r = run(b.root, b.slug, b.dir);
+    assert.notEqual(r.status, 0);
+    assert.match(r.stdout, /already exists/);
+  } finally {
+    cleanup(b.root);
+  }
+});
+
+test('updateArticle revise mode touches only alt text and placeholders', () => {
+  const out = updateArticle(revArticle, 'sample-article-slug', [], {
+    revise: true,
+    fresh: [{ kind: 'diagram', file: 'loop.svg', name: 'loop', alt: ALT }],
+    replaced: [{ kind: 'diagram', file: 'flow.svg', name: 'flow', alt: ALT2 }],
+  });
+  assert.deepEqual(out.altMissing, []);
+  assert.equal(out.placed.length, 1);
+  assert.ok(out.mdx.includes('heroImage: /assets/posts/sample-article-slug/hero.png'));
+  const missing = updateArticle(revArticle, 'sample-article-slug', [], { revise: true, fresh: [], replaced: [{ kind: 'diagram', file: 'nope.svg', name: 'nope', alt: ALT2 }] });
+  assert.deepEqual(missing.altMissing, ['/assets/posts/sample-article-slug/nope.png']);
+});

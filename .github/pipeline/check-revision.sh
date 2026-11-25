@@ -6,12 +6,31 @@ set -uo pipefail
 file="src/content/posts/$SLUG/index.mdx"
 
 changed="$(git diff --name-only)"
-if [ "$changed" != "$file" ]; then
-  echo "Expected only $file to change. Changed:"; echo "$changed"; exit 1
-fi
 untracked="$(git ls-files --others --exclude-standard)"
-if [ -n "$untracked" ]; then
-  echo "Unexpected new files:"; echo "$untracked"; exit 1
+if [ "${ALLOW_IMAGES:-}" = true ]; then
+  # The owner's @claude revise may also replace or add this article's images (their SVG sources, PNG and
+  # WebP files). Nothing else may change, every file must be a small regular file, and nothing is deleted.
+  all="$(printf '%s\n%s\n' "$changed" "$untracked" | sed '/^$/d')"
+  [ -n "$all" ] || { echo "Nothing changed."; exit 1; }
+  bad=0
+  while IFS= read -r p; do
+    case "$p" in
+      "$file") ;;
+      "src/content/posts/$SLUG/images/"*) [[ "$p" =~ ^src/content/posts/${SLUG}/images/[a-z0-9-]+\.svg$ ]] || { bad=1; echo "Unexpected path: $p"; } ;;
+      "public/assets/posts/$SLUG/"*) [[ "$p" =~ ^public/assets/posts/${SLUG}/[a-z0-9-]+\.(png|webp)$ ]] || { bad=1; echo "Unexpected path: $p"; } ;;
+      *) bad=1; echo "Unexpected path: $p" ;;
+    esac
+    if [ -L "$p" ] || [ ! -f "$p" ]; then bad=1; echo "Not a regular file (or deleted): $p"; fi
+    if [ -f "$p" ] && [ "$(wc -c < "$p")" -ge 600000 ]; then bad=1; echo "Too large: $p"; fi
+  done <<< "$all"
+  [ "$bad" -eq 0 ] || exit 1
+else
+  if [ "$changed" != "$file" ]; then
+    echo "Expected only $file to change. Changed:"; echo "$changed"; exit 1
+  fi
+  if [ -n "$untracked" ]; then
+    echo "Unexpected new files:"; echo "$untracked"; exit 1
+  fi
 fi
 if [ -L "$file" ] || [ ! -f "$file" ] || [ "$(wc -c < "$file")" -ge 100000 ]; then
   echo "The article must be a regular file under 100,000 bytes."; exit 1

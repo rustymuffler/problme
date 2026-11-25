@@ -13,6 +13,14 @@ excerpt() {
   tail -n 15 "$1" 2>/dev/null | head -c 1500 | perl -CS -pe 's/[`<>]//g; s/@(?=\w)/@\x{200B}/g; s/[^\n\x20-\x7E\x{A0}-\x{FFFF}]//g'
 }
 summary() { cat .pipeline-tmp/summary-clean.txt 2>/dev/null; }
+# One line about the image work (only when images were part of the request).
+images_note() {
+  if [ "${IMAGES_UNDONE:-}" = "success" ]; then
+    printf '\n\nImages: the image changes were NOT applied (the drawing step failed or its output was rejected by the safety checks, so nothing image-related was committed). The text changes were applied. Comment `@claude revise ...` again with just the image request to retry.'
+  elif [ "${IMAGES_NEEDED:-}" = "true" ]; then
+    printf '\n\nImages: updated as requested (new or redrawn files are in this push).'
+  fi
+}
 
 if [ "${PREP_OK:-}" != "true" ]; then
   if [ -n "${PREP_ERROR:-}" ]; then
@@ -26,8 +34,9 @@ elif [ "${WRITER:-}" != "success" ]; then
   printf 'The Writer step failed (a common cause is the Claude Pro usage limit). Nothing was changed. Comment `@claude revise ...` again later.\n\nRun: %s\n' "$RUN_URL" > "$body"
 elif [ "${CHANGED:-}" = "false" ]; then
   {
-    printf 'No change made. The Writer did not edit the article.\n\n'
+    printf 'No change made. Nothing in the article or its images changed.\n\n'
     summary
+    images_note
     printf '\n\nRephrase the request if you want a different outcome.\n\nRun: %s\n' "$RUN_URL"
   } > "$body"
 elif [ "${CHECK:-}" != "success" ]; then
@@ -42,6 +51,7 @@ else
   {
     printf 'Revised as you asked.\n\n'
     summary
+    images_note
     printf '\n\nWhat to do next: the Vercel preview rebuilds from this push, so open the preview link to read it. Pushes made by the pipeline do not start the required checks by themselves, so close and reopen this pull request once before merging. The review agents do not re-run on a manual revision; the content lint did.\n\nRun: %s\n' "$RUN_URL"
   } > "$body"
 fi
