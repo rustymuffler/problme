@@ -13,7 +13,7 @@ scan="$(cat .pipeline-tmp/scan-summary.txt 2>/dev/null || echo unavailable)"
 domains="$(grep -oE '\]\(https?://[^/) ]+' "$file" | sed -E 's#\]\(https?://##' | sort -u | tr '\n' ' ')"
 
 cat > .pipeline-tmp/pr-body.md <<BODY
-Closes #$ISSUE_NUMBER
+Article issue: #$ISSUE_NUMBER (not a closing keyword: the issue stays open until the article is live)
 
 Automated draft from the content pipeline (interview notes, research brief, draft). Nothing here has been published; merging schedules it for its \`date\`.
 
