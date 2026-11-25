@@ -31,7 +31,7 @@ if [ "$ready" = true ]; then
   fi
   gh label create "stage:review" --repo "$REPO" --color 5319E7 --description "Draft PR open for review" 2>/dev/null || true
   gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:drafting" --add-label "stage:review" --add-assignee "$OWNER"
-  gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Ready for you: $PR_URL. $note Read the scorecard comment, open the preview, check the required CI results, then merge."
+  gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "Ready for you: $PR_URL. $note Read the scorecard comment, open the preview, check the required CI results, then merge. Pushes made by the pipeline do not start CI by themselves: if the required checks are missing or older than the last commit, close and reopen the PR once to run them."
 else
   gh label create "stage:stalled" --repo "$REPO" --color B60205 --description "No progress; needs Richard" 2>/dev/null || true
   gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --remove-label "stage:drafting" --add-label "stage:stalled" --add-assignee "$OWNER"
