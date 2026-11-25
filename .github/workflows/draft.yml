@@ -268,6 +268,12 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      # publish-draft.sh checks the article branch out into this workspace, which replaces every tracked file
+      # (including these scripts) with the branch copy. Run the publish and PR scripts from a copy taken now,
+      # so they are always the default-branch versions (the first live runs ran a stale branch copy of open-pr.sh).
+      - name: Copy the pipeline tools aside
+        run: cp -r .github/pipeline "$RUNNER_TEMP/pipeline-tools"
+
       - name: Download research
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
         with:
@@ -415,14 +421,14 @@ jobs:
           # Preferred: the Claude GitHub App token, so CI runs on the PR. Fallback: the default token.
           GH_TOKEN: ${{ steps.writer.outputs.github_token || github.token }}
           GH_TOKEN_FALLBACK: ${{ github.token }}
-        run: bash .github/pipeline/publish-draft.sh
+        run: bash "$RUNNER_TEMP/pipeline-tools/publish-draft.sh"
 
       - name: Open pull request
         id: pr
         env:
           GH_TOKEN: ${{ steps.writer.outputs.github_token || github.token }}
           GH_TOKEN_FALLBACK: ${{ github.token }}
-        run: bash .github/pipeline/open-pr.sh
+        run: bash "$RUNNER_TEMP/pipeline-tools/open-pr.sh"
 
       - name: Upload lint and scan summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
