@@ -24,6 +24,7 @@ Rules that apply to every prompt:
 | Comment your answers | The same issue | Follow-up questions, or "you have enough" |
 | Comment `@claude done` on its own line | The same issue | Notes are saved, then research, drafting, lint, PR and review run |
 | Comment `@claude draft` on its own line | An issue labelled `stage:drafting` | Re-runs research and drafting after a failure |
+| Comment `@claude revise <what to change>` at the start of a line | An open article pull request | The Writer applies your request to the article, the checks run, the result is committed to the same branch and a reply says what changed |
 
 The interview stage and the draft stage (`notify` job) each post an issue comment with a link to the run when they stop. The independent review step posts its result on the PR.
 
@@ -44,6 +45,22 @@ The interview stage and the draft stage (`notify` job) each post an issue commen
 ### Second research pass
 
 After the first research pass, `scripts/research-gaps.mjs` checks the brief: fewer than 3 competitor articles, fewer than 3 credible sources, fewer than 2 counterarguments, any `[UNVERIFIED]` claim, or no recommended target length. If there are gaps, one second pass runs with the same web-only isolation and fills them (prompt: `research-gaps.md`). The first-pass brief is injection-scanned before the second agent reads it, and the final brief is scanned again. If the second pass fails or its output does not pass sanitising, the scanned first-pass brief is used. It costs extra Pro quota only when gaps exist.
+
+### Asking for changes (`@claude revise`)
+
+On an open article pull request, comment for example:
+
+```
+@claude revise Shorten the intro to two sentences and make the TL;DR mention the test run.
+```
+
+The instructions are the rest of that line and every line after it (10 to 4,000 characters). Only your account can use it, and only on an open pull request from an `article/<issue>` branch of this repository.
+
+- **What it can change:** the article body, headings, frontmatter (title, description, tags, FAQ, TL;DR) and image alt text. New facts may come only from the interview notes, the research brief or your own words in the request. Links you paste into the request are allowed for that revision.
+- **What it will not do:** change the publish date, remove images, add or redraw images (image changes are a separate feature, not built yet), or touch any other file. If your request needs one of those, the reply under "Not done" says so.
+- **Safety checks before anything is committed:** exactly one file changed, date unchanged, images kept, content lint has no hard-safety errors, links stay within allowed hosts. If a check fails nothing is committed and the reply shows the reason.
+- **After it commits:** the Vercel preview rebuilds, so open it to read the change. Close and reopen the pull request once so the required checks run. The review agents do not re-run on a manual revision.
+- **If it fails:** the reply says why (for example the Pro usage limit); comment again later. Merged articles cannot be revised this way yet.
 
 ### Images
 

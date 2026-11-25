@@ -2,7 +2,7 @@
 # Commit the validated revision of the article to the article branch from a pristine repository
 # (nothing left in the workspace .git can run or redirect the push). Only the article file is added.
 # Env: GH_TOKEN (preferred: the Claude App token, so CI runs), GH_TOKEN_FALLBACK, REPO, BRANCH, SLUG,
-# PASS_NUMBER, ISSUE_NUMBER.
+# PASS_NUMBER, ISSUE_NUMBER, and optionally COMMIT_MESSAGE (default: the review-pass message).
 set -euo pipefail
 file="src/content/posts/$SLUG/index.mdx"
 base_sha="$(cat .pipeline-tmp/base-sha)"
@@ -28,7 +28,8 @@ cp -- "$RUNNER_TEMP/rev/index.mdx" "$file"
 git add -- "$file"
 staged="$(git diff --cached --name-only)"
 [ "$staged" = "$file" ] || { echo "Unexpected staged files: $staged"; exit 1; }
-git -c core.hooksPath=/dev/null commit -q -m "content: revision after review pass $PASS_NUMBER for issue #$ISSUE_NUMBER"
+msg="${COMMIT_MESSAGE:-content: revision after review pass $PASS_NUMBER for issue #$ISSUE_NUMBER}"
+git -c core.hooksPath=/dev/null commit -q -m "$msg"
 if ! gh_git "$GH_TOKEN" push origin "$BRANCH"; then
   echo "Push with the preferred token failed; retrying with the default Actions token (CI will not start automatically)."
   gh_git "$GH_TOKEN_FALLBACK" push origin "$BRANCH"
