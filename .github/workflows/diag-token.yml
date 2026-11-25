@@ -1,0 +1,65 @@
+name: Diag token (temporary)
+
+# Throwaway diagnostic, never merged: does the default Actions token survive a Claude action step
+# that mints and revokes its own app token?
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/diag-token.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Before the Claude step
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          echo "graphql pr list:"; gh pr list --repo "$GITHUB_REPOSITORY" --limit 1 --json number; echo "exit=$?"
+          echo "rest:"; gh api "repos/$GITHUB_REPOSITORY" --jq .full_name; echo "exit=$?"
+
+      - name: Claude step that mints its own app token
+        id: writer
+        uses: anthropics/claude-code-action@f431adaf77e0fecf918431e75a2b5b45b85af002  # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: Reply with the single word ok. Do not use any tools.
+          claude_args: |
+            --max-turns 1
+            --allowedTools "Read(nothing-here)"
+
+      - name: After the Claude step (default token)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          echo "graphql pr list:"; gh pr list --repo "$GITHUB_REPOSITORY" --limit 1 --json number; echo "exit=$?"
+          echo "rest:"; gh api "repos/$GITHUB_REPOSITORY" --jq .full_name; echo "exit=$?"
+          echo "app token output empty? [${{ steps.writer.outputs.github_token == '' }}]"
+
+      - name: After the Claude step (app token)
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.writer.outputs.github_token }}
+        run: |
+          set +e
+          echo "app token graphql:"; gh pr list --repo "$GITHUB_REPOSITORY" --limit 1 --json number; echo "exit=$?"
+          echo "app token rest:"; gh api "repos/$GITHUB_REPOSITORY" --jq .full_name; echo "exit=$?"
