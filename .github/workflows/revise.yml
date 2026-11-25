@@ -79,6 +79,10 @@ jobs:
           printf '.pipeline-tmp/\n.claude/\n' >> .git/info/exclude
           git fetch -q --depth=1 origin "$BRANCH"   # public repository: no credentials needed
           git checkout FETCH_HEAD -- "src/content/posts/$SLUG"
+          git checkout FETCH_HEAD -- "public/assets/posts/$SLUG" 2>/dev/null || true   # so the image lint rules see the real files
+          for f in interview-notes.md research-brief.md; do
+            [ -f "src/content/posts/$SLUG/$f" ] && [ ! -L "src/content/posts/$SLUG/$f" ] || { echo "$f is missing or not a regular file"; exit 1; }
+          done
           # The branch tip this revision starts from; the commit step refuses to run if it has moved.
           git rev-parse FETCH_HEAD > .pipeline-tmp/base-sha
           cp -- "src/content/posts/$SLUG/interview-notes.md" .pipeline-tmp/interview-notes.md
@@ -103,9 +107,18 @@ jobs:
             --allowedTools "Read(.pipeline-tmp/**),Read(.github/pipeline/**),Read(AGENTS.md),Read(CONTENT_STANDARDS.md),Read(src/content/posts/**),Glob,Edit(src/content/posts/${{ steps.prep.outputs.slug }}/index.mdx),Write(src/content/posts/${{ steps.prep.outputs.slug }}/index.mdx),Write(.pipeline-tmp/revise-summary.md)"
             --disallowedTools "Bash,Task,NotebookEdit,MultiEdit,WebFetch,WebSearch,Read(//proc/**),Read(//etc/**),Read(.git/**),Grep(.git/**),Glob(.git/**),Edit(.github/**),Write(.github/**),Write(.git/**)"
 
+      # The Writer may legitimately decline the whole request (it explains why in its summary).
+      - name: Detect whether the article changed
+        id: changed
+        if: steps.writer.outcome == 'success'
+        env:
+          SLUG: ${{ steps.prep.outputs.slug }}
+        run: |
+          if git diff --quiet -- "src/content/posts/$SLUG/index.mdx"; then echo "changed=false" >> "$GITHUB_OUTPUT"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+
       - name: Check the revision
         id: check
-        if: steps.writer.outcome == 'success'
+        if: steps.changed.outputs.changed == 'true'
         continue-on-error: true
         env:
           SLUG: ${{ steps.prep.outputs.slug }}
@@ -115,7 +128,9 @@ jobs:
 
       # Sanitised before the commit step, because that step replaces the workspace tools with the branch copy.
       - name: Prepare the summary
-        if: steps.check.outcome == 'success'
+        id: summary
+        if: steps.writer.outcome == 'success'
+        continue-on-error: true
         run: node scripts/revise.mjs summary > .pipeline-tmp/summary-clean.txt
 
       - name: Commit the revision (pristine repository)
@@ -138,8 +153,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PREP_OK: ${{ steps.prep.outputs.ok }}
           PREP_ERROR: ${{ steps.prep.outputs.error }}
+          STAGE: ${{ steps.stage.outcome }}
           WRITER: ${{ steps.writer.outcome }}
+          CHANGED: ${{ steps.changed.outputs.changed }}
           CHECK: ${{ steps.check.outcome }}
+          SUMMARY: ${{ steps.summary.outcome }}
           COMMIT: ${{ steps.commit.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: bash "$RUNNER_TEMP/pipeline-tools/revise-report.sh"

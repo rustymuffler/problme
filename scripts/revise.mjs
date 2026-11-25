@@ -63,7 +63,7 @@ function main() {
     try {
       r = prepare({ repo: process.env.REPO ?? '', prNumber: process.env.PR_NUMBER ?? '', commentBody: process.env.COMMENT_BODY ?? '', commentId: process.env.COMMENT_ID ?? '' });
     } catch (err) {
-      r = { ok: false, error: `Could not prepare the revision: ${String(err.message).split('\n')[0].slice(0, 200)}` };
+      r = { ok: false, error: sanitizeSummary(`Could not prepare the revision: ${String(err.message).split('\n')[0].slice(0, 200)}`) };
     }
     setOutputs(r.ok ? { ok: true, error: '', branch: r.branch, slug: r.slug, issue: r.issue, publish_date: r.publishDate } : { ok: false, error: r.error });
   } else if (command === 'summary') {

@@ -45,11 +45,29 @@ test('slugOfPr needs exactly one article folder', () => {
 });
 
 test('sanitizeSummary strips markup, controls and mentions and bounds length', () => {
-  const out = sanitizeSummary('Changed: <b>x</b> <!-- hidden --> ![pixel](http://t/x.png) ping @someone​ and \u0007 bell');
+  const zw = String.fromCharCode(0x200b);
+  const bell = String.fromCharCode(7);
+  const out = sanitizeSummary(`Changed: <b>x</b> <!-- hidden --> ![pixel](http://t/x.png) ping @someone${zw} and ${bell} bell`);
   assert.ok(!out.includes('<b>') && !out.includes('hidden') && !out.includes('pixel') && !out.includes('\u0007'));
-  assert.ok(out.includes('@​someone'));
+  assert.ok(out.includes(`@${zw}someone`));
   assert.equal(sanitizeSummary('y'.repeat(5000)).length, 2003);
   assert.equal(sanitizeSummary(null), '');
+});
+
+test('sanitizeSummary removes links, code fences and issue references', () => {
+  const out = sanitizeSummary('See [the docs](https://evil.example/x) or https://phish.example/login now. ```code``` Fixes #12 and owner/repo#34.');
+  assert.ok(!out.includes('evil.example') && !out.includes('phish.example') && !out.includes('```'));
+  assert.ok(out.includes('the docs'));
+  assert.ok(out.includes('[link removed]'));
+  assert.ok(!/#\d/.test(out));
+});
+
+test('sanitizeSummary stays fast on hostile input', () => {
+  const start = Date.now();
+  sanitizeSummary(`${'['.repeat(100000)}${'(' .repeat(100000)}`);
+  sanitizeSummary(`${'http://'.repeat(50000)}`);
+  sanitizeSummary(`${'<a'.repeat(100000)}`);
+  assert.ok(Date.now() - start < 2000);
 });
 
 function fakeGh({ pr = goodPr, files = ['src/content/posts/aa-bb-cc/index.mdx', 'src/content/posts/aa-bb-cc/interview-notes.md'], mdx = '---\ntitle: T\ndate: 2026-12-01\n---\nBody\n', calls = [] as string[][] } = {}) {
