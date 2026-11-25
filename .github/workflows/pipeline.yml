@@ -183,7 +183,7 @@ jobs:
           if gh_git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
             branch="article/$ISSUE_NUMBER-$RUN_ID"   # re-run: never fail on an existing branch
           fi
-          git switch -q -c "$branch" FETCH_HEAD
+          git checkout -q -f -B "$branch" FETCH_HEAD   # -f: the fresh repository sees every tracked file as untracked
           mkdir -p -- "$(dirname "$file")"
           cp -- "$RUNNER_TEMP/notes.md" "$file"
           git add -- "$file"
