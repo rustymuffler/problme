@@ -232,6 +232,7 @@ jobs:
         if: steps.scan.outputs.blocked == 'false'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
+          include-hidden-files: true   # the files live under .pipeline-tmp; v4.4+ skips hidden paths otherwise
           name: research
           path: |
             .pipeline-tmp/research-brief.md
@@ -426,6 +427,7 @@ jobs:
       - name: Upload lint and scan summary
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
+          include-hidden-files: true   # the files live under .pipeline-tmp; v4.4+ skips hidden paths otherwise
           name: draft-meta
           path: |
             .pipeline-tmp/lint-output.txt
