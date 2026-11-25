@@ -1,0 +1,131 @@
+---
+title: "Multi-Agent Workflows Without a Framework: Try AGENTS.md"
+description: "I run multi-agent workflows with named roles in one AGENTS.md file, no orchestration framework. Here is how it works, where it limits you, and when to switch."
+primaryKeyword: "multi-agent workflows"
+category: ai-development
+tags: ["ai-agents", "agents-md", "multi-agent", "orchestration", "building-in-public"]
+date: 2026-12-01
+readTime: "8 min"
+heroImage: /assets/posts/multi-agent-workflows-agents-md/hero.png
+imageCredit: "AI-generated with Claude"
+faq:
+  - question: "Do I need an orchestration framework for multi-agent workflows?"
+    answer: "Not always. It depends on the person, the team, and the project. I started with named roles in one AGENTS.md file and have not needed more for a personal blog. A framework starts to pay off when agents need crash recovery, parallel branches writing shared state, pauses for a human, or tracing. Start simple, and add one when a real need shows up."
+  - question: "What is an AGENTS.md file?"
+    answer: "It is a plain Markdown file that works like a README for AI agents. The agents.md site says the nearest file in the folder tree wins, and that an explicit prompt in chat overrides it. I use mine for more than coding rules. It holds my agent roster, what each agent owns, and the order of handoffs between them."
+  - question: "Can agents ignore an AGENTS.md file?"
+    answer: "Yes. The file is guidance, not enforcement. One developer who ran three agents from three companies on one project reported an agent skipping the shared files and reporting tests as passing. That is why I keep checks outside the model. Automated checks run on every pull request, and only I can merge. The file is the plan, and the checks are the proof."
+  - question: "When should I move from AGENTS.md to a framework?"
+    answer: "Watch for long-running agents that must recover from a crash, parallel branches that write to shared state, workflows that pause and resume for a human, or a need for tracing. Tallyfy lists these as signals that justify a graph runtime such as LangGraph. I have not hit them on a blog pipeline, so treat this as a fair limit, not a failure I lived through."
+---
+import Callout from '../../../components/Callout.astro';
+
+<Callout type="note">
+TL;DR: You can run multi-agent workflows without an orchestration framework. I define named roles and handoff rules in one AGENTS.md file, then use CI and a human merge as the checks. Start simple, test it, and add a framework only when your agents need state a file cannot hold.
+</Callout>
+
+Do you need an orchestration framework to run multi-agent workflows? I don't think so, at least not on day one. My pipeline for probl.me runs on named roles written in a single AGENTS.md file, and it has been enough so far.
+
+I'm not saying frameworks are wrong. My point is that the right setup depends on the person and the project. In my own words: "It is okay to start simple, test, and iterate as you find new challenges or ways to improve."
+
+This article covers what that looks like in practice, what I learned from a team-built pipeline at work, and where a plain file runs out of road.
+
+## What is AGENTS.md, and why use it?
+
+[AGENTS.md](https://agents.md) describes itself as "a README for agents." It is a Markdown file that tells an AI agent how your project works. The nearest file to the code wins, and anything you type directly in chat overrides it.
+
+According to the site, more than 60,000 open-source projects use the format, and that it is stewarded by the Agentic AI Foundation under the Linux Foundation. That count is the site's own claim, so treat it as a rough signal of popularity and nothing more.
+
+Most people use the file for coding rules: build commands, test commands, and style. [Addy Osmani's guide](https://addyosmani.com/agents/15-agents-md/) covers that well, and his advice to update the file when agents repeat a mistake is worth following.
+
+I use mine for something a bit different. I treat it as a team roster.
+
+## How do I define agent roles in one file?
+
+I give every agent a name, a tool, a job, and a trigger. Then I write down who hands off to whom. That is the whole system.
+
+Here is a trimmed view of the roles in my content track. The full file also lists my development agents.
+
+| Agent | What it owns | Hands off to |
+|---|---|---|
+| Interview Agent | Captures my opinions and experience | Research Agent |
+| Research Agent | Builds a brief of sources and counterarguments | Writer Agent |
+| Writer Agent | Drafts the article in my voice | SEO Reviewer and Proofreader |
+| Publisher Agent | Opens a draft pull request | Me |
+
+![A left-to-right flow of four agent roles, Interview, Research, Writer and Publisher, each handing work to the next and ending at a box labeled Richard merges.](/assets/posts/multi-agent-workflows-agents-md/handoff-chain.png)
+
+Two rules in that file matter more than the roster itself. The first is no self-review: the agent that writes something cannot be the only agent that approves it. Second comes a human merge: nothing ships until I merge it.
+
+I wrote about how this setup came together, and the first things that broke, in [how I built a Claude agent content pipeline](/blog/claude-agent-content-pipeline/).
+
+[NOT ANSWERED - Richard to add: one specific handoff on probl.me that worked well or went wrong]
+
+## What can a team-built pipeline teach about specialised agents?
+
+Before probl.me, I used a set of threat investigation agents built by my team at ReversingLabs. The public repository is [rl-spectra-ai-soc](https://github.com/reversinglabs/rl-spectra-ai-soc).
+
+It is not an AGENTS.md setup. As far as the public repo shows, the agents are Markdown files with YAML frontmatter, and they run as Claude Code plugins. I'm describing it because it shows the idea behind roles, not because it uses the same file.
+
+I found it exciting to watch a security event work through "various stages of an investigation pipeline with agents that have specializations in specific tasks." Each agent could work on its own and reach its own conclusion. Then the pipeline could see whether they agreed.
+
+The repo lists stages for triage, false-positive validation, investigation, adjudication, remediation, and reporting. Triage and investigation run some sub-agents in parallel.
+
+The adjudication agent is the part I liked most. It weighs the false-positive findings against the investigation evidence and returns a verdict of confirmed true positive, confirmed false positive, or uncertain. The agent also acts as an independent reviewer, and the repo blocks Bash for it, so it can only reason about what the others found.
+
+![A pipeline from triage to reporting. Triage feeds false-positive validation and investigation, which both feed a highlighted adjudication agent acting as independent reviewer, then remediation and reporting.](/assets/posts/multi-agent-workflows-agents-md/investigation-stages.png)
+
+That is the same principle as my no-self-review rule, applied to security work. The agent that gathers evidence should not be the one that decides what it means.
+
+## Why does every project end up with its own agents?
+
+This surprised me. I expected to reuse one set of agents everywhere. Instead, "each major project like Celly or probl.me has a unique set of agents."
+
+Some roles overlap. A reviewer is useful almost anywhere. But some work needs agents built for that specific project, and I keep finding new ones to add as I expand.
+
+I have tried roughly defining agents to build Celly, probl.me, and in my professional work too. I keep learning from each one, big and small. It all feels "organic and is adjustable as needed and as I build."
+
+That is a real advantage of a plain file. Adding an agent means adding a section. There is no framework code to rewrite.
+
+## Where does a file-based setup fall short?
+
+A Markdown file gives you roles. It does not give you a runtime.
+
+[Tallyfy's opinion piece](https://tallyfy.com/when-not-to-use-an-agent-framework/) lists the signals that justify a graph framework such as LangGraph:
+
+| Need | AGENTS.md alone | Graph framework |
+|---|---|---|
+| Crash recovery for long jobs | No | Yes |
+| Parallel branches writing shared state | No | Yes |
+| Pause and resume for a human | Only by hand | Yes |
+| Tracing every step | No | Yes |
+
+My pipeline is a blog. The state is files and pull requests, so I have not needed any of those. Someone running long agents that hold state might outgrow a file quickly. I have not hit that limit, so I'm describing it as a fair boundary and not as something I lived through.
+
+There is a second problem. The file is guidance, and agents can ignore guidance. One developer who [ran three agents from three companies on one project](https://dev.to/wilddog64/i-ran-three-ai-agents-from-three-different-companies-on-one-complex-project-heres-the-909) reported an agent skipping the shared files and reporting tests as passing.
+
+[InfoQ's coverage of AGENTS.md](https://infoq.com/news/2025/08/agents-md/) makes a similar point: the format will not remove the need for human oversight.
+
+I agree, and that is why my pipeline puts checks outside the model. Automated checks run on every pull request, and a human merge is the last gate. I also audited my own setup for injection gaps, which I covered in [my prompt injection audit of this pipeline](/blog/prompt-injection-lessons-applied/).
+
+![Three stacked layers: AGENTS.md roles as guidance only, then automated checks on every pull request, then a human merge as the last gate, showing the file guides and the checks enforce.](/assets/posts/multi-agent-workflows-agents-md/guide-and-enforce.png)
+
+[Anthropic's guide to building effective agents](https://www.anthropic.com/engineering/building-effective-agents) lands in the same place from a different direction. It advises starting with the simplest solution and adding complexity only when it helps.
+
+## What would I tell someone starting from zero?
+
+I expect many people would give the same answer here, but it is still the right one. Do not overthink it, and do not wait for the perfect timing or scenario. Start small with something like I did, and see if it works for you.
+
+My reasons were practical. I wanted a way to run the blog that is "free or very inexpensive." probl.me is a personal blog, and I am not monetizing it. The idea has not crossed my mind.
+
+I also wanted to try something. In my words, "I just wanted to experience working with AI as my teammate to see what is possible and where I can go with it."
+
+So far the experience has been interesting and fun, because I am learning. That counts for more than any architecture diagram.
+
+## Key takeaways
+
+You do not need an orchestration framework to start running multi-agent workflows. A single AGENTS.md file can hold your roster, your handoff order, and rules like no self-review and a human merge.
+
+A file is guidance, so back it with checks that sit outside the model. And if your agents later need crash recovery, shared state, or tracing, that is the time to look at a framework.
+
+There is no single right way to run a pipeline. The right answer is to be actionable and make progress on your objectives.
