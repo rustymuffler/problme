@@ -31,14 +31,19 @@ Automated draft from the content pipeline (interview notes, research brief, draf
 
 BODY
 
-try() { GH_TOKEN="$1" "${@:2}"; }
+# The Claude App token is revoked when the Claude action step ends, so it is usually dead by now (first live
+# run: HTTP 401). Probe it once and use the default Actions token for everything below when it fails.
+if ! GH_TOKEN="$GH_TOKEN" gh api "repos/$REPO" --silent >/dev/null 2>&1; then
+  echo "The preferred token is not valid; using the default Actions token (CI will not start automatically)."
+  export GH_TOKEN="$GH_TOKEN_FALLBACK"
+fi
 existing="$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json url --jq '.[0].url // ""')"
 if [ -n "$existing" ]; then
   pr_url="$existing"
 else
   # Opened as a draft until the Proofreader and SEO review stages exist (MILESTONES invariants 4 and 8).
   create=(gh pr create --draft --repo "$REPO" --base "$DEFAULT_BRANCH" --head "$BRANCH" --title "$title" --body-file .pipeline-tmp/pr-body.md)
-  pr_url="$(try "$GH_TOKEN" "${create[@]}" || try "$GH_TOKEN_FALLBACK" "${create[@]}")"
+  pr_url="$("${create[@]}")"
 fi
 pr_number="$(gh pr view "$pr_url" --repo "$REPO" --json number --jq .number)"
 echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
