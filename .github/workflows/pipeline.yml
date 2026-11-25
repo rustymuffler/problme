@@ -158,8 +158,8 @@ jobs:
           RUN_ID: ${{ github.run_id }}
         run: |
           set -euo pipefail
-          # Exactly one new file, in the one allowed place. Anything else aborts.
-          changed="$(git status --porcelain --untracked-files=all)"
+          # Exactly one new file, in the one allowed place (the .pipeline-tmp scratch directory is ignored). Anything else aborts.
+          changed="$(git status --porcelain --untracked-files=all -- . ':!.pipeline-tmp')"   # our own scratch directory is not a change
           [ "$(printf '%s\n' "$changed" | wc -l)" -eq 1 ] || { echo "Expected exactly one changed file:"; echo "$changed"; exit 1; }
           file="$(printf '%s' "$changed" | sed -E 's/^.{3}//')"
           printf '%s' "$file" | grep -Eq '^src/content/posts/[a-z0-9]+(-[a-z0-9]+){2,5}/interview-notes\.md$' \
